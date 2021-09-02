@@ -49,7 +49,7 @@ class Utilities {
 
       xhr.responseType = options.responseType || "text";
       xhr.onload = () => resolve(xhr.response);
-      xhr.onerror = (error) => reject(error);
+      xhr.onerror = (error) => reject(xhr.responseText);
       xhr.open("GET", url, true);
       xhr.send(null);
     });

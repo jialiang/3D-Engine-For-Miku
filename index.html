@@ -87,6 +87,37 @@
         display: none;
       }
 
+      #cover .error-content {
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: none;
+        box-sizing: border-box;
+        max-width: calc(100% - 20px);
+        padding: 10px;
+        text-align: left;
+        color: red;
+        border: 2px solid red;
+        border-radius: 10px;
+        background: white;
+      }
+
+      #cover .error-message {
+        margin: 10px 0;
+        color: black;
+      }
+
+      #cover .error-close {
+        margin: 10px 0 0 0;
+        cursor: pointer;
+        text-align: center;
+        text-transform: uppercase;
+        color: white;
+        border-radius: 10px;
+        background: red;
+      }
+
       #cover .play {
         font-weight: bold;
         margin-top: 3rem;
@@ -339,6 +370,13 @@
             <br />
             <div>Animation contains sound.</div>
           </div>
+          <div class="error-content">
+            <div>An error occured!</div>
+            <div class="error-message"></div>
+            <div>It might or might not be fatal.</div>
+            <div>Check the <a href="#browser-compatibility">Browser Compatibility</a> section for advice.</div>
+            <div class="error-close" onclick="this.parentNode.style.display = ''">Dismiss</div>
+          </div>
         </div>
       </div>
     </div>
@@ -346,10 +384,10 @@
     <div class="article-container">
       <article class="text">
         <h1>Wavefile feat. Hatsune Miku</h1>
-        <p>Hi, this 3D web animation was created using my own personal home-made JavaScript 3D engine.</p>
+        <p>Hi, I build my own 3D engine from scratch and created this web animation.</p>
         <p>
-          I've been working on it for almost the entirety of August and managed to get a simple demo out around Miku's
-          14th birthday, which falls on the 31st August 2021.
+          I've been working on it the engine for the entirety of August and managed to get this simple demo out right
+          around Miku's 14th birthday, which falls on the 31st August 2021.
         </p>
         <p>
           <a href="https://github.com/jialiang/3D-Engine-For-Miku" target="_blank" rel="noopener noreferrer"
@@ -357,7 +395,7 @@
           >
         </p>
 
-        <h2>Browser Compatability</h2>
+        <h2 id="browser-compatibility">Browser Compatibility</h2>
 
         <p>
           The latest stable release of Firefox, Chrome or Edge on Windows or Android should work fine. At the time of
@@ -373,7 +411,7 @@
           <p>For MacOS</p>
           <ol>
             <li>From the menu bar on top, go to <b>Safari</b> 🠖 <b>Preferences</b> 🠖 <b>Advanced</b>.</li>
-            <li>Tick the <b>Show Develop menu in menu bar</b> checkbox.</li>
+            <li>Tick the <b>Show Develop menu in the menu bar</b> checkbox.</li>
             <li>From the menu bar on top, go to <b>Develop</b> 🠖 <b>Experimental Features</b> 🠖 <b>WebGL 2.0</b>.</li>
           </ol>
         </div>
@@ -395,7 +433,7 @@
 
         <p>
           The model used is the Hatsune Miku Ver.2 model by Animasa. It is one of the default models included in the MMD
-          software. It was released in 5th of March 2009.
+          software. It was released on 5th of March 2009.
         </p>
 
         <p>
@@ -413,7 +451,7 @@
         <h2>3D Engine For Miku</h2>
 
         <p>
-          The 3D engine used is one I created from scratch. The only 2 external libraries it uses are
+          The 3D engine used is one I created completely from scratch. The only 2 external libraries it uses are
           <a href="https://github.com/kripken/ammo.js/" target="_blank" rel="noopener noreferrer">Ammo.js</a>
           for physics simulation and
           <a href="https://glmatrix.net/" target="_blank" rel="noopener noreferrer">glMatrix</a> for matrix operations.
@@ -511,7 +549,7 @@
           <li>
             <h3>Toon Textures</h3>
             <p>
-              It is more widely known as ramp textures. It accentures diffuse textures in order to fake the effects of
+              More widely known as ramp textures. It accentures diffuse textures in order to fake the effects of
               advanced lighting setups.
             </p>
           </li>
@@ -569,7 +607,25 @@
     <script src="Grid.js" defer></script>
 
     <script>
-      window.addEventListener("load", async function () {
+      window.addEventListener("error", handleError);
+
+      window.addEventListener("load", async () => {
+        try {
+          await onload();
+        } catch (e) {
+          handleError(e);
+        }
+      });
+
+      function handleError(e) {
+        const error = document.querySelector(".error-content");
+        const message = document.querySelector(".error-message");
+
+        error.style.display = "block";
+        message.innerHTML += `<div>${e.message || e.toString()}</div>`;
+      }
+
+      async function onload() {
         const modelUrl = "models/Animasa/Miku_Hatsune_Ver2.pmd.js";
         const motionUrl = "motions/wavefile_v2.vmd.js";
 
@@ -758,7 +814,6 @@
 
         const loading = document.querySelector(".loading-content");
         const ready = document.querySelector(".ready-content");
-        const error = document.querySelector(".error-content");
 
         const playButton = document.querySelector(".play");
 
@@ -794,7 +849,7 @@
         else if (bgm.networkState === 2) canPlayThroughEvent = bgm.addEventListener("canplaythrough", signalReady);
         // not enough data and not loading, probably preload disabled
         else signalReady();
-      });
+      }
     </script>
   </body>
 </html>
