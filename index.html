@@ -1,0 +1,768 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Engine For Miku</title>
+
+    <style>
+      html {
+        font-size: 14.4px;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.25;
+        width: 100%;
+        min-width: 360px;
+        height: 100%;
+        min-height: 480px;
+        margin: 0;
+        letter-spacing: 0.2px;
+        color: #444;
+        background: black;
+      }
+
+      .canvas-container {
+        overflow: auto;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: calc(100vh * 16 / 9);
+        height: 100%;
+        margin: auto;
+        border-top: 5vh solid black;
+        border-bottom: 5vh solid black;
+        background: white;
+        box-shadow: 0 0 10vmin rgba(0, 0, 0, 0.75) inset;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        max-width: 150vh;
+        height: 100%;
+        margin: auto;
+        transform: scaleX(-1);
+      }
+
+      .text {
+        font-size: 1.35rem;
+        text-shadow: 0.05rem 0.05rem 0.15rem rgba(0, 0, 0, 0.1);
+      }
+
+      button {
+        font-size: 2rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0.5rem;
+      }
+
+      #cover {
+        line-height: 1.5;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        overflow: hidden;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        padding: 0.5rem;
+        text-align: center;
+        background: linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100% 10px,
+          linear-gradient(to right, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 0/10px 100%,
+          linear-gradient(to right, rgba(119, 136, 136, 0.1) 1px, transparent 0) 0 0/100px 100%,
+          linear-gradient(to top, rgba(0, 25, 25, 0.1) 1px, transparent 0) 0 100%/100% 100px,
+          linear-gradient(to bottom right, #f5f5f0, whitesmoke, #f5f5f0);
+      }
+
+      #cover .ready-content {
+        display: none;
+      }
+
+      #cover .play {
+        text-transform: uppercase;
+        font-weight: bold;
+        margin-top: 3rem;
+      }
+
+      #cover .content {
+        width: 100%;
+      }
+
+      #cover .big {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      #cover .loading-bar {
+        font-size: 3rem;
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 36rem;
+        height: 3rem;
+        margin: 6.5rem auto;
+        pointer-events: none;
+      }
+
+      #cover .loading-bar .glyph {
+        position: relative;
+        width: 3rem;
+        animation: 1s loading-bar-glyph-stretch linear infinite alternate;
+      }
+
+      #cover .loading-bar .glyph span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3rem;
+      }
+
+      #cover .loading-bar .glyph:nth-child(1) span:first-child {
+        animation: 5s blur-fade 1s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(1) span:last-child {
+        animation: 5s blur-fade-reverse 1s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(2) span:first-child {
+        animation: 5s blur-fade 1.5s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(2) span:last-child {
+        animation: 5s blur-fade-reverse 1.5s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(3) span:first-child {
+        animation: 5s blur-fade 2s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(3) span:last-child {
+        animation: 5s blur-fade-reverse 2s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(4) span:first-child {
+        animation: 5s blur-fade 2.5s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(4) span:last-child {
+        animation: 5s blur-fade-reverse 2.5s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(5) span:first-child {
+        animation: 5s blur-fade 3s linear infinite both;
+      }
+
+      #cover .loading-bar .glyph:nth-child(5) span:last-child {
+        animation: 5s blur-fade-reverse 3s linear infinite both;
+      }
+
+      @keyframes blur-fade {
+        0% {
+          transform: scale(1, 1);
+          opacity: 1;
+
+          filter: blur(0.5px);
+        }
+        5% {
+          transform: scale(0.75, 5);
+          opacity: 0;
+
+          filter: blur(20px);
+        }
+        50% {
+          transform: scale(0.75, 5);
+          opacity: 0;
+
+          filter: blur(20px);
+        }
+        55% {
+          transform: scale(1, 1);
+          opacity: 1;
+
+          filter: blur(0.5px);
+        }
+        100% {
+          transform: scale(1, 1);
+          opacity: 1;
+
+          filter: blur(0.5px);
+        }
+      }
+
+      @keyframes blur-fade-reverse {
+        0% {
+          transform: scale(0.75, 5);
+          opacity: 0;
+
+          filter: blur(20px);
+        }
+        5% {
+          transform: scale(1, 1);
+          opacity: 1;
+
+          filter: blur(0.5px);
+        }
+        50% {
+          transform: scale(1, 1);
+          opacity: 1;
+
+          filter: blur(0.5px);
+        }
+        55% {
+          transform: scale(0.75, 5);
+          opacity: 0;
+
+          filter: blur(20px);
+        }
+        100% {
+          transform: scale(0.75, 5);
+          opacity: 0;
+
+          filter: blur(20px);
+        }
+      }
+
+      .article-container {
+        padding: 5vh 0;
+        background: linear-gradient(white, whitesmoke) 0 0 / cover fixed;
+      }
+
+      article {
+        font-size: 1.25rem;
+        max-width: 500px;
+        margin: auto;
+        padding: 0 1.25rem 5rem 1.25rem;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      h2 {
+        margin-top: 4rem;
+        color: #333;
+      }
+
+      h3 {
+        font-size: 1.35rem;
+        margin: 2.25rem 0 -1.25rem 0;
+        color: #333;
+      }
+
+      p {
+        margin: 2.25rem 0;
+      }
+
+      b {
+        color: black;
+      }
+
+      .list-container {
+        margin: 2.25rem 0;
+      }
+
+      .list-container p {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .list-container p,
+      .list-container ul,
+      .list-container ol {
+        margin: 1rem 0;
+      }
+
+      li {
+        margin-bottom: 1rem;
+      }
+
+      a {
+        color: #007aff;
+        text-shadow: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas-container">
+      <canvas></canvas>
+      <div id="cover">
+        <div class="content">
+          <div class="loading-content">
+            <div class="big text">
+              <span>Website is loading now.</span>
+              <br />
+              <span>Please watch warmly</span>
+              <span>until it is ready.</span>
+            </div>
+            <div class="loading-bar">
+              <span class="glyph">
+                <span>•</span>
+                <span>🡨</span>
+              </span>
+              <span class="glyph">
+                <span>•</span>
+                <span>🡯</span>
+              </span>
+              <span class="glyph">
+                <span>•</span>
+                <span>🡫</span>
+              </span>
+              <span class="glyph">
+                <span>•</span>
+                <span>🡮</span>
+              </span>
+              <span class="glyph">
+                <span>•</span>
+                <span>🡪</span>
+              </span>
+            </div>
+          </div>
+          <div class="ready-content">
+            <div class="big text">
+              <span>Thank you for waiting.</span>
+              <br />
+              <span>Preparations are now complete.</span>
+            </div>
+            <div>
+              <button class="play">Play</button>
+            </div>
+            <br />
+            <div>Animation contains sound.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="article-container">
+      <article class="text">
+        <h1>Wavefile feat. Hatsune Miku</h1>
+        <p>Hi, this 3D web animation was created using my own personal home-made JavaScript 3D engine.</p>
+        <p>
+          I've been working on it for almost the entirety of August and managed to get a simple demo out around Miku's
+          14th birthday, which falls on the 31st August 2021.
+        </p>
+        <p>
+          <a href="https://github.com/jialiang/3D-Engine-For-Miku" target="_blank">Github repository</a>
+        </p>
+
+        <h2>Browser Compatability</h2>
+
+        <p>
+          The latest stable release of Firefox, Chrome or Edge on Windows or Android should work fine. At the time of
+          writing, these are Firefox 90, Chrome 92 and Edge 92.
+        </p>
+
+        <p>
+          If you're using Safari 14 on MacOS or using iOS with Safari 14 installed, you would either need to upgrade to
+          Safari 15 or enable the WebGL 2.0 feature manually. To do the latter:
+        </p>
+
+        <div class="list-container">
+          <p>For MacOS</p>
+          <ol>
+            <li>From the menu bar on top, go to <b>Safari</b> 🠖 <b>Preferences</b> 🠖 <b>Advanced</b>.</li>
+            <li>Tick the <b>Show Develop menu in menu bar</b> checkbox.</li>
+            <li>From the menu bar on top, go to <b>Develop</b> 🠖 <b>Experimental Features</b> 🠖 <b>WebGL 2.0</b>.</li>
+          </ol>
+        </div>
+
+        <div class="list-container">
+          <p>For iOS</p>
+          <ol>
+            <li>Go to <b>Settings</b> 🠖 <b>Safari</b> 🠖 <b>Advanced</b> 🠖 <b>Experimental Features</b>.</li>
+            <li>Enable <b>WebGL 2.0</b>.</li>
+          </ol>
+        </div>
+
+        <p>Refresh the page to see the changes take effect.</p>
+        <p>
+          Do note that on iOS, all browsers are forced to use Safari's Webkit browser engine due to App Store rules.
+        </p>
+
+        <h2>Thanks</h2>
+
+        <p>
+          The model used is the Hatsune Miku Ver.2 model by Animasa. It is one of the default models included in the MMD
+          software. It was released in 5th of March 2009.
+        </p>
+
+        <p>
+          The song is Wavefile (short version) by Lamaze-P. It was released on 30th August 2010.
+          <a href="https://www.nicovideo.jp/watch/sm11938255">Link to original</a>.
+        </p>
+
+        <p>
+          The motion was created by Hino.
+          <a href="https://www.nicovideo.jp/watch/sm13147122">Link to the distribution video</a>. It was rotoscoped from
+          Bakamerou's <a href="https://www.nicovideo.jp/watch/sm12016176" target="_blank">dance cover</a>.
+        </p>
+
+        <h2>3D Engine For Miku</h2>
+
+        <p>
+          The 3D engine used is one I created from scratch. The only 2 external libraries it uses are
+          <a href="https://github.com/kripken/ammo.js/" target="_blank">Ammo.js</a>
+          for physics simulation and <a href="https://glmatrix.net/" target="_blank">glMatrix</a> for matrix operations.
+          It is inspired by the de facto animation program of the Anime community,
+          <a href="https://sites.google.com/view/vpvp/" target="_blank">MikuMikuDance (MMD)</a>.
+        </p>
+
+        <p>Features include:</p>
+
+        <ol>
+          <li>
+            <h3>PMD & VMD File Support</h3>
+            <p>
+              PMD (Polygon Model Data) files stores model information. VMD (Vocaloid Motion Data) stores motion
+              information. These are the primary file formats used by MMD.
+            </p>
+          </li>
+
+          <li>
+            <h3>Skeletal Animation</h3>
+            <p>
+              Forward and inverse kinematics are used. Forward kinematics is calculated using simple trigonometry. The
+              inverse kinematics (IK) algorithm used is Quaternion Cyclic Coordinate Descent (CCD). Hinge joints and
+              joint limits are also supported. The blog post
+              <a href="https://zalo.github.io/blog/inverse-kinematics/" target="_blank">Inverse Kinematics</a> by
+              Johnathon Selstad is the best resource I encountered by far on CCD IK.
+            </p>
+          </li>
+
+          <li>
+            <h3>Morph Target Animation</h3>
+            <p>
+              Vertices are manipulated directly to mould the model. Used to animate facial motions and certain character
+              props.
+            </p>
+          </li>
+
+          <li>
+            <h3>Real framerate-independent motions.</h3>
+            <p>
+              Motion is interpolated along euclidean cubic bezier curves for translations and spherical cubic bezier
+              curves for rotations. The article
+              <a href="https://medium.com/@adrian_cooney/bezier-interpolation-13b68563313a" target="_blank"
+                >Bezier Interpolation</a
+              >
+              by Adrian Cooney nicely explains how the former works. The algorithm for the latter is based on Douglas
+              Wilhelm Harder's
+              <a href="https://ece.uwaterloo.ca/~dwharder/C++/CQOST/src/Bezier.cpp" target="_blank">Bezier C++ class</a
+              >.
+            </p>
+          </li>
+
+          <li>
+            <h3>Soft Shadow Mapping</h3>
+            <p>
+              Shadow mapping is used so that light can be obscured by other objects. The technique used for soft shadows
+              is Percentage-Closer Soft Shadows (PCSS). Here is the
+              <a href="http://developer.download.nvidia.com/shaderlibrary/docs/shadow_PCSS.pdf" target="_blank"
+                >PCSS Whitepaper</a
+              >
+              by nVidia. This technique softens shadows by blurring the edges around shadows depending on the luminance
+              of neighbouring pixels.
+            </p>
+          </li>
+
+          <li>
+            <h3>Real-time Physics</h3>
+            <p>
+              Ammo.js is used to simulate constrained rigid bodies. It is a Emscripten-port of the Bullet physics
+              engine. The version I used is my own custom build which includes some methods not included in the official
+              release. Unused code is removed using
+              <a href="https://github.com/pinqy520/coverage-shaker" target="_blank">Coverage Shaker</a> and then further
+              minified using the
+              <a href="https://developers.google.com/closure/compiler" target="_blank">Closure Compiler</a>.
+            </p>
+          </li>
+
+          <li>
+            <h3>Toon Textures</h3>
+            <p>
+              It is more widely known as ramp textures. It accentures diffuse textures in order to fake the effects of
+              advanced lighting setups.
+            </p>
+          </li>
+        </ol>
+
+        <p>
+          Do note that being a personal engine, I will only take my own use cases and preferences into account when
+          developing it. So I wouldn't use it if I were you. If you're looking for something more general purpose, you
+          can consider <a href="https://threejs.org/" target="_blank">THREE.js</a>. They too have several
+          <a href="https://threejs.org/examples/?q=mmd" target="_blank">Miku examples</a>. With that said, you're
+          welcome to look around the code to see how things work and perhaps draw ideas for your own engine. I myself
+          extensively studied the code in Takahiro's
+          <a href="https://github.com/takahirox/mmd-viewer-js" target="_blank">MMD Viewer</a>, who in turn studied the
+          code in Atsushi's <a href="https://github.com/edvakf/MMD.js/" target="_blank">MMD.js</a>, who in turn studied
+          the code in the <a href="http://www.mmdagent.jp/" target="_blank">MMDAgent</a> and
+          <a href="http://sourceforge.jp/projects/mikumikustudio" target="_blank">MikuMikuStudio</a> projects.
+          Unfortunely, the source code for MMD was never released and will never be.
+        </p>
+
+        <h2>Privacy</h2>
+
+        <p>
+          This webpage contains absolutely no tracking.<br />
+          No analytics, no advertisements.<br />
+          No fingerprinters, no cryptominers.
+        </p>
+      </article>
+    </div>
+
+    <audio src="audios/wavefile_short.mp3" preload="auto"></audio>
+
+    <script src="Utilities.js" defer></script>
+    <script src="glMatrix-mat4.js" defer></script>
+    <script src="external/ammo.min.js" defer></script>
+
+    <script src="GL.js" defer></script>
+    <script src="VAO.js" defer></script>
+    <script src="UBO.js" defer></script>
+    <script src="FBO.js" defer></script>
+    <script src="Transform.js" defer></script>
+    <script src="Camera.js" defer></script>
+    <script src="Texture.js" defer></script>
+    <script src="Light.js" defer></script>
+    <script src="Kinematics.js" defer></script>
+    <script src="Physics.js" defer></script>
+
+    <script src="FileParser.js" defer></script>
+    <script src="PMD.js" defer></script>
+    <script src="VMD.js" defer></script>
+    <script src="Grid.js" defer></script>
+
+    <script>
+      window.addEventListener("load", async function () {
+        const modelUrl = "models/Animasa/Miku_Hatsune_Ver2.pmd";
+        const motionUrl = "motions/wavefile_v2.vmd";
+
+        const [
+          Physics,
+          [vertexShaderSource, fragmentShaderSource], //
+          [simpleVertexShaderSource, simpleFragmentShaderSource], //
+          [modelArraybuffer, motionArraybuffer], //
+        ] = await Promise.all([
+          initAmmo(),
+          Promise.all([
+            Utilities.fetch("shaders/vertex.glsl"), //
+            Utilities.fetch("shaders/fragment.glsl"), //
+          ]),
+          Promise.all([
+            Utilities.fetch("shaders/simple_vertex.glsl"), //
+            Utilities.fetch("shaders/simple_fragment.glsl"), //
+          ]),
+          Promise.all([
+            Utilities.fetch(modelUrl, { responseType: "arraybuffer" }), //
+            Utilities.fetch(motionUrl, { responseType: "arraybuffer" }), //
+          ]),
+        ]);
+
+        //
+
+        const canvas = document.getElementsByTagName("canvas")[0];
+        const gl = GL.init(canvas);
+
+        //
+
+        const program = GL.createProgram(gl, vertexShaderSource, fragmentShaderSource);
+        const simpleProgram = GL.createProgram(gl, simpleVertexShaderSource, simpleFragmentShaderSource);
+
+        //
+
+        const mikuPmd = await new PMD(modelUrl, modelArraybuffer);
+        const mikuVao = new VAO(gl, mikuPmd.dataForAttributeBuffer, mikuPmd.verticesToDrawCount);
+        const mikuModelUbo = new ModelUbo(gl, [program], "Model");
+        const mikuBoneUbo = new BoneArrayUbo(gl, [program], "Bone");
+        const mikuMaterialUbo = new MaterialArrayUbo(gl, [program], "Material");
+
+        gl.useProgram(program);
+
+        const mikuMaterialTextures = mikuPmd.materialTextureImages.array.map((image, index) => {
+          const texture = new Texture(gl, image);
+          texture.setTextureUnitIndex(index);
+          texture.bindTextureUnitToUniform(program, `u_materialTexture_${index}`, { programBound: true });
+          return texture;
+        });
+
+        const mikuToonTextures = new Texture(gl, mikuPmd.toonTextureImages.combinedImage, {
+          width: mikuPmd.toonTextureImages.array[0].width,
+          height: mikuPmd.toonTextureImages.array[0].height,
+          imageCount: mikuPmd.toonTextureImages.array.length,
+          generateMipmaps: false,
+        });
+        mikuToonTextures.setTextureUnitIndex(10);
+        mikuToonTextures.bindTextureUnitToUniform(program, "u_toonTextures", { programBound: true });
+
+        gl.useProgram(null);
+
+        mikuPmd.transform.setTransformation({ rotation: [0, 180, 0] });
+        mikuModelUbo.updateModelData(mikuPmd);
+        mikuBoneUbo.updateBoneData(mikuPmd.dataForBoneUbo);
+        mikuMaterialUbo.updateMaterialData(mikuPmd.dataForMaterialUbo);
+
+        //
+
+        const mikuVmd = new VMD(motionUrl, motionArraybuffer);
+
+        mikuVmd.setActiveDataByPmd(mikuPmd);
+
+        //
+
+        const grid = new Grid(30);
+        const gridVao = new VAO(gl, grid.dataForAttributeBuffer, grid.verticesToDrawCount);
+        const gridModelUbo = new ModelUbo(gl, [simpleProgram], "Model");
+
+        gridModelUbo.updateModelData(grid);
+
+        //
+
+        const camera = new Camera(gl);
+        const cameraUbo = new CameraUbo(gl, [program, simpleProgram], "Camera");
+        const cameraController = new CameraController(gl, camera);
+
+        camera.transform.setTransformation({ position: [0, 10, 25] });
+        cameraUbo.updateCameraData(camera);
+
+        //
+
+        const light = new Light(gl, { position: [0, 10, 25], rotation: [0, -15, 0], projectionSize: 25 });
+        const lightUbo = new LightUbo(gl, [program], "Light");
+
+        lightUbo.updateLightData(light);
+
+        //
+
+        const shadowFbo = new FBO(gl);
+        shadowFbo.addDepthbuffer("texture");
+
+        shadowFbo.depthTexture.setTextureUnitIndex(9);
+        shadowFbo.depthTexture.bindTextureUnitToUniform(program, "u_shadowTexture");
+
+        const shadowUbo = new ShadowUbo(gl, [program], "Shadow");
+        const shadowMapTexelSize = [1 / canvas.width, 1 / canvas.height];
+
+        //
+
+        mikuModelUbo.bindUniformBlock();
+        mikuBoneUbo.bindUniformBlock();
+        mikuMaterialUbo.bindUniformBlock();
+        gridModelUbo.bindUniformBlock();
+        cameraUbo.bindUniformBlock();
+        lightUbo.bindUniformBlock();
+        shadowUbo.bindUniformBlock();
+
+        mikuMaterialTextures.forEach((texture) => texture.addToTextureUnit());
+        mikuToonTextures.addToTextureUnit();
+
+        //
+
+        const bgm = document.querySelector("audio");
+
+        let lastTime = 0;
+        let pauseAnimation = false;
+
+        const draw = async (currentTime) => {
+          if (pauseAnimation) return;
+
+          let timeElapsed = lastTime === 0 ? -1 : currentTime - lastTime;
+          lastTime = currentTime;
+
+          // play audio at vmd frame 160 and before don't end
+          if (mikuVmd.lastConsumedFrameNum > 160 && mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum && bgm.paused) {
+            await bgm.play();
+
+            if (bgm.paused) return;
+          }
+
+          gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+
+          cameraUbo.updateCameraData(camera);
+
+          gl.useProgram(program);
+
+          mikuPmd.updateAnimation(mikuVmd, timeElapsed);
+          mikuBoneUbo.updateBoneData(mikuPmd.dataForBoneUbo);
+          mikuVao.update({
+            morph: mikuPmd.dataForAttributeBuffer.morph,
+          });
+
+          gl.bindVertexArray(mikuVao.vao);
+
+          shadowFbo.draw(() => {
+            shadowUbo.updateShadowData({
+              shadowMappingMode: 1,
+              shadowMapTexelSize,
+            });
+
+            shadowFbo.depthTexture.removeFromTextureUnit();
+
+            gl.drawElements(gl.TRIANGLES, mikuVao.verticesToDrawCount, gl.UNSIGNED_SHORT, 0);
+          });
+
+          shadowFbo.depthTexture.addToTextureUnit();
+          shadowUbo.updateShadowData({
+            shadowMappingMode: 0,
+            shadowMapTexelSize,
+          });
+
+          gl.drawElements(gl.TRIANGLES, mikuVao.verticesToDrawCount, gl.UNSIGNED_SHORT, 0);
+
+          gl.useProgram(simpleProgram);
+
+          gl.bindVertexArray(gridVao.vao);
+          gl.drawArrays(gl.LINES, 0, gridVao.verticesToDrawCount);
+
+          if (!pauseAnimation) requestAnimationFrame(draw);
+        };
+
+        //
+
+        const cover = document.querySelector("#cover");
+
+        const loading = document.querySelector(".loading-content");
+        const ready = document.querySelector(".ready-content");
+        const error = document.querySelector(".error-content");
+
+        const playButton = document.querySelector(".play");
+
+        playButton.addEventListener("click", () => {
+          cover.style.display = "none";
+
+          document.addEventListener("visibilitychange", () => {
+            pauseAnimation = document.hidden;
+
+            // pause animation
+            if (pauseAnimation) return bgm.pause();
+
+            // unpause animation
+            lastTime = performance.now();
+            requestAnimationFrame(draw);
+          });
+
+          requestAnimationFrame(draw);
+        });
+
+        let canPlayThroughEvent;
+
+        const signalReady = () => {
+          loading.style.display = "none";
+          ready.style.display = "block";
+
+          if (canPlayThroughEvent) bgm.removeEventListener(canPlayThroughEvent);
+        };
+
+        // loaded enough data to play without pause
+        if (bgm.readyState === 4) signalReady();
+        // still loading, not enough to play without pause
+        else if (bgm.networkState === 2) canPlayThroughEvent = bgm.addEventListener("canplaythrough", signalReady);
+        // not enough data and not loading, probably preload disabled
+        else signalReady();
+      });
+    </script>
+  </body>
+</html>
