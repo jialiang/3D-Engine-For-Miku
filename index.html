@@ -1,8 +1,12 @@
-<html>
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
     <title>3D Engine For Miku</title>
+    <meta name="description" content="My own personal 3D JavaScript Engine for playing MMD file formats." />
+    <link rel="canonical" href="https://jialiang.github.io/3D-Engine-For-Miku/" />
 
     <style>
       html {
@@ -346,7 +350,9 @@
           14th birthday, which falls on the 31st August 2021.
         </p>
         <p>
-          <a href="https://github.com/jialiang/3D-Engine-For-Miku" target="_blank">Github repository</a>
+          <a href="https://github.com/jialiang/3D-Engine-For-Miku" target="_blank" rel="noopener noreferrer"
+            >Github repository</a
+          >
         </p>
 
         <h2>Browser Compatability</h2>
@@ -398,17 +404,20 @@
         <p>
           The motion was created by Hino.
           <a href="https://www.nicovideo.jp/watch/sm13147122">Link to the distribution video</a>. It was rotoscoped from
-          Bakamerou's <a href="https://www.nicovideo.jp/watch/sm12016176" target="_blank">dance cover</a>.
+          Bakamerou's
+          <a href="https://www.nicovideo.jp/watch/sm12016176" target="_blank" rel="noopener noreferrer">dance cover</a>.
         </p>
 
         <h2>3D Engine For Miku</h2>
 
         <p>
           The 3D engine used is one I created from scratch. The only 2 external libraries it uses are
-          <a href="https://github.com/kripken/ammo.js/" target="_blank">Ammo.js</a>
-          for physics simulation and <a href="https://glmatrix.net/" target="_blank">glMatrix</a> for matrix operations.
+          <a href="https://github.com/kripken/ammo.js/" target="_blank" rel="noopener noreferrer">Ammo.js</a>
+          for physics simulation and
+          <a href="https://glmatrix.net/" target="_blank" rel="noopener noreferrer">glMatrix</a> for matrix operations.
           It is inspired by the de facto animation program of the Anime community,
-          <a href="https://sites.google.com/view/vpvp/" target="_blank">MikuMikuDance (MMD)</a>.
+          <a href="https://sites.google.com/view/vpvp/" target="_blank" rel="noopener noreferrer">MikuMikuDance (MMD)</a
+          >.
         </p>
 
         <p>Features include:</p>
@@ -428,8 +437,10 @@
               Forward and inverse kinematics are used. Forward kinematics is calculated using simple trigonometry. The
               inverse kinematics (IK) algorithm used is Quaternion Cyclic Coordinate Descent (CCD). Hinge joints and
               joint limits are also supported. The blog post
-              <a href="https://zalo.github.io/blog/inverse-kinematics/" target="_blank">Inverse Kinematics</a> by
-              Johnathon Selstad is the best resource I encountered by far on CCD IK.
+              <a href="https://zalo.github.io/blog/inverse-kinematics/" target="_blank" rel="noopener noreferrer"
+                >Inverse Kinematics</a
+              >
+              by Johnathon Selstad is the best resource I encountered by far on CCD IK.
             </p>
           </li>
 
@@ -446,12 +457,19 @@
             <p>
               Motion is interpolated along euclidean cubic bezier curves for translations and spherical cubic bezier
               curves for rotations. The article
-              <a href="https://medium.com/@adrian_cooney/bezier-interpolation-13b68563313a" target="_blank"
+              <a
+                href="https://medium.com/@adrian_cooney/bezier-interpolation-13b68563313a"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Bezier Interpolation</a
               >
               by Adrian Cooney nicely explains how the former works. The algorithm for the latter is based on Douglas
               Wilhelm Harder's
-              <a href="https://ece.uwaterloo.ca/~dwharder/C++/CQOST/src/Bezier.cpp" target="_blank">Bezier C++ class</a
+              <a
+                href="https://ece.uwaterloo.ca/~dwharder/C++/CQOST/src/Bezier.cpp"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Bezier C++ class</a
               >.
             </p>
           </li>
@@ -461,7 +479,10 @@
             <p>
               Shadow mapping is used so that light can be obscured by other objects. The technique used for soft shadows
               is Percentage-Closer Soft Shadows (PCSS). Here is the
-              <a href="http://developer.download.nvidia.com/shaderlibrary/docs/shadow_PCSS.pdf" target="_blank"
+              <a
+                href="http://developer.download.nvidia.com/shaderlibrary/docs/shadow_PCSS.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
                 >PCSS Whitepaper</a
               >
               by nVidia. This technique softens shadows by blurring the edges around shadows depending on the luminance
@@ -475,9 +496,13 @@
               Ammo.js is used to simulate constrained rigid bodies. It is a Emscripten-port of the Bullet physics
               engine. The version I used is my own custom build which includes some methods not included in the official
               release. Unused code is removed using
-              <a href="https://github.com/pinqy520/coverage-shaker" target="_blank">Coverage Shaker</a> and then further
-              minified using the
-              <a href="https://developers.google.com/closure/compiler" target="_blank">Closure Compiler</a>.
+              <a href="https://github.com/pinqy520/coverage-shaker" target="_blank" rel="noopener noreferrer"
+                >Coverage Shaker</a
+              >
+              and then further minified using the
+              <a href="https://developers.google.com/closure/compiler" target="_blank" rel="noopener noreferrer"
+                >Closure Compiler</a
+              >.
             </p>
           </li>
 
@@ -493,15 +518,20 @@
         <p>
           Do note that being a personal engine, I will only take my own use cases and preferences into account when
           developing it. So I wouldn't use it if I were you. If you're looking for something more general purpose, you
-          can consider <a href="https://threejs.org/" target="_blank">THREE.js</a>. They too have several
-          <a href="https://threejs.org/examples/?q=mmd" target="_blank">Miku examples</a>. With that said, you're
-          welcome to look around the code to see how things work and perhaps draw ideas for your own engine. I myself
-          extensively studied the code in Takahiro's
-          <a href="https://github.com/takahirox/mmd-viewer-js" target="_blank">MMD Viewer</a>, who in turn studied the
-          code in Atsushi's <a href="https://github.com/edvakf/MMD.js/" target="_blank">MMD.js</a>, who in turn studied
-          the code in the <a href="http://www.mmdagent.jp/" target="_blank">MMDAgent</a> and
-          <a href="http://sourceforge.jp/projects/mikumikustudio" target="_blank">MikuMikuStudio</a> projects.
-          Unfortunely, the source code for MMD was never released and will never be.
+          can consider <a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">THREE.js</a>. They too
+          have several
+          <a href="https://threejs.org/examples/?q=mmd" target="_blank" rel="noopener noreferrer">Miku examples</a>.
+          With that said, you're welcome to look around the code to see how things work and perhaps draw ideas for your
+          own engine. I myself extensively studied the code in Takahiro's
+          <a href="https://github.com/takahirox/mmd-viewer-js" target="_blank" rel="noopener noreferrer">MMD Viewer</a>,
+          who in turn studied the code in Atsushi's
+          <a href="https://github.com/edvakf/MMD.js/" target="_blank" rel="noopener noreferrer">MMD.js</a>, who in turn
+          studied the code in the
+          <a href="http://www.mmdagent.jp/" target="_blank" rel="noopener noreferrer">MMDAgent</a> and
+          <a href="http://sourceforge.jp/projects/mikumikustudio" target="_blank" rel="noopener noreferrer"
+            >MikuMikuStudio</a
+          >
+          projects. Unfortunely, the source code for MMD was never released and will never be.
         </p>
 
         <h2>Privacy</h2>
