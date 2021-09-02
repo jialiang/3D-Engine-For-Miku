@@ -5,6 +5,8 @@ class GL {
   static init(canvas) {
     const gl = canvas.getContext("webgl2");
 
+    if (!gl) throw "Your browser doesn't support WebGL 2.0 not supported.";
+
     const computedStyle = getComputedStyle(canvas);
     const width = parseInt(computedStyle.getPropertyValue("width"), 10);
     const height = parseInt(computedStyle.getPropertyValue("height"), 10);
