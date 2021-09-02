@@ -9,8 +9,8 @@ class GL {
     const width = parseInt(computedStyle.getPropertyValue("width"), 10);
     const height = parseInt(computedStyle.getPropertyValue("height"), 10);
 
-    canvas.style.width = width;
-    canvas.style.height = height;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
     const realWidth = width * devicePixelRatio;
     const realHeight = height * devicePixelRatio;
