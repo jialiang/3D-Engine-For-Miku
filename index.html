@@ -403,8 +403,8 @@
         </p>
 
         <p>
-          If you're using Safari 14.1 on MacOS or using iOS with Safari 14.1 installed, you would either need to upgrade to
-          Safari 15 or enable the WebGL 2.0 feature manually. To do the latter:
+          If you're using Safari 14.1 on MacOS or using iOS with Safari 14.1 installed, you would either need to upgrade
+          to Safari 15 or enable the WebGL 2.0 feature manually. To do the latter:
         </p>
 
         <div class="list-container">
@@ -760,11 +760,9 @@
           let timeElapsed = lastTime === 0 ? -1 : currentTime - lastTime;
           lastTime = currentTime;
 
-          // play audio at vmd frame 160 and before don't end
-          if (mikuVmd.lastConsumedFrameNum > 160 && mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum && bgm.paused) {
-            await bgm.play();
-
-            if (bgm.paused) return;
+          if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum && bgm.paused) {
+            requestAnimationFrame(draw);
+            return;
           }
 
           gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
@@ -828,9 +826,12 @@
 
             // unpause animation
             lastTime = performance.now();
+
+            if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) bgm.play();
             requestAnimationFrame(draw);
           });
 
+          bgm.play();
           requestAnimationFrame(draw);
         });
 
