@@ -32,6 +32,8 @@ class CameraController {
   initialPosition;
   previousPosition;
 
+  tainted = false;
+
   constructor(gl, camera) {
     this.canvas = gl.canvas;
     this.camera = camera;
@@ -116,5 +118,6 @@ class CameraController {
     // }
 
     this.previousPosition = currentPosition;
+    this.tainted = true;
   }
 }
