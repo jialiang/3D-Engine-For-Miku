@@ -92,6 +92,9 @@ const initAmmo = async function () {
         this.rigidBody = rigidBody;
         this.boneOffsetTransform = boneOffsetTransform;
         this.boneOffsetTransformInverse = inverseTransform(boneOffsetTransform);
+
+        Ammo.destroy(localInertia);
+        Ammo.destroy(boneTransform);
       }
 
       preSimulation(motions) {
@@ -109,18 +112,20 @@ const initAmmo = async function () {
 
         const transform = motionTransform.op_mul(boneOffsetTransform);
 
-        if (info.type === 2) {
-          const rigidBodyTransform = new Ammo.btTransform();
-          rigidBody.getMotionState().getWorldTransform(rigidBodyTransform);
+        const rigidBodyTransform = new Ammo.btTransform();
+        rigidBody.getMotionState().getWorldTransform(rigidBodyTransform);
 
-          transform.setRotation(rigidBodyTransform.getRotation());
+        const rigidBodyRotation = rigidBodyTransform.getRotation();
 
-          Ammo.destroy(rigidBodyTransform);
-        }
+        if (info.type === 2) transform.setRotation(rigidBodyRotation);
 
         rigidBody.getMotionState().setWorldTransform(transform);
 
+        Ammo.destroy(motionTransform);
         Ammo.destroy(transform);
+
+        Ammo.destroy(rigidBodyTransform);
+        Ammo.destroy(rigidBodyRotation);
       }
 
       postSimulation(motions) {
@@ -208,6 +213,14 @@ const initAmmo = async function () {
         });
 
         world.addConstraint(constraint, true);
+
+        Ammo.destroy(transform);
+        Ammo.destroy(rigidBodyTransformInv_1);
+        Ammo.destroy(rigidBodyTransformInv_2);
+        Ammo.destroy(linearLowerLimit);
+        Ammo.destroy(linearUpperLimit);
+        Ammo.destroy(angularLowerLimit);
+        Ammo.destroy(angularUpperLimit);
       }
     }
 

@@ -34,7 +34,8 @@ class FileParser {
     this.rawData = new DataView(arrayBuffer);
     this.parsedData = this.parseStructure(structure);
 
-    console.log(this);
+    // Don't need this anymore
+    delete this.rawData;
   }
 
   // Interprets PMD.Structure recursively to find out
