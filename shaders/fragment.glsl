@@ -36,13 +36,13 @@ void main() {
     vec4 baseColor = v_color;
 
     if (v_diffuseTextureIndex == 0) baseColor = texture(u_materialTexture_0, v_uv);
-    else if (v_diffuseTextureIndex == 1) baseColor = texture(u_materialTexture_1, v_uv);
-    else if (v_diffuseTextureIndex == 2) baseColor = texture(u_materialTexture_2, v_uv);
-    else if (v_diffuseTextureIndex == 3) baseColor = texture(u_materialTexture_3, v_uv);
-    else if (v_diffuseTextureIndex == 4) baseColor = texture(u_materialTexture_4, v_uv);
-    else if (v_diffuseTextureIndex == 5) baseColor = texture(u_materialTexture_5, v_uv);
-    else if (v_diffuseTextureIndex == 6) baseColor = texture(u_materialTexture_6, v_uv);
-    else if (v_diffuseTextureIndex == 7) baseColor = texture(u_materialTexture_7, v_uv);
+    // else if (v_diffuseTextureIndex == 1) baseColor = texture(u_materialTexture_1, v_uv);
+    // else if (v_diffuseTextureIndex == 2) baseColor = texture(u_materialTexture_2, v_uv);
+    // else if (v_diffuseTextureIndex == 3) baseColor = texture(u_materialTexture_3, v_uv);
+    // else if (v_diffuseTextureIndex == 4) baseColor = texture(u_materialTexture_4, v_uv);
+    // else if (v_diffuseTextureIndex == 5) baseColor = texture(u_materialTexture_5, v_uv);
+    // else if (v_diffuseTextureIndex == 6) baseColor = texture(u_materialTexture_6, v_uv);
+    // else if (v_diffuseTextureIndex == 7) baseColor = texture(u_materialTexture_7, v_uv);
 
     vec3 shadow_uv = v_shadow_uv.xyz / v_shadow_uv.w;
 
