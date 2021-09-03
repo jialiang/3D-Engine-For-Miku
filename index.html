@@ -776,6 +776,15 @@
             return;
           }
 
+          if (mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum) {
+            if (!cameraController.tainted) {
+              requestAnimationFrame(draw);
+              return;
+            }
+
+            cameraController.tainted = false;
+          }
+
           gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
           cameraUbo.updateCameraData(camera);
