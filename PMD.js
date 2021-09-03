@@ -239,9 +239,6 @@ class PMD extends FileParser {
       this.kinematics = new Kinematics(bones.array, iks.array);
       this.physics = new Physics(bones.array, rigidBodies.array, joints.array);
 
-      // Don't need these anymore, save memory?
-      delete this.rawData;
-
       return this;
     })();
   }
