@@ -835,12 +835,16 @@
             // unpause animation
             lastTime = performance.now();
 
-            if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) bgm.play();
-            requestAnimationFrame(draw);
+            requestAnimationFrame(async (currentTime) => {
+              if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) await bgm.play();
+              draw(currentTime);
+            });
           });
 
-          bgm.play();
-          requestAnimationFrame(draw);
+          requestAnimationFrame(async (currentTime) => {
+            await bgm.play();
+            draw(currentTime);
+          });
         });
 
         let canPlayThroughEvent;
