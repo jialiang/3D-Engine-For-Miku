@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <title>3D Engine For Miku</title>
-    <meta name="description" content="My own personal 3D JavaScript Engine for playing MMD file formats." />
+    <meta
+      name="description"
+      content="My own personal 3D JavaScript Engine for playing MMD file formats."
+    />
     <link rel="icon" type="image/png" href="https://jialiang.github.io/favicon.png" />
     <link rel="canonical" href="https://jialiang.github.io/3D-Engine-For-Miku/" />
     <meta name="theme-color" content="#fff" />
@@ -98,7 +101,8 @@
         height: 100%;
         padding: 0.5rem;
         text-align: center;
-        background: linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100% 10px,
+        background: linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100%
+            10px,
           linear-gradient(to right, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 0/10px 100%,
           linear-gradient(to right, rgba(119, 136, 136, 0.1) 1px, transparent 0) 0 0/100px 100%,
           linear-gradient(to top, rgba(0, 25, 25, 0.1) 1px, transparent 0) 0 100%/100% 100px,
@@ -396,7 +400,10 @@
             <div>An error occured!</div>
             <div class="error-message"></div>
             <div>It might or might not be fatal.</div>
-            <div>Check the <a href="#browser-compatibility">Browser Compatibility</a> section for advice.</div>
+            <div>
+              Check the <a href="#browser-compatibility">Browser Compatibility</a> section for
+              advice.
+            </div>
             <div class="error-close" onclick="this.parentNode.style.display = ''">Dismiss</div>
           </div>
         </div>
@@ -407,13 +414,16 @@
     <div class="article-container">
       <article class="text">
         <h1>Wavefile feat. Hatsune Miku</h1>
-        <p>Hi, I build my own 3D engine from scratch and created this web animation.</p>
+        <p>Hi, I built my own 3D engine from scratch and created this web animation.</p>
         <p>
-          I've been working on it the engine for the entirety of August and managed to get this simple demo out right
-          around Miku's 14th birthday, which falls on the 31st August 2021.
+          I've been working on the engine for the entirety of August and managed to get this simple
+          demo out right around Miku's 14th birthday, which falls on the 31st August 2021.
         </p>
         <p>
-          <a href="https://github.com/jialiang/3D-Engine-For-Miku" target="_blank" rel="noopener noreferrer"
+          <a
+            href="https://github.com/jialiang/3D-Engine-For-Miku"
+            target="_blank"
+            rel="noopener noreferrer"
             >Github repository</a
           >
         </p>
@@ -421,42 +431,52 @@
         <h2 id="browser-compatibility">Browser Compatibility</h2>
 
         <p>
-          The latest stable release of Firefox, Chrome or Edge on Windows or Android should work fine. At the time of
-          writing, these are Firefox 90, Chrome 92 and Edge 92.
+          The latest stable release of Firefox, Chrome or Edge on Windows or Android should work
+          fine. At the time of writing, these are Firefox 90, Chrome 92 and Edge 92.
         </p>
 
         <p>
-          If you're using Safari 14.1 on MacOS or using iOS with Safari 14.1 installed, you would either need to upgrade
-          to Safari 15 or enable the WebGL 2.0 feature manually. To do the latter:
+          If you're using Safari 14.1 on MacOS or using iOS with Safari 14.1 installed, you would
+          either need to upgrade to Safari 15 or enable the WebGL 2.0 feature manually. To do the
+          latter:
         </p>
 
         <div class="list-container">
           <p>For MacOS</p>
           <ol>
-            <li>From the menu bar on top, go to <b>Safari</b> 🠖 <b>Preferences</b> 🠖 <b>Advanced</b>.</li>
+            <li>
+              From the menu bar on top, go to <b>Safari</b> 🠖 <b>Preferences</b> 🠖 <b>Advanced</b>.
+            </li>
             <li>Tick the <b>Show Develop menu in the menu bar</b> checkbox.</li>
-            <li>From the menu bar on top, go to <b>Develop</b> 🠖 <b>Experimental Features</b> 🠖 <b>WebGL 2.0</b>.</li>
+            <li>
+              From the menu bar on top, go to <b>Develop</b> 🠖 <b>Experimental Features</b> 🠖
+              <b>WebGL 2.0</b>.
+            </li>
           </ol>
         </div>
 
         <div class="list-container">
           <p>For iOS</p>
           <ol>
-            <li>Go to <b>Settings</b> 🠖 <b>Safari</b> 🠖 <b>Advanced</b> 🠖 <b>Experimental Features</b>.</li>
+            <li>
+              Go to <b>Settings</b> 🠖 <b>Safari</b> 🠖 <b>Advanced</b> 🠖
+              <b>Experimental Features</b>.
+            </li>
             <li>Enable <b>WebGL 2.0</b>.</li>
           </ol>
         </div>
 
         <p>Refresh the page to see the changes take effect.</p>
         <p>
-          Do note that on iOS, all browsers are forced to use Safari's Webkit browser engine due to App Store rules.
+          Do note that on iOS, all browsers are forced to use Safari's Webkit browser engine due to
+          App Store rules.
         </p>
 
         <h2>Thanks</h2>
 
         <p>
-          The model used is the Hatsune Miku Ver.2 model by Animasa. It is one of the default models included in the MMD
-          software. It was released on 5th of March 2009.
+          The model used is the Hatsune Miku Ver.2 model by Animasa. It is one of the default models
+          included in the MMD software. It was released on 5th of March 2009.
         </p>
 
         <p>
@@ -466,20 +486,30 @@
 
         <p>
           The motion was created by Hino.
-          <a href="https://www.nicovideo.jp/watch/sm13147122">Link to the distribution video</a>. It was rotoscoped from
-          Bakamerou's
-          <a href="https://www.nicovideo.jp/watch/sm12016176" target="_blank" rel="noopener noreferrer">dance cover</a>.
+          <a href="https://www.nicovideo.jp/watch/sm13147122">Link to the distribution video</a>. It
+          was rotoscoped from Bakamerou's
+          <a
+            href="https://www.nicovideo.jp/watch/sm12016176"
+            target="_blank"
+            rel="noopener noreferrer"
+            >dance cover</a
+          >.
         </p>
 
         <h2>3D Engine For Miku</h2>
 
         <p>
-          The 3D engine used is one I created completely from scratch. The only 2 external libraries it uses are
-          <a href="https://github.com/kripken/ammo.js/" target="_blank" rel="noopener noreferrer">Ammo.js</a>
+          The 3D engine used is one I created completely from scratch. The only 2 external libraries
+          it uses are
+          <a href="https://github.com/kripken/ammo.js/" target="_blank" rel="noopener noreferrer"
+            >Ammo.js</a
+          >
           for physics simulation and
-          <a href="https://glmatrix.net/" target="_blank" rel="noopener noreferrer">glMatrix</a> for matrix operations.
-          It is inspired by the de facto animation program of the Anime community,
-          <a href="https://sites.google.com/view/vpvp/" target="_blank" rel="noopener noreferrer">MikuMikuDance (MMD)</a
+          <a href="https://glmatrix.net/" target="_blank" rel="noopener noreferrer">glMatrix</a> for
+          matrix operations. It is inspired by the de facto animation program of the Anime
+          community,
+          <a href="https://sites.google.com/view/vpvp/" target="_blank" rel="noopener noreferrer"
+            >MikuMikuDance (MMD)</a
           >.
         </p>
 
@@ -489,18 +519,22 @@
           <li>
             <h3>PMD & VMD File Support</h3>
             <p>
-              PMD (Polygon Model Data) files stores model information. VMD (Vocaloid Motion Data) stores motion
-              information. These are the primary file formats used by MMD.
+              PMD (Polygon Model Data) files store model information. VMD (Vocaloid Motion Data)
+              stores motion information. These are the primary file formats used by MMD.
             </p>
           </li>
 
           <li>
             <h3>Skeletal Animation</h3>
             <p>
-              Forward and inverse kinematics are used. Forward kinematics is calculated using simple trigonometry. The
-              inverse kinematics (IK) algorithm used is Quaternion Cyclic Coordinate Descent (CCD). Hinge joints and
-              joint limits are also supported. The blog post
-              <a href="https://zalo.github.io/blog/inverse-kinematics/" target="_blank" rel="noopener noreferrer"
+              Forward and inverse kinematics are used. Forward kinematics is calculated using simple
+              trigonometry. The inverse kinematics (IK) algorithm used is Quaternion Cyclic
+              Coordinate Descent (CCD). Hinge joints and joint limits are also supported. The blog
+              post
+              <a
+                href="https://zalo.github.io/blog/inverse-kinematics/"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Inverse Kinematics</a
               >
               by Johnathon Selstad is the best resource I encountered by far on CCD IK.
@@ -510,38 +544,44 @@
           <li>
             <h3>Morph Target Animation</h3>
             <p>
-              Vertices are manipulated directly to mould the model. Used to animate facial motions and certain character
-              props.
+              Vertices are manipulated directly to mould the model. Used to animate facial motions
+              and certain character props.
             </p>
           </li>
 
           <li>
             <h3>Soft Shadow Mapping</h3>
             <p>
-              Shadow mapping is used so that light can be obscured by other objects. The technique used for soft shadows
-              is Percentage-Closer Soft Shadows (PCSS). Here is the
+              Shadow mapping is used so that light can be obscured by other objects. The technique
+              used for soft shadows is Percentage-Closer Soft Shadows (PCSS). Here is the
               <a
                 href="http://developer.download.nvidia.com/shaderlibrary/docs/shadow_PCSS.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 >PCSS Whitepaper</a
               >
-              by nVidia. This technique softens shadows by blurring the edges around shadows depending on the luminance
-              of neighbouring pixels.
+              by nVidia. This technique softens shadows by blurring the edges around shadows
+              depending on the luminance of neighbouring pixels.
             </p>
           </li>
 
           <li>
             <h3>Real-time Physics</h3>
             <p>
-              Ammo.js is used to simulate constrained rigid bodies. It is a Emscripten-port of the Bullet physics
-              engine. The version I used is my own custom build which includes some methods not included in the official
-              release. Unused code is removed using
-              <a href="https://github.com/pinqy520/coverage-shaker" target="_blank" rel="noopener noreferrer"
+              Ammo.js is used to simulate constrained rigid bodies. It is a Emscripten-port of the
+              Bullet physics engine. The version I used is my own custom build which includes some
+              methods not included in the official release. Unused code is removed using
+              <a
+                href="https://github.com/pinqy520/coverage-shaker"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Coverage Shaker</a
               >
               and then further minified using the
-              <a href="https://developers.google.com/closure/compiler" target="_blank" rel="noopener noreferrer"
+              <a
+                href="https://developers.google.com/closure/compiler"
+                target="_blank"
+                rel="noopener noreferrer"
                 >Closure Compiler</a
               >.
             </p>
@@ -550,29 +590,41 @@
           <li>
             <h3>Toon Textures</h3>
             <p>
-              More widely known as ramp textures. It accentures diffuse textures in order to fake the effects of
-              advanced lighting setups.
+              More widely known as ramp textures. It accentures diffuse textures in order to fake
+              the effects of advanced lighting setups.
             </p>
           </li>
         </ol>
 
         <p>
-          Do note that being a personal engine, I will only take my own use cases and preferences into account when
-          developing it. So I wouldn't use it if I were you. If you're looking for something more general purpose, you
-          can consider <a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">THREE.js</a>. They too
-          have several
-          <a href="https://threejs.org/examples/?q=mmd" target="_blank" rel="noopener noreferrer">Miku examples</a>.
-          With that said, you're welcome to look around the code to see how things work and perhaps draw ideas for your
-          own engine. I myself extensively studied the code in Takahiro's
-          <a href="https://github.com/takahirox/mmd-viewer-js" target="_blank" rel="noopener noreferrer">MMD Viewer</a>,
-          who in turn studied the code in Atsushi's
-          <a href="https://github.com/edvakf/MMD.js/" target="_blank" rel="noopener noreferrer">MMD.js</a>, who in turn
-          studied the code in the
-          <a href="http://www.mmdagent.jp/" target="_blank" rel="noopener noreferrer">MMDAgent</a> and
-          <a href="http://sourceforge.jp/projects/mikumikustudio" target="_blank" rel="noopener noreferrer"
+          Do note that being a personal engine, I will only take my own use cases and preferences
+          into account when developing it. So I wouldn't use it if I were you. If you're looking for
+          something more general purpose, you can consider
+          <a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">THREE.js</a>.
+          They too have several
+          <a href="https://threejs.org/examples/?q=mmd" target="_blank" rel="noopener noreferrer"
+            >Miku examples</a
+          >. With that said, you're welcome to look around the code to see how things work and
+          perhaps draw ideas for your own engine. I myself extensively studied the code in
+          Takahiro's
+          <a
+            href="https://github.com/takahirox/mmd-viewer-js"
+            target="_blank"
+            rel="noopener noreferrer"
+            >MMD Viewer</a
+          >, who in turn studied the code in Atsushi's
+          <a href="https://github.com/edvakf/MMD.js/" target="_blank" rel="noopener noreferrer"
+            >MMD.js</a
+          >, who in turn studied the code in the
+          <a href="http://www.mmdagent.jp/" target="_blank" rel="noopener noreferrer">MMDAgent</a>
+          and
+          <a
+            href="http://sourceforge.jp/projects/mikumikustudio"
+            target="_blank"
+            rel="noopener noreferrer"
             >MikuMikuStudio</a
           >
-          projects. Unfortunely, the source code for MMD was never released and will never be.
+          projects. Unfortunately, the source code for MMD was never released and will never be.
         </p>
 
         <h2>Privacy</h2>
@@ -659,7 +711,11 @@
         //
 
         const program = GL.createProgram(gl, vertexShaderSource, fragmentShaderSource);
-        const simpleProgram = GL.createProgram(gl, simpleVertexShaderSource, simpleFragmentShaderSource);
+        const simpleProgram = GL.createProgram(
+          gl,
+          simpleVertexShaderSource,
+          simpleFragmentShaderSource
+        );
 
         //
 
@@ -674,7 +730,9 @@
         const mikuMaterialTextures = mikuPmd.materialTextureImages.array.map((image, index) => {
           const texture = new Texture(gl, image);
           texture.setTextureUnitIndex(index);
-          texture.bindTextureUnitToUniform(program, `u_materialTexture_${index}`, { programBound: true });
+          texture.bindTextureUnitToUniform(program, `u_materialTexture_${index}`, {
+            programBound: true,
+          });
           return texture;
         });
 
@@ -685,7 +743,9 @@
           generateMipmaps: false,
         });
         mikuToonTextures.setTextureUnitIndex(10);
-        mikuToonTextures.bindTextureUnitToUniform(program, "u_toonTextures", { programBound: true });
+        mikuToonTextures.bindTextureUnitToUniform(program, "u_toonTextures", {
+          programBound: true,
+        });
 
         gl.useProgram(null);
 
@@ -719,7 +779,11 @@
 
         //
 
-        const light = new Light(gl, { position: [0, 10, 25], rotation: [0, -15, 0], projectionSize: 25 });
+        const light = new Light(gl, {
+          position: [0, 10, 25],
+          rotation: [0, -15, 0],
+          projectionSize: 25,
+        });
         const lightUbo = new LightUbo(gl, [program], "Light");
 
         lightUbo.updateLightData(light);
@@ -861,7 +925,8 @@
         // loaded enough data to play without pause
         if (bgm.readyState === 4) signalReady();
         // still loading, not enough to play without pause
-        else if (bgm.networkState === 2) canPlayThroughEvent = bgm.addEventListener("canplaythrough", signalReady);
+        else if (bgm.networkState === 2)
+          canPlayThroughEvent = bgm.addEventListener("canplaythrough", signalReady);
         // not enough data and not loading, probably preload disabled
         else signalReady();
       }
