@@ -33,8 +33,7 @@ class Texture {
 
     const texture = gl.createTexture();
 
-    if (flipY) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
     gl.bindTexture(bindingPoint, texture);
 
     if (imageCount === 1) {
@@ -101,5 +100,13 @@ class Texture {
     gl.uniform1i(location, textureUnit);
 
     if (!programBound) gl.useProgram(null);
+  }
+
+  dispose() {
+    const { gl, texture } = this;
+
+    gl.deleteTexture(texture);
+
+    this.texture = null;
   }
 }

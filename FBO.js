@@ -89,4 +89,19 @@ class FBO {
 
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
   }
+
+  dispose() {
+    const { gl, framebuffer, colorTexture, depthbuffer, depthTexture } = this;
+
+    if (colorTexture) colorTexture.dispose();
+    if (depthTexture) depthTexture.dispose();
+    if (depthbuffer) gl.deleteRenderbuffer(depthbuffer);
+
+    gl.deleteFramebuffer(framebuffer);
+
+    this.colorTexture = null;
+    this.depthTexture = null;
+    this.depthbuffer = null;
+    this.framebuffer = null;
+  }
 }
