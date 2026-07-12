@@ -1,6 +1,7 @@
 #version 300 es
 
-precision mediump float;
+precision highp float;
+precision highp sampler2DArray;
 
 // Percentage-Closer Soft Shadows (PCSS), following the NVIDIA paper:
 // https://developer.download.nvidia.com/shaderlibrary/docs/shadow_PCSS.pdf
@@ -46,14 +47,35 @@ uniform sampler2D u_materialTexture_6;
 uniform sampler2D u_materialTexture_7;
 
 uniform sampler2D u_shadowTexture;
+uniform sampler2DArray u_toonTextures;
+
+uniform Material {
+    vec4 u_diffuseColor[32];
+    vec4 u_diffuseTextureIndex[32];
+    vec4 u_sphereTextureIndex[32];
+    vec4 u_sphereTextureType[32];
+    vec4 u_toonTextureIndex[32];
+    vec4 u_ambientColor[32];
+    vec4 u_specularity[32];
+    vec4 u_specularColor[32];
+};
+
+uniform Light {
+    vec3 u_lightColor;
+    vec3 u_lightDirection;
+    mat4 u_lightProjectionMatrix;
+    mat4 u_lightViewMatrix;
+    mat4 u_lightTransformationMatrix;
+};
 
 in vec2 v_uv;
 in vec4 v_color;
-in vec3 v_lighting;
+in vec3 v_worldNormal;
 in vec4 v_shadow_uv;
 in float v_shadowMappingMode;
 in vec2 v_shadowMapTexelSize;
 
+flat in int v_material;
 flat in int v_diffuseTextureIndex;
 flat in int v_sphereTextureIndex;
 flat in int v_sphereTextureType;
@@ -159,5 +181,18 @@ void main() {
 
     float lightFactor = 1.0 - (inShadowPercentage * 0.67);
 
-    finalColor = vec4(baseColor.rgb * v_lighting * lightFactor, baseColor.a);
+    vec3 normalDirection = normalize(v_worldNormal);
+    float lightIntensity = dot(normalDirection, normalize(u_lightDirection));
+
+    if (lightIntensity < 0.1) lightIntensity = 0.1;
+
+    vec3 ambientLight = u_ambientColor[v_material].rgb;
+    vec3 lighting = u_lightColor * lightIntensity + ambientLight;
+
+    vec2 toon_uv = vec2(0.0, lightIntensity * 0.5 + 0.5);
+    vec4 toonColor = texture(u_toonTextures, vec3(toon_uv, v_toonTextureIndex));
+
+    lighting = lighting * 0.75 + lighting * toonColor.rgb * 0.25;
+
+    finalColor = vec4(baseColor.rgb * lighting * lightFactor, baseColor.a);
 }
