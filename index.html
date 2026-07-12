@@ -657,7 +657,7 @@
     <script src="FileParser.js" defer></script>
     <script src="PMD.js" defer></script>
     <script src="VMD.js" defer></script>
-    <script src="Grid.js" defer></script>
+    <script src="Floor.js" defer></script>
 
     <script>
       window.addEventListener("error", handleError);
@@ -685,7 +685,8 @@
         const [
           Physics,
           [vertexShaderSource, fragmentShaderSource], //
-          [simpleVertexShaderSource, simpleFragmentShaderSource], //
+          [floorVertexShaderSource, floorFragmentShaderSource], //
+          shadowShaderChunk,
           [modelArraybuffer, motionArraybuffer], //
         ] = await Promise.all([
           initAmmo(),
@@ -694,14 +695,18 @@
             Utilities.fetch("shaders/fragment.glsl"), //
           ]),
           Promise.all([
-            Utilities.fetch("shaders/simple_vertex.glsl"), //
-            Utilities.fetch("shaders/simple_fragment.glsl"), //
+            Utilities.fetch("shaders/floor_vertex.glsl"), //
+            Utilities.fetch("shaders/floor_fragment.glsl"), //
           ]),
+          Utilities.fetch("shaders/shadow.glsl"),
           Promise.all([
             Utilities.fetch(modelUrl, { responseType: "arraybuffer" }), //
             Utilities.fetch(motionUrl, { responseType: "arraybuffer" }), //
           ]),
         ]);
+
+        const includeShadowChunk = (shaderSource) =>
+          shaderSource.replace("//#include shadow", shadowShaderChunk);
 
         //
 
@@ -710,11 +715,15 @@
 
         //
 
-        const program = GL.createProgram(gl, vertexShaderSource, fragmentShaderSource);
-        const simpleProgram = GL.createProgram(
+        const program = GL.createProgram(
           gl,
-          simpleVertexShaderSource,
-          simpleFragmentShaderSource,
+          vertexShaderSource,
+          includeShadowChunk(fragmentShaderSource),
+        );
+        const floorProgram = GL.createProgram(
+          gl,
+          floorVertexShaderSource,
+          includeShadowChunk(floorFragmentShaderSource),
         );
 
         //
@@ -770,16 +779,16 @@
 
         //
 
-        const grid = new Grid(30);
-        const gridVao = new VAO(gl, grid.dataForAttributeBuffer, grid.verticesToDrawCount);
-        const gridModelUbo = new ModelUbo(gl, [simpleProgram], "Model");
+        const floor = new Floor(60);
+        const floorVao = new VAO(gl, floor.dataForAttributeBuffer, floor.verticesToDrawCount);
+        const floorModelUbo = new ModelUbo(gl, [floorProgram], "Model");
 
-        gridModelUbo.updateModelData(grid);
+        floorModelUbo.updateModelData(floor);
 
         //
 
         const camera = new Camera(gl);
-        const cameraUbo = new CameraUbo(gl, [program, simpleProgram], "Camera");
+        const cameraUbo = new CameraUbo(gl, [program, floorProgram], "Camera");
         const cameraController = new CameraController(gl, camera);
 
         camera.transform.setTransformation({ position: [0, 10, 25] });
@@ -789,10 +798,10 @@
 
         const light = new Light(gl, {
           position: [0, 10, 25],
-          rotation: [0, -15, 0],
-          projectionSize: 25,
+          rotation: [-45, -15, 0],
+          projectionSize: 30,
         });
-        const lightUbo = new LightUbo(gl, [program], "Light");
+        const lightUbo = new LightUbo(gl, [program, floorProgram], "Light");
 
         lightUbo.updateLightData(light);
 
@@ -803,8 +812,9 @@
 
         shadowFbo.depthTexture.setTextureUnitIndex(9);
         shadowFbo.depthTexture.bindTextureUnitToUniform(program, "u_shadowTexture");
+        shadowFbo.depthTexture.bindTextureUnitToUniform(floorProgram, "u_shadowTexture");
 
-        const shadowUbo = new ShadowUbo(gl, [program], "Shadow");
+        const shadowUbo = new ShadowUbo(gl, [program, floorProgram], "Shadow");
         const shadowMapTexelSize = [1 / canvas.width, 1 / canvas.height];
 
         //
@@ -812,7 +822,7 @@
         mikuModelUbo.bindUniformBlock();
         mikuBoneUbo.bindUniformBlock();
         mikuMaterialUbo.bindUniformBlock();
-        gridModelUbo.bindUniformBlock();
+        floorModelUbo.bindUniformBlock();
         cameraUbo.bindUniformBlock();
         lightUbo.bindUniformBlock();
         shadowUbo.bindUniformBlock();
@@ -899,10 +909,10 @@
 
           gl.drawElements(gl.TRIANGLES, mikuVao.verticesToDrawCount, gl.UNSIGNED_SHORT, 0);
 
-          gl.useProgram(simpleProgram);
+          gl.useProgram(floorProgram);
 
-          gl.bindVertexArray(gridVao.vao);
-          gl.drawArrays(gl.LINES, 0, gridVao.verticesToDrawCount);
+          gl.bindVertexArray(floorVao.vao);
+          gl.drawArrays(gl.TRIANGLES, 0, floorVao.verticesToDrawCount);
 
           scheduleDraw();
         };

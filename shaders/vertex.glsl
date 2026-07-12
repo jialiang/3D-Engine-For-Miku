@@ -58,8 +58,6 @@ out vec4 v_color;
 out vec3 v_worldNormal;
 out vec3 v_worldPosition;
 out vec4 v_shadow_uv;
-out float v_shadowMappingMode;
-out vec2 v_shadowMapTexelSize;
 
 flat out int v_material;
 flat out int v_diffuseTextureIndex;
@@ -114,9 +112,6 @@ void main() {
   v_sphereTextureIndex = int(u_sphereTextureIndex[a_material].x);
   v_sphereTextureType = int(u_sphereTextureType[a_material].x);
   v_toonTextureIndex = int(u_toonTextureIndex[a_material].x);
-
-  v_shadowMappingMode = u_shadowMappingMode;
-  v_shadowMapTexelSize = u_shadowMapTexelSize;
 
   v_worldNormal = worldNormal.xyz;
   v_worldPosition = worldPosition.xyz;
