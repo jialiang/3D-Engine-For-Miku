@@ -63,6 +63,11 @@ uniform Light {
     mat4 u_lightTransformationMatrix;
 };
 
+uniform Camera {
+    mat4 u_projectionMatrix;
+    mat4 u_viewMatrix;
+};
+
 in vec2 v_uv;
 in vec4 v_color;
 in vec3 v_worldNormal;
@@ -140,10 +145,23 @@ float shadowedFraction(vec2 uv, float receiverDistance, vec2 filterRadiusUv) {
 void main() {
     if (v_shadowMappingMode > 0.5) return;
 
+    vec3 normalDirection = normalize(v_worldNormal);
+
     vec4 baseColor = v_color;
 
     if (v_diffuseTextureIndex != 255) {
         baseColor = texture(u_materialTextures, vec3(v_uv, v_diffuseTextureIndex));
+    }
+
+    // MMD sphere maps: fake environment highlights looked up by the
+    // view-space normal (.sph multiplies, .spa adds)
+    if (v_sphereTextureIndex != 255) {
+        vec3 viewNormal = normalize((u_viewMatrix * vec4(normalDirection, 0.0)).xyz);
+        vec2 sphere_uv = vec2(0.5 + viewNormal.x * 0.5, 0.5 - viewNormal.y * 0.5);
+        vec3 sphereColor = texture(u_materialTextures, vec3(sphere_uv, v_sphereTextureIndex)).rgb;
+
+        if (v_sphereTextureType == 1) baseColor.rgb *= sphereColor;
+        if (v_sphereTextureType == 0) baseColor.rgb += sphereColor;
     }
 
     vec3 shadow_uv = v_shadow_uv.xyz / v_shadow_uv.w;
@@ -171,7 +189,6 @@ void main() {
 
     float lightFactor = 1.0 - (inShadowPercentage * 0.67);
 
-    vec3 normalDirection = normalize(v_worldNormal);
     float lightIntensity = dot(normalDirection, normalize(u_lightDirection));
 
     if (lightIntensity < 0.1) lightIntensity = 0.1;
