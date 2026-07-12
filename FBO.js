@@ -79,10 +79,25 @@ class FBO {
     return this;
   };
 
+  isStatusChecked = false;
+
   draw(drawFunc) {
     const { gl, framebuffer } = this;
 
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
+
+    // an incomplete framebuffer silently renders nothing,
+    // so validate it once on first use
+    if (!this.isStatusChecked) {
+      const status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
+
+      if (status !== gl.FRAMEBUFFER_COMPLETE) {
+        throw new Error(`Framebuffer is incomplete, status code ${status}.`);
+      }
+
+      this.isStatusChecked = true;
+    }
+
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
     drawFunc();
