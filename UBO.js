@@ -210,7 +210,7 @@ class LightUbo extends UBO {
   getDefaultBlockVariableNames() {
     return [
       "u_lightColor",
-      "u_lightPosition",
+      "u_lightDirection",
       "u_lightProjectionMatrix",
       "u_lightViewMatrix",
       "u_lightTransformationMatrix",
@@ -220,7 +220,7 @@ class LightUbo extends UBO {
   updateLightData(light) {
     return this.updateData([
       { name: "u_lightColor", value: light.color },
-      { name: "u_lightPosition", value: light.transform.position },
+      { name: "u_lightDirection", value: light.transform.forward.slice(0, 3) },
       { name: "u_lightProjectionMatrix", value: light.projectionMatrix },
       { name: "u_lightViewMatrix", value: light.transform.viewMatrix },
       { name: "u_lightTransformationMatrix", value: light.transformationMatrix },

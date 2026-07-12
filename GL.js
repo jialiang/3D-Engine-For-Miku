@@ -55,6 +55,10 @@ class GL {
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
 
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(`Program Link Error:\n${gl.getProgramInfoLog(program)}`);
+    }
+
     program.gl = gl;
     program.index = GL.PROGRAM_INDEX;
     GL.PROGRAM_INDEX += 1;
