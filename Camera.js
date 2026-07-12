@@ -97,7 +97,8 @@ class CameraController {
 
   handleMouseMove(e) {
     const { pageX, pageY, shiftKey } = e;
-    const { offset, previousPosition, camera, effectiveRotateRate, effectivePanRate, rotateOn } = this;
+    const { offset, previousPosition, camera, effectiveRotateRate, effectivePanRate, rotateOn } =
+      this;
 
     const currentPosition = {
       x: pageX - offset.x,

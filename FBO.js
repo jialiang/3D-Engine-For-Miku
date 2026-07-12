@@ -26,7 +26,13 @@ class FBO {
       height: canvas.height,
     });
 
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture.texture, 0);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      colorTexture.texture,
+      0,
+    );
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -46,7 +52,13 @@ class FBO {
         height: canvas.height,
       });
 
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture.texture, 0);
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.DEPTH_ATTACHMENT,
+        gl.TEXTURE_2D,
+        depthTexture.texture,
+        0,
+      );
 
       this.depthTexture = depthTexture;
     }

@@ -109,7 +109,7 @@ class Utilities {
 
         return total;
       },
-      [0, 0, 0]
+      [0, 0, 0],
     );
   };
 

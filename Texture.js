@@ -41,7 +41,18 @@ class Texture {
       if (image) gl.texImage2D(bindingPoint, 0, format, internalFormat, type, image);
       else gl.texImage2D(bindingPoint, 0, format, width, height, 0, internalFormat, type, null);
     } else {
-      gl.texImage3D(bindingPoint, 0, format, width, height, imageCount, 0, internalFormat, type, image);
+      gl.texImage3D(
+        bindingPoint,
+        0,
+        format,
+        width,
+        height,
+        imageCount,
+        0,
+        internalFormat,
+        type,
+        image,
+      );
     }
 
     gl.texParameteri(bindingPoint, gl.TEXTURE_MAG_FILTER, maxFilterType);
