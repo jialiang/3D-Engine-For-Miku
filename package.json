@@ -4,6 +4,7 @@
   "description": "A personal 3D JavaScript engine for playing MMD file formats",
   "private": true,
   "scripts": {
+    "dev": "http-server -c-1 -o",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -12,6 +13,7 @@
     "@eslint/js": "^10.0.1",
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
+    "http-server": "^14.1.1",
     "prettier": "^3.9.5"
   }
 }
