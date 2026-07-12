@@ -202,14 +202,11 @@ class PMD extends FileParser {
   dataForBoneUbo = {};
   dataForMaterialUbo = {};
 
-  numberOfVerticesToDraw = 0;
-
   materialTextureImages = {
     array: [],
     hash: {},
   };
   toonTextureImages = {
-    combined: null,
     array: [],
     hash: {},
   };
@@ -536,7 +533,7 @@ class PMD extends FileParser {
   prepareBonesForAnimation = () => {
     const { parsedData } = this;
 
-    parsedData.bones.array.forEach((bone, index) => {
+    parsedData.bones.array.forEach((bone) => {
       const { parentIndex } = bone;
       const parentBone = parsedData.bones.array[parentIndex];
 

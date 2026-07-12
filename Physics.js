@@ -44,7 +44,6 @@ const initAmmo = async function () {
           width,
           height,
           depth,
-          type,
           weight,
           boneIndex,
           position,

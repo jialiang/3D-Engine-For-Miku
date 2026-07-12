@@ -5,7 +5,7 @@ class GL {
   static init(canvas) {
     const gl = canvas.getContext("webgl2");
 
-    if (!gl) throw "Your browser doesn't support WebGL 2.0 not supported.";
+    if (!gl) throw new Error("Your browser doesn't support WebGL 2.0.");
 
     const computedStyle = getComputedStyle(canvas);
     const width = parseInt(computedStyle.getPropertyValue("width"), 10);
@@ -47,8 +47,8 @@ class GL {
     const vLog = gl.getShaderInfoLog(vertexShader);
     const fLog = gl.getShaderInfoLog(fragmentShader);
 
-    if (vLog) throw `Vertex Shader Error:\n${vLog}`;
-    if (fLog) throw `Fragment Shader Error:\n${fLog}`;
+    if (vLog) throw new Error(`Vertex Shader Error:\n${vLog}`);
+    if (fLog) throw new Error(`Fragment Shader Error:\n${fLog}`);
 
     const program = gl.createProgram();
     gl.attachShader(program, vertexShader);

@@ -1,6 +1,5 @@
 class Grid {
   dataForAttributeBuffer = {};
-  numberOfVerticesToDraw = 0;
   transform = new Transform();
 
   constructor(size = 2, horizontalCount = 13, verticalCount = 13) {

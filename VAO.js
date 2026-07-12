@@ -65,7 +65,7 @@ class VAO {
 
       const attributeInfo = VAO.AttributeInfo[key];
 
-      if (!attributeInfo) throw `Invalid attribute ${key} supplied.`;
+      if (!attributeInfo) throw new Error(`Invalid attribute ${key} supplied.`);
 
       const { location, size, type = "float" } = attributeInfo;
 
@@ -104,17 +104,20 @@ class VAO {
     gl.bindVertexArray(vao);
 
     for (const key in source) {
-      if (key === "index") throw "Updating of Index not supported yet";
+      if (key === "index") throw new Error("Updating of index is not supported yet.");
 
       const buffer = buffers[key];
 
-      if (!buffer) throw `Attribute ${key} not initialised in constructor`;
+      if (!buffer) throw new Error(`Attribute ${key} was not initialised in the constructor.`);
 
       const { type = "float" } = VAO.AttributeInfo[key];
       const array = type === "int" ? new Int16Array(source[key]) : new Float32Array(source[key]);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+
+      // update() runs every frame (morph targets), so hint the driver
+      // that this buffer's contents change often
+      gl.bufferData(gl.ARRAY_BUFFER, array, gl.DYNAMIC_DRAW);
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
