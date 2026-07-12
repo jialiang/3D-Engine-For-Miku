@@ -913,21 +913,21 @@
           });
         });
 
-        let canPlayThroughEvent;
-
         const signalReady = () => {
           loading.style.display = "none";
           ready.style.display = "block";
 
-          if (canPlayThroughEvent) bgm.removeEventListener(canPlayThroughEvent);
+          bgm.removeEventListener("canplay", signalReady);
         };
 
-        // loaded enough data to play without pause
-        if (bgm.readyState === 4) signalReady();
-        // still loading, not enough to play without pause
-        else if (bgm.networkState === 2)
-          canPlayThroughEvent = bgm.addEventListener("canplaythrough", signalReady);
-        // not enough data and not loading, probably preload disabled
+        // enough audio is buffered to start playing
+        // (the browser keeps downloading the rest during playback,
+        // so there is no need to wait for the full file)
+        if (bgm.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) signalReady();
+        // still loading, wait until playback can start
+        else if (bgm.networkState === HTMLMediaElement.NETWORK_LOADING)
+          bgm.addEventListener("canplay", signalReady);
+        // no data and not loading, probably preload disabled
         else signalReady();
       }
     </script>
