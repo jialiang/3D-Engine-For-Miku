@@ -63,7 +63,8 @@ class FileParser {
           let keyPart = metadata.length;
           let subtractPart = 0;
 
-          if (metadata.length.indexOf("-") > -1) [keyPart, subtractPart] = metadata.length.split("-");
+          if (metadata.length.indexOf("-") > -1)
+            [keyPart, subtractPart] = metadata.length.split("-");
 
           let keys = keyPart.split(".");
 
@@ -75,7 +76,8 @@ class FileParser {
 
         if (valueIsObject) {
           data[key] = [];
-          for (let i = 0; i < computedLength; i++) data[key].push(this.parseStructure(metadata.structure, mainData));
+          for (let i = 0; i < computedLength; i++)
+            data[key].push(this.parseStructure(metadata.structure, mainData));
         }
 
         if (valueIsPrimitive) data[key] = this.extractFromRawData(metadata.type, computedLength);

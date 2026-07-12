@@ -14,7 +14,11 @@ class UBO {
     this.programs = programs;
 
     const blockIndex = gl.getUniformBlockIndex(programs[0], blockName);
-    const blockSize = gl.getActiveUniformBlockParameter(programs[0], blockIndex, gl.UNIFORM_BLOCK_DATA_SIZE);
+    const blockSize = gl.getActiveUniformBlockParameter(
+      programs[0],
+      blockIndex,
+      gl.UNIFORM_BLOCK_DATA_SIZE,
+    );
 
     const uniformBuffer = gl.createBuffer();
 
@@ -32,7 +36,11 @@ class UBO {
     }
 
     const blockVariableIndices = gl.getUniformIndices(programs[0], blockVariableNames);
-    const blockVariableOffsets = gl.getActiveUniforms(programs[0], blockVariableIndices, gl.UNIFORM_OFFSET);
+    const blockVariableOffsets = gl.getActiveUniforms(
+      programs[0],
+      blockVariableIndices,
+      gl.UNIFORM_OFFSET,
+    );
 
     const blockVariableIndicesArray = Array.from(blockVariableIndices);
     const blockVariableOffsetsArray = Array.from(blockVariableOffsets);

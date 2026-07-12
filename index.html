@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" />
@@ -101,8 +101,8 @@
         height: 100%;
         padding: 0.5rem;
         text-align: center;
-        background: linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100%
-            10px,
+        background:
+          linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100% 10px,
           linear-gradient(to right, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 0/10px 100%,
           linear-gradient(to right, rgba(119, 136, 136, 0.1) 1px, transparent 0) 0 0/100px 100%,
           linear-gradient(to top, rgba(0, 25, 25, 0.1) 1px, transparent 0) 0 100%/100% 100px,
@@ -714,7 +714,7 @@
         const simpleProgram = GL.createProgram(
           gl,
           simpleVertexShaderSource,
-          simpleFragmentShaderSource
+          simpleFragmentShaderSource,
         );
 
         //

@@ -8,7 +8,17 @@ class Kinematics {
   }
 
   update = (vmdMotions) => {
-    const { dot, cross, norm, clamp, invertQuat, sumVecs, subtractVecs, multiplyVecByQuat, multiplyQuats } = Utilities;
+    const {
+      dot,
+      cross,
+      norm,
+      clamp,
+      invertQuat,
+      sumVecs,
+      subtractVecs,
+      multiplyVecByQuat,
+      multiplyQuats,
+    } = Utilities;
     const { boneArray, ikArray } = this;
 
     // will contain vmd + ik motions
@@ -45,7 +55,10 @@ class Kinematics {
       const parentFinalMotion = resolveFk(bone.parentIndex);
 
       const positionAfterBoneMotion = sumVecs(bone.distanceFromParent, boneMotion.position);
-      const positionRotatedByParent = multiplyVecByQuat(positionAfterBoneMotion, parentFinalMotion.rotation);
+      const positionRotatedByParent = multiplyVecByQuat(
+        positionAfterBoneMotion,
+        parentFinalMotion.rotation,
+      );
       const finalPosition = sumVecs(positionRotatedByParent, parentFinalMotion.position);
 
       const finalRotation = multiplyQuats(parentFinalMotion.rotation, boneMotion.rotation);
@@ -82,7 +95,9 @@ class Kinematics {
             const linkParentTransform = resolveFk(link.parentIndex);
             const effectorTransform = resolveFk(effectorIndex);
 
-            const dirToEffector = norm(subtractVecs(effectorTransform.position, linkTransform.position));
+            const dirToEffector = norm(
+              subtractVecs(effectorTransform.position, linkTransform.position),
+            );
             const dirToTarget = norm(subtractVecs(targetPos, linkTransform.position));
 
             const cosAngle = clamp(dot(dirToTarget, dirToEffector), -1, 1);
@@ -104,7 +119,10 @@ class Kinematics {
             ];
 
             const linkParentRotationInv = invertQuat(linkParentTransform.rotation);
-            let boneMotion = multiplyQuats(multiplyQuats(linkParentRotationInv, ikRotation), linkTransform.rotation);
+            let boneMotion = multiplyQuats(
+              multiplyQuats(linkParentRotationInv, ikRotation),
+              linkTransform.rotation,
+            );
 
             // constraint rotation on hinges
             if (link.name.indexOf("ひざ") > -1) {

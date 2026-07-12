@@ -421,7 +421,8 @@ class PMD extends FileParser {
     for (const oldIndex in oldIndexToNewIndex) {
       const newIndexArray = [];
 
-      for (const newIndex in oldIndexToNewIndex[oldIndex]) newIndexArray.push(parseInt(newIndex, 10));
+      for (const newIndex in oldIndexToNewIndex[oldIndex])
+        newIndexArray.push(parseInt(newIndex, 10));
 
       oldIndexToNewIndex[oldIndex] = newIndexArray;
     }
@@ -461,8 +462,12 @@ class PMD extends FileParser {
       const toonTexture = parsedData.toonTextures.array[toonIndex];
       const toonTextureName = toonTexture && toonTexture.filename;
 
-      let diffuseTextureIndex = diffuseTextureName ? materialTextureImages.hash[diffuseTextureName] : null;
-      let sphereTextureIndex = sphereTextureName ? materialTextureImages.hash[sphereTextureName] : null;
+      let diffuseTextureIndex = diffuseTextureName
+        ? materialTextureImages.hash[diffuseTextureName]
+        : null;
+      let sphereTextureIndex = sphereTextureName
+        ? materialTextureImages.hash[sphereTextureName]
+        : null;
       let toonTextureIndex = toonTextureName ? toonTextureImages.hash[toonTextureName] : null;
 
       if (diffuseTextureIndex == null) diffuseTextureIndex = 255;
@@ -587,7 +592,10 @@ class PMD extends FileParser {
         const oldVertexIndex = baseMorph.vertices[baseIndex].index;
 
         oldIndexToNewIndex[oldVertexIndex].forEach((newVertexIndex) => {
-          const totalPosition = Utilities.sumVecs(newMorphData.getRange(newVertexIndex * 3, 3), weightedPosition);
+          const totalPosition = Utilities.sumVecs(
+            newMorphData.getRange(newVertexIndex * 3, 3),
+            weightedPosition,
+          );
           newMorphData.replaceRange(newVertexIndex * 3, totalPosition, 3);
         });
       });

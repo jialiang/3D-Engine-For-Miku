@@ -71,8 +71,10 @@ class VMD extends FileParser {
     const boneToMotions = group(parsedData.motions.array, "boneName");
     const morphToWeights = group(parsedData.weights.array, "morphName");
 
-    for (const key in boneToMotions) boneToMotions[key].available.sort((a, b) => a.frameNum - b.frameNum);
-    for (const key in morphToWeights) morphToWeights[key].available.sort((a, b) => a.frameNum - b.frameNum);
+    for (const key in boneToMotions)
+      boneToMotions[key].available.sort((a, b) => a.frameNum - b.frameNum);
+    for (const key in morphToWeights)
+      morphToWeights[key].available.sort((a, b) => a.frameNum - b.frameNum);
 
     this.boneToMotions = boneToMotions;
     this.morphToWeights = morphToWeights;
@@ -107,7 +109,9 @@ class VMD extends FileParser {
     console.info(`${morphReport.active.length} compatible morphs.`);
 
     console.info(`${boneReport.missing.length} missing bones:\n${boneReport.missing.join("\n")}`);
-    console.info(`${morphReport.missing.length} missing morphs:\n${morphReport.missing.join("\n")}`);
+    console.info(
+      `${morphReport.missing.length} missing morphs:\n${morphReport.missing.join("\n")}`,
+    );
 
     this.activeBones = boneReport.active;
     this.activeMorphs = morphReport.active;
@@ -123,8 +127,12 @@ class VMD extends FileParser {
     const frameIncrement = timeElapsed === -1 ? 1 : timeElapsed / (1000 / 30);
     const frameNumToConsume = lastConsumedFrameNum + frameIncrement;
 
-    activeBones.forEach((boneName) => (motions[boneName] = this.getNextMotion(boneName, frameNumToConsume)));
-    activeMorphs.forEach((morphName) => (weights[morphName] = this.getNextWeight(morphName, frameNumToConsume)));
+    activeBones.forEach(
+      (boneName) => (motions[boneName] = this.getNextMotion(boneName, frameNumToConsume)),
+    );
+    activeMorphs.forEach(
+      (morphName) => (weights[morphName] = this.getNextWeight(morphName, frameNumToConsume)),
+    );
 
     this.lastConsumedFrameNum += frameIncrement;
 
@@ -167,10 +175,19 @@ class VMD extends FileParser {
       const minValue = lastConsumed || zero;
       const maxValue = firstAvailable;
 
-      const weightOfMax = (targetFrameNum - minValue.frameNum) / (maxValue.frameNum - minValue.frameNum);
+      const weightOfMax =
+        (targetFrameNum - minValue.frameNum) / (maxValue.frameNum - minValue.frameNum);
 
-      const interpolatedPosition = Utilities.vectorLerp(maxValue.position, minValue.position, weightOfMax);
-      const interpolatedRotation = Utilities.quatenionSlerp(maxValue.rotation, minValue.rotation, weightOfMax);
+      const interpolatedPosition = Utilities.vectorLerp(
+        maxValue.position,
+        minValue.position,
+        weightOfMax,
+      );
+      const interpolatedRotation = Utilities.quatenionSlerp(
+        maxValue.rotation,
+        minValue.rotation,
+        weightOfMax,
+      );
 
       result.position.push(...interpolatedPosition);
       result.rotation.push(...interpolatedRotation);
@@ -210,7 +227,8 @@ class VMD extends FileParser {
       const minValue = lastConsumed || zero;
       const maxValue = firstAvailable;
 
-      const weightOfMax = (targetFrameNum - minValue.frameNum) / (maxValue.frameNum - minValue.frameNum);
+      const weightOfMax =
+        (targetFrameNum - minValue.frameNum) / (maxValue.frameNum - minValue.frameNum);
 
       return Utilities.lerp(maxValue.weight, minValue.weight, weightOfMax);
     }
