@@ -80,6 +80,25 @@ class VMD extends FileParser {
     this.morphToWeights = morphToWeights;
   };
 
+  // rewind the animation to the beginning so it can play again
+  reset = () => {
+    const restore = (map) => {
+      for (const key in map) {
+        const track = map[key];
+
+        // frames were consumed in order, so putting them back in front
+        // of the remaining ones restores the original sorted order
+        track.available = [...track.consumed, ...track.available];
+        track.consumed = [];
+      }
+    };
+
+    restore(this.boneToMotions);
+    restore(this.morphToWeights);
+
+    this.lastConsumedFrameNum = -1;
+  };
+
   // identify which bone and morph in vmd is present in pmd
   // so that we can skip those that are not in pmd when animating
   setActiveDataByPmd = (pmd) => {

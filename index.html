@@ -817,22 +817,38 @@
         const bgm = document.querySelector("audio");
 
         let lastTime = 0;
-        let pauseAnimation = false;
+        let isManuallyPaused = false;
+        let isDrawScheduled = false;
+
+        const scheduleDraw = () => {
+          if (isDrawScheduled) return;
+
+          isDrawScheduled = true;
+          requestAnimationFrame(draw);
+        };
 
         const draw = async (currentTime) => {
-          if (pauseAnimation) return;
+          isDrawScheduled = false;
+
+          // a hidden tab stops the loop entirely, a manual pause only
+          // freezes the dance so the camera can still be rotated
+          if (document.hidden) return;
 
           let timeElapsed = lastTime === 0 ? -1 : currentTime - lastTime;
           lastTime = currentTime;
 
-          if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum && bgm.paused) {
-            requestAnimationFrame(draw);
+          const isDanceFinished = mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum;
+
+          if (!isDanceFinished && !isManuallyPaused && bgm.paused) {
+            scheduleDraw();
             return;
           }
 
-          if (mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum) {
+          // while frozen (paused or finished), the model does not change,
+          // so only re-render when the camera has moved
+          if (isDanceFinished || isManuallyPaused) {
             if (!cameraController.tainted) {
-              requestAnimationFrame(draw);
+              scheduleDraw();
               return;
             }
 
@@ -845,11 +861,14 @@
 
           gl.useProgram(program);
 
-          mikuPmd.updateAnimation(mikuVmd, timeElapsed);
-          mikuBoneUbo.updateBoneData(mikuPmd.dataForBoneUbo);
-          mikuVao.update({
-            morph: mikuPmd.dataForAttributeBuffer.morph,
-          });
+          if (!isManuallyPaused) {
+            mikuPmd.updateAnimation(mikuVmd, timeElapsed);
+            mikuBoneUbo.updateBoneData(mikuPmd.dataForBoneUbo);
+
+            mikuVao.update({
+              morph: mikuPmd.dataForAttributeBuffer.morph,
+            });
+          }
 
           gl.bindVertexArray(mikuVao.vao);
 
@@ -877,10 +896,20 @@
           gl.bindVertexArray(gridVao.vao);
           gl.drawArrays(gl.LINES, 0, gridVao.verticesToDrawCount);
 
-          if (!pauseAnimation) requestAnimationFrame(draw);
+          scheduleDraw();
         };
 
-        //
+        const resumeAnimation = () => {
+          lastTime = performance.now();
+
+          if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) {
+            // the browser may have revoked autoplay permission,
+            // keep animating without audio then
+            bgm.play().catch((error) => console.warn("Could not resume audio:", error));
+          }
+
+          scheduleDraw();
+        };
 
         const cover = document.querySelector("#cover");
 
@@ -893,27 +922,39 @@
           cover.style.display = "none";
 
           document.addEventListener("visibilitychange", () => {
-            pauseAnimation = document.hidden;
+            if (document.hidden) return bgm.pause();
 
-            // pause animation
-            if (pauseAnimation) return bgm.pause();
+            // returning to the tab must not override a manual pause,
+            // but the loop has to restart for the camera to stay usable
+            if (isManuallyPaused) return scheduleDraw();
 
-            // unpause animation
-            lastTime = performance.now();
+            resumeAnimation();
+          });
 
-            requestAnimationFrame(async (currentTime) => {
-              if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) {
-                // the browser may have revoked autoplay permission while
-                // the tab was hidden, keep animating without audio then
-                try {
-                  await bgm.play();
-                } catch (error) {
-                  console.warn("Could not resume audio:", error);
-                }
-              }
+          // clicking the canvas pauses or resumes the dance,
+          // dragging rotates the camera and should not toggle pause
+          let isMoved = false;
 
-              draw(currentTime);
-            });
+          canvas.addEventListener("mousedown", () => (isMoved = false));
+          canvas.addEventListener("mousemove", () => (isMoved = true));
+
+          canvas.addEventListener("mouseup", () => {
+            if (isMoved) return;
+
+            if (mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum) {
+              mikuVmd.reset();
+
+              bgm.currentTime = 0;
+              bgm.play().catch((error) => console.warn("Could not restart audio:", error));
+
+              return;
+            }
+
+            isManuallyPaused = !isManuallyPaused;
+
+            if (isManuallyPaused) return bgm.pause();
+
+            resumeAnimation();
           });
 
           requestAnimationFrame(async (currentTime) => {
@@ -932,10 +973,13 @@
         // enough audio is buffered to start playing
         // (the browser keeps downloading the rest during playback,
         // so there is no need to wait for the full file)
-        if (bgm.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) signalReady();
+        if (bgm.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+          signalReady();
+        }
         // still loading, wait until playback can start
-        else if (bgm.networkState === HTMLMediaElement.NETWORK_LOADING)
+        else if (bgm.networkState === HTMLMediaElement.NETWORK_LOADING) {
           bgm.addEventListener("canplay", signalReady);
+        }
         // no data and not loading, probably preload disabled
         else signalReady();
       }
