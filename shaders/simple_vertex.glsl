@@ -13,6 +13,7 @@ uniform Model {
 uniform Camera {
   mat4 u_projectionMatrix;
   mat4 u_viewMatrix;
+  vec3 u_cameraPosition;
 };
 
 out vec4 v_color;

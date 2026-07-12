@@ -129,7 +129,7 @@ class UBO {
 
 class CameraUbo extends UBO {
   getDefaultBlockVariableNames() {
-    return ["u_projectionMatrix", "u_viewMatrix"];
+    return ["u_projectionMatrix", "u_viewMatrix", "u_cameraPosition"];
   }
 
   updateCameraData(camera) {
@@ -141,6 +141,12 @@ class CameraUbo extends UBO {
       {
         name: "u_viewMatrix",
         value: camera.transform.viewMatrix,
+      },
+      {
+        // the translation column of the model matrix is the camera's
+        // world position, even after orbiting
+        name: "u_cameraPosition",
+        value: camera.transform.modelMatrix.slice(12, 15),
       },
     ]);
   }

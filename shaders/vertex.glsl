@@ -37,6 +37,7 @@ uniform Material {
 uniform Camera {
   mat4 u_projectionMatrix;
   mat4 u_viewMatrix;
+  vec3 u_cameraPosition;
 };
 
 uniform Light {
@@ -55,6 +56,7 @@ uniform Shadow {
 out vec2 v_uv;
 out vec4 v_color;
 out vec3 v_worldNormal;
+out vec3 v_worldPosition;
 out vec4 v_shadow_uv;
 out float v_shadowMappingMode;
 out vec2 v_shadowMapTexelSize;
@@ -117,6 +119,7 @@ void main() {
   v_shadowMapTexelSize = u_shadowMapTexelSize;
 
   v_worldNormal = worldNormal.xyz;
+  v_worldPosition = worldPosition.xyz;
 
   v_shadow_uv = u_lightTransformationMatrix * worldPosition;
 }

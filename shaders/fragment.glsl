@@ -66,11 +66,13 @@ uniform Light {
 uniform Camera {
     mat4 u_projectionMatrix;
     mat4 u_viewMatrix;
+    vec3 u_cameraPosition;
 };
 
 in vec2 v_uv;
 in vec4 v_color;
 in vec3 v_worldNormal;
+in vec3 v_worldPosition;
 in vec4 v_shadow_uv;
 in float v_shadowMappingMode;
 in vec2 v_shadowMapTexelSize;
@@ -201,5 +203,24 @@ void main() {
 
     lighting = lighting * 0.75 + lighting * toonColor.rgb * 0.25;
 
-    finalColor = vec4(baseColor.rgb * lighting * lightFactor, baseColor.a);
+    // Phong specular highlight, sized by the material's shininess
+    // (zero shininess means the material has no specular term)
+    float shininess = u_specularity[v_material].x;
+    vec3 specular = vec3(0.0);
+
+    if (shininess > 0.0) {
+        vec3 viewDirection = normalize(u_cameraPosition - v_worldPosition);
+        vec3 reflection = reflect(-normalize(u_lightDirection), normalDirection);
+        float highlight = pow(max(dot(reflection, viewDirection), 0.0), shininess);
+
+        // a low shininess makes a very broad highlight, which reads as
+        // plastic on large smooth surfaces like skin, so scale strength
+        // down as the highlight gets broader (raise to damp more)
+        float broadnessDamping = 16.0;
+        float strength = shininess / (shininess + broadnessDamping);
+
+        specular = u_specularColor[v_material].rgb * u_lightColor * highlight * strength;
+    }
+
+    finalColor = vec4((baseColor.rgb * lighting + specular) * lightFactor, baseColor.a);
 }
