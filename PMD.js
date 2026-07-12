@@ -8,7 +8,7 @@ class PMD extends FileParser {
       comment: { type: "char", length: 256 },
     },
     vertices: {
-      count: { type: "long" },
+      count: { type: "unsignedLong" },
       // this block of code means:
       // property "array" consists of
       // an array of objects whose structure is defined by the property "structure"
@@ -19,18 +19,18 @@ class PMD extends FileParser {
           position: { type: "float", length: 3 }, // property "position" consists of an array of 3 floats
           normal: { type: "float", length: 3 },
           uv: { type: "float", length: 2 },
-          boneIndices: { type: "short", length: 2 }, // property "boneIndices" consists of an array of 2 shorts
-          boneWeight: { type: "integer" },
-          edgeFlag: { type: "integer" },
+          boneIndices: { type: "unsignedShort", length: 2 }, // property "boneIndices" consists of an array of 2 unsigned shorts
+          boneWeight: { type: "unsignedInteger" },
+          edgeFlag: { type: "unsignedInteger" },
         },
       },
     },
     indices: {
-      count: { type: "long" },
-      array: { type: "short", length: "count" },
+      count: { type: "unsignedLong" },
+      array: { type: "unsignedShort", length: "count" },
     },
     materials: {
-      count: { type: "long" },
+      count: { type: "unsignedLong" },
       array: {
         length: "count",
         structure: {
@@ -38,53 +38,53 @@ class PMD extends FileParser {
           specularity: { type: "float" },
           specularColor: { type: "float", length: 3 },
           ambientColor: { type: "float", length: 3 },
-          toonIndex: { type: "integer" },
-          edgeFlag: { type: "integer" },
-          vertexCount: { type: "long" },
+          toonIndex: { type: "unsignedInteger" },
+          edgeFlag: { type: "unsignedInteger" },
+          vertexCount: { type: "unsignedLong" },
           filename: { type: "char", length: 20 },
         },
       },
     },
     bones: {
-      count: { type: "short" },
+      count: { type: "unsignedShort" },
       array: {
         length: "count",
         structure: {
           name: { type: "char", length: 20 },
-          parentIndex: { type: "short" },
-          tailIndex: { type: "short" },
-          type: { type: "integer" },
-          ikIndex: { type: "short" },
+          parentIndex: { type: "unsignedShort" },
+          tailIndex: { type: "unsignedShort" },
+          type: { type: "unsignedInteger" },
+          ikIndex: { type: "unsignedShort" },
           position: { type: "float", length: 3 },
         },
       },
     },
     iks: {
-      count: { type: "short" },
+      count: { type: "unsignedShort" },
       array: {
         length: "count",
         structure: {
-          targetIndex: { type: "short" },
-          effectorIndex: { type: "short" },
-          chainLength: { type: "integer" },
-          iterations: { type: "short" },
+          targetIndex: { type: "unsignedShort" },
+          effectorIndex: { type: "unsignedShort" },
+          chainLength: { type: "unsignedInteger" },
+          iterations: { type: "unsignedShort" },
           angleLimit: { type: "float" },
-          linkIndices: { type: "short", length: "chainLength" },
+          linkIndices: { type: "unsignedShort", length: "chainLength" },
         },
       },
     },
     morphs: {
-      count: { type: "short" },
+      count: { type: "unsignedShort" },
       array: {
         length: "count",
         structure: {
           name: { type: "char", length: 20 },
-          vertexCount: { type: "long" },
-          type: { type: "integer" },
+          vertexCount: { type: "unsignedLong" },
+          type: { type: "unsignedInteger" },
           vertices: {
             length: "vertexCount",
             structure: {
-              index: { type: "long" },
+              index: { type: "unsignedLong" },
               position: { type: "float", length: 3 },
             },
           },
@@ -92,11 +92,11 @@ class PMD extends FileParser {
       },
     },
     faceDisplayNames: {
-      count: { type: "integer" },
-      array: { type: "short", length: "count" },
+      count: { type: "unsignedInteger" },
+      array: { type: "unsignedShort", length: "count" },
     },
     boneGroupNames: {
-      count: { type: "integer" },
+      count: { type: "unsignedInteger" },
       array: {
         length: "count",
         structure: {
@@ -105,19 +105,19 @@ class PMD extends FileParser {
       },
     },
     boneDisplayNames: {
-      count: { type: "long" },
+      count: { type: "unsignedLong" },
       displays: {
         length: "count",
         structure: {
-          index: { type: "short" },
-          groupIndex: { type: "integer" },
+          index: { type: "unsignedShort" },
+          groupIndex: { type: "unsignedInteger" },
         },
       },
     },
     english: {
       // Stop parsing the rest of the block "english" if
       // the value of "compatibility" = 0
-      compatibility: { type: "integer", stopParseIf: 0 },
+      compatibility: { type: "unsignedInteger", stopParseIf: 0 },
       modelName: { type: "char", length: 20 },
       comment: { type: "char", length: 256 },
       boneName: {
@@ -154,15 +154,15 @@ class PMD extends FileParser {
       },
     },
     rigidBodies: {
-      count: { type: "long" },
+      count: { type: "unsignedLong" },
       array: {
         length: "count",
         structure: {
           name: { type: "char", length: 20 },
-          boneIndex: { type: "short" },
-          groupIndex: { type: "integer" },
-          groupTarget: { type: "short" },
-          shapeType: { type: "integer" },
+          boneIndex: { type: "unsignedShort" },
+          groupIndex: { type: "unsignedInteger" },
+          groupTarget: { type: "unsignedShort" },
+          shapeType: { type: "unsignedInteger" },
           width: { type: "float" },
           height: { type: "float" },
           depth: { type: "float" },
@@ -173,18 +173,18 @@ class PMD extends FileParser {
           rotationDamping: { type: "float" },
           recoil: { type: "float" },
           friction: { type: "float" },
-          type: { type: "integer" },
+          type: { type: "unsignedInteger" },
         },
       },
     },
     joints: {
-      count: { type: "long" },
+      count: { type: "unsignedLong" },
       array: {
         length: "count",
         structure: {
           name: { type: "char", length: 20 },
-          rigidBodyIndex_1: { type: "long" },
-          rigidBodyIndex_2: { type: "long" },
+          rigidBodyIndex_1: { type: "unsignedLong" },
+          rigidBodyIndex_2: { type: "unsignedLong" },
           position: { type: "float", length: 3 },
           rotation: { type: "float", length: 3 },
           translationLimit_1: { type: "float", length: 3 },
@@ -227,6 +227,19 @@ class PMD extends FileParser {
       const {
         parsedData: { bones, morphs, iks, rigidBodies, joints },
       } = this;
+
+      // PMD stores "no bone" as the unsigned sentinel 0xFFFF
+      // convert to -1 so downstream code can use plain "=== -1" checks
+      const noBoneSentinel = 0xffff;
+
+      bones.array.forEach((bone) => {
+        if (bone.parentIndex === noBoneSentinel) bone.parentIndex = -1;
+        if (bone.tailIndex === noBoneSentinel) bone.tailIndex = -1;
+      });
+
+      rigidBodies.array.forEach((rigidBody) => {
+        if (rigidBody.boneIndex === noBoneSentinel) rigidBody.boneIndex = -1;
+      });
 
       bones.hash = Utilities.createHashtableFromArray(bones.array, "name");
       morphs.hash = Utilities.createHashtableFromArray(morphs.array, "name");

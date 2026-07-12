@@ -48,8 +48,17 @@ class Utilities {
       const xhr = new XMLHttpRequest();
 
       xhr.responseType = options.responseType || "text";
-      xhr.onload = () => resolve(xhr.response);
-      xhr.onerror = (error) => reject(xhr.responseText);
+
+      // onload also fires for HTTP errors (404, 500, ...), so check the
+      // status instead of handing an error page to the caller as data
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
+        else reject(new Error(`Failed to fetch ${url}: HTTP status ${xhr.status}`));
+      };
+
+      // reading responseText here would throw on the arraybuffer path
+      xhr.onerror = () => reject(new Error(`Network error while fetching ${url}`));
+
       xhr.open("GET", url, true);
       xhr.send(null);
     });

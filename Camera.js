@@ -3,14 +3,15 @@ class Camera {
   transform;
 
   constructor(gl, options = {}) {
-    const { fov = 45, near = 0.1, far = 100.0 } = options;
+    // fov is in degrees
+    const { fov = 58.3, near = 0.1, far = 100.0 } = options;
 
     const aspectRatio = gl.canvas.width / gl.canvas.height;
 
     this.projectionMatrix = mat4.create();
     this.transform = new CameraTransform();
 
-    mat4.perspective(this.projectionMatrix, fov, aspectRatio, near, far);
+    mat4.perspective(this.projectionMatrix, Transform.toRadian(fov), aspectRatio, near, far);
   }
 }
 
