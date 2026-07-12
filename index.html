@@ -727,13 +727,21 @@
 
         gl.useProgram(program);
 
-        const mikuMaterialTextures = mikuPmd.materialTextureImages.array.map((image, index) => {
-          const texture = new Texture(gl, image);
-          texture.setTextureUnitIndex(index);
-          texture.bindTextureUnitToUniform(program, `u_materialTexture_${index}`, {
-            programBound: true,
-          });
-          return texture;
+        // all material textures live in one texture array, so any number
+        // of them fits in a single texture unit
+        const combinedMaterialImage = mikuPmd.materialTextureImages.combinedImage;
+        const materialTextureCount = mikuPmd.materialTextureImages.array.length;
+
+        const mikuMaterialTextures = new Texture(gl, combinedMaterialImage, {
+          width: combinedMaterialImage.width,
+          height: combinedMaterialImage.height / materialTextureCount,
+          imageCount: materialTextureCount,
+          isTextureArray: true,
+          generateMipmaps: false,
+        });
+        mikuMaterialTextures.setTextureUnitIndex(0);
+        mikuMaterialTextures.bindTextureUnitToUniform(program, "u_materialTextures", {
+          programBound: true,
         });
 
         const mikuToonTextures = new Texture(gl, mikuPmd.toonTextureImages.combinedImage, {
@@ -809,7 +817,7 @@
         lightUbo.bindUniformBlock();
         shadowUbo.bindUniformBlock();
 
-        mikuMaterialTextures.forEach((texture) => texture.addToTextureUnit());
+        mikuMaterialTextures.addToTextureUnit();
         mikuToonTextures.addToTextureUnit();
 
         //

@@ -37,14 +37,9 @@ const float maxFilterRadiusTexels = 24.0;
 // depth offset to stop surfaces from shadowing themselves
 const float shadowBias = 0.006;
 
-uniform sampler2D u_materialTexture_0;
-uniform sampler2D u_materialTexture_1;
-uniform sampler2D u_materialTexture_2;
-uniform sampler2D u_materialTexture_3;
-uniform sampler2D u_materialTexture_4;
-uniform sampler2D u_materialTexture_5;
-uniform sampler2D u_materialTexture_6;
-uniform sampler2D u_materialTexture_7;
+// all material textures share one texture array, and a layer index of
+// 255 marks a material that has no texture at all
+uniform sampler2DArray u_materialTextures;
 
 uniform sampler2D u_shadowTexture;
 uniform sampler2DArray u_toonTextures;
@@ -147,14 +142,9 @@ void main() {
 
     vec4 baseColor = v_color;
 
-    if (v_diffuseTextureIndex == 0) baseColor = texture(u_materialTexture_0, v_uv);
-    // else if (v_diffuseTextureIndex == 1) baseColor = texture(u_materialTexture_1, v_uv);
-    // else if (v_diffuseTextureIndex == 2) baseColor = texture(u_materialTexture_2, v_uv);
-    // else if (v_diffuseTextureIndex == 3) baseColor = texture(u_materialTexture_3, v_uv);
-    // else if (v_diffuseTextureIndex == 4) baseColor = texture(u_materialTexture_4, v_uv);
-    // else if (v_diffuseTextureIndex == 5) baseColor = texture(u_materialTexture_5, v_uv);
-    // else if (v_diffuseTextureIndex == 6) baseColor = texture(u_materialTexture_6, v_uv);
-    // else if (v_diffuseTextureIndex == 7) baseColor = texture(u_materialTexture_7, v_uv);
+    if (v_diffuseTextureIndex != 255) {
+        baseColor = texture(u_materialTextures, vec3(v_uv, v_diffuseTextureIndex));
+    }
 
     vec3 shadow_uv = v_shadow_uv.xyz / v_shadow_uv.w;
     float receiverDistance = depthToDistance(shadow_uv.z - shadowBias);

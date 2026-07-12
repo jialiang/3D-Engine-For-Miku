@@ -335,22 +335,30 @@ class PMD extends FileParser {
     this.materialTextureImages.array = materialTextureImages;
     this.toonTextureImages.array = toonTextureImages;
 
-    // combine toon texture images into 1 image to conserve texture units.
-    // all toon textures are the same size which makes them perfect for combining
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
+    // stack a list of images vertically into one image so they can be
+    // uploaded as a single texture array on a single texture unit
+    // (images are stretched to the largest width and height found)
+    const combineImages = (images) => {
+      if (images.length === 0) return null;
 
-    const singleImageWidth = toonTextureImages[0].width;
-    const singleImageHeight = toonTextureImages[0].height;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
 
-    canvas.width = singleImageWidth;
-    canvas.height = singleImageHeight * toonTextureImages.length;
+      const layerWidth = Math.max(...images.map((image) => image.width));
+      const layerHeight = Math.max(...images.map((image) => image.height));
 
-    toonTextureImages.forEach((image, index) => {
-      context.drawImage(image, 0, singleImageHeight * index, singleImageWidth, singleImageHeight);
-    });
+      canvas.width = layerWidth;
+      canvas.height = layerHeight * images.length;
 
-    this.toonTextureImages.combinedImage = context.getImageData(0, 0, canvas.width, canvas.height);
+      images.forEach((image, index) => {
+        context.drawImage(image, 0, layerHeight * index, layerWidth, layerHeight);
+      });
+
+      return context.getImageData(0, 0, canvas.width, canvas.height);
+    };
+
+    this.materialTextureImages.combinedImage = combineImages(materialTextureImages);
+    this.toonTextureImages.combinedImage = combineImages(toonTextureImages);
   };
 
   // Process parsed data to make it suitable for use in creating attribute buffers

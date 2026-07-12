@@ -11,9 +11,10 @@ class Texture {
       height = 1,
       imageCount = 1,
       depthTexture = false,
+      isTextureArray = imageCount > 1,
     } = options;
 
-    const bindingPoint = imageCount > 1 ? gl.TEXTURE_2D_ARRAY : gl.TEXTURE_2D;
+    const bindingPoint = isTextureArray ? gl.TEXTURE_2D_ARRAY : gl.TEXTURE_2D;
 
     let format = gl.RGBA;
     let internalFormat = gl.RGBA;
@@ -36,7 +37,7 @@ class Texture {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
     gl.bindTexture(bindingPoint, texture);
 
-    if (imageCount === 1) {
+    if (!isTextureArray) {
       if (image) gl.texImage2D(bindingPoint, 0, format, internalFormat, type, image);
       else gl.texImage2D(bindingPoint, 0, format, width, height, 0, internalFormat, type, null);
     } else {
@@ -65,6 +66,7 @@ class Texture {
     this.gl = gl;
     this.texture = texture;
     this.imageCount = imageCount;
+    this.bindingTarget = bindingPoint;
   }
 
   setTextureUnitIndex(index) {
@@ -72,21 +74,17 @@ class Texture {
   }
 
   addToTextureUnit() {
-    const { gl, texture, textureUnit, imageCount } = this;
-
-    const bindingPoint = imageCount > 1 ? gl.TEXTURE_2D_ARRAY : gl.TEXTURE_2D;
+    const { gl, texture, textureUnit, bindingTarget } = this;
 
     gl.activeTexture(gl.TEXTURE0 + textureUnit);
-    gl.bindTexture(bindingPoint, texture);
+    gl.bindTexture(bindingTarget, texture);
   }
 
   removeFromTextureUnit() {
-    const { gl, textureUnit, imageCount } = this;
-
-    const bindingPoint = imageCount > 1 ? gl.TEXTURE_2D_ARRAY : gl.TEXTURE_2D;
+    const { gl, textureUnit, bindingTarget } = this;
 
     gl.activeTexture(gl.TEXTURE0 + textureUnit);
-    gl.bindTexture(bindingPoint, null);
+    gl.bindTexture(bindingTarget, null);
   }
 
   bindTextureUnitToUniform(program, uniformName, options = {}) {
