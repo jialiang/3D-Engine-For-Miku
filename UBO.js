@@ -1,5 +1,29 @@
 class UBO {
-  static INDEX = 1;
+  // binding points are limited per context (spec guarantees only 24),
+  // so track them per context and reuse the ones released by dispose
+  static bindingPointsByContext = new WeakMap();
+
+  static allocateBindingPoint(gl) {
+    let state = UBO.bindingPointsByContext.get(gl);
+
+    if (!state) {
+      state = { next: 1, released: [] };
+      UBO.bindingPointsByContext.set(gl, state);
+    }
+
+    if (state.released.length > 0) return state.released.pop();
+
+    const bindingPoint = state.next;
+    state.next += 1;
+
+    return bindingPoint;
+  }
+
+  static releaseBindingPoint(gl, bindingPoint) {
+    const state = UBO.bindingPointsByContext.get(gl);
+
+    if (state) state.released.push(bindingPoint);
+  }
 
   gl;
   programs;
@@ -26,8 +50,7 @@ class UBO {
     gl.bufferData(gl.UNIFORM_BUFFER, blockSize, gl.DYNAMIC_DRAW);
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 
-    const bindingPoint = UBO.INDEX;
-    UBO.INDEX += 1;
+    const bindingPoint = UBO.allocateBindingPoint(gl);
 
     gl.bindBufferBase(gl.UNIFORM_BUFFER, bindingPoint, uniformBuffer);
 
@@ -92,6 +115,15 @@ class UBO {
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 
     return this;
+  }
+
+  dispose() {
+    const { gl, uniformBuffer, bindingPoint } = this;
+
+    gl.deleteBuffer(uniformBuffer);
+    UBO.releaseBindingPoint(gl, bindingPoint);
+
+    this.uniformBuffer = null;
   }
 }
 

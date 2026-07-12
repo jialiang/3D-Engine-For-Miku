@@ -313,9 +313,14 @@ const initAmmo = async function () {
       }
 
       simulateFrame(motions, timeElapsed) {
-        var stepTime = timeElapsed / 1000;
-        var maxStepNum = 1;
-        var unitStep = 1 / 60;
+        // the first frame passes -1 as a sentinel, clamp it away so
+        // Bullet never receives a negative time step
+        const stepTime = Math.max(timeElapsed, 0) / 1000;
+
+        // enough substeps to not lose simulation time on high-refresh
+        // displays or frame drops, Bullet only runs the ones it needs
+        const maxStepNum = 10;
+        const unitStep = 1 / 60;
 
         const newMotions = motions.map((motion) => ({
           position: [...motion.position],

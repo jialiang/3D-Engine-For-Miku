@@ -120,4 +120,15 @@ class VAO {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
   }
+
+  dispose() {
+    const { gl, vao, buffers } = this;
+
+    for (const key in buffers) gl.deleteBuffer(buffers[key]);
+
+    gl.deleteVertexArray(vao);
+
+    this.buffers = {};
+    this.vao = null;
+  }
 }

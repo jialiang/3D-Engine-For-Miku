@@ -175,8 +175,10 @@ class VMD extends FileParser {
       const minValue = lastConsumed || zero;
       const maxValue = firstAvailable;
 
-      const weightOfMax =
-        (targetFrameNum - minValue.frameNum) / (maxValue.frameNum - minValue.frameNum);
+      // duplicate keyframes can share a frame number,
+      // avoid dividing by zero by taking the newer one outright
+      const frameSpan = maxValue.frameNum - minValue.frameNum;
+      const weightOfMax = frameSpan === 0 ? 1 : (targetFrameNum - minValue.frameNum) / frameSpan;
 
       const interpolatedPosition = Utilities.vectorLerp(
         maxValue.position,
@@ -227,8 +229,9 @@ class VMD extends FileParser {
       const minValue = lastConsumed || zero;
       const maxValue = firstAvailable;
 
-      const weightOfMax =
-        (targetFrameNum - minValue.frameNum) / (maxValue.frameNum - minValue.frameNum);
+      // same divide-by-zero guard as in getNextMotion
+      const frameSpan = maxValue.frameNum - minValue.frameNum;
+      const weightOfMax = frameSpan === 0 ? 1 : (targetFrameNum - minValue.frameNum) / frameSpan;
 
       return Utilities.lerp(maxValue.weight, minValue.weight, weightOfMax);
     }

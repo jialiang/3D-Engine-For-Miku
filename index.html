@@ -902,7 +902,16 @@
             lastTime = performance.now();
 
             requestAnimationFrame(async (currentTime) => {
-              if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) await bgm.play();
+              if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) {
+                // the browser may have revoked autoplay permission while
+                // the tab was hidden, keep animating without audio then
+                try {
+                  await bgm.play();
+                } catch (error) {
+                  console.warn("Could not resume audio:", error);
+                }
+              }
+
               draw(currentTime);
             });
           });
