@@ -1,5 +1,10 @@
 // https://stackoverflow.com/questions/4124041/is-opengl-coordinate-system-left-handed-or-right-handed
 
+// Memory quirks of this Ammo.js build (verified by direct test):
+// - btTransform.op_mul follows "*=" semantics: it mutates the callee in
+//   place and returns that same object, never a new one
+// - getters that return by value in C++ (like getRotation) return a pointer
+//   to a shared static temporary, which must never be passed to Ammo.destroy
 const initAmmo = async function () {
   return await Ammo().then((Ammo) => {
     // For some reason, the inverse() for btTransform in Ammo.js is broken
@@ -115,11 +120,14 @@ const initAmmo = async function () {
 
         Ammo.destroy(_rotation);
 
+        // op_mul mutates in place, so "transform" is just another handle to
+        // "motionTransform" (see the memory quirks note at the top of file)
         const transform = motionTransform.op_mul(boneOffsetTransform);
 
         const rigidBodyTransform = new Ammo.btTransform();
         rigidBody.getMotionState().getWorldTransform(rigidBodyTransform);
 
+        // points to a static temporary: do not destroy
         const rigidBodyRotation = rigidBodyTransform.getRotation();
 
         if (info.type === 2) transform.setRotation(rigidBodyRotation);
@@ -127,10 +135,7 @@ const initAmmo = async function () {
         rigidBody.getMotionState().setWorldTransform(transform);
 
         Ammo.destroy(motionTransform);
-        Ammo.destroy(transform);
-
         Ammo.destroy(rigidBodyTransform);
-        Ammo.destroy(rigidBodyRotation);
       }
 
       postSimulation(motions) {
@@ -140,8 +145,11 @@ const initAmmo = async function () {
 
         const transform = new Ammo.btTransform();
         rigidBody.getMotionState().getWorldTransform(transform);
+
+        // applies the offset inverse in place (op_mul mutates the callee)
         transform.op_mul(boneOffsetTransformInverse);
 
+        // points to a static temporary: do not destroy
         const newRotation = transform.getRotation();
         motion.rotation = [-newRotation.x(), -newRotation.y(), newRotation.z(), newRotation.w()];
 

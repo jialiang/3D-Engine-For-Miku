@@ -113,13 +113,12 @@ class CameraTransform extends Transform {
 
     let newX = 0;
     let newY = 0;
-    let newZ = 0;
 
     // panY
     newY += up[1] * y;
 
     // panZ
-    newZ = z;
+    const newZ = z;
 
     return this.setTransformation({
       position: [newX, newY, newZ],

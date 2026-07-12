@@ -98,7 +98,7 @@ void main() {
   vec3 normal = normalize(mix(normalRotatedByBone2, normalRotatedByBone1, a_boneWeight));
 
   vec4 worldPosition = (u_modelMatrix * vec4(position, 1.0));
-  vec4 worldNormal = (u_normalMatrix * vec4(normal, 1.0));
+  vec4 worldNormal = (u_normalMatrix * vec4(normal, 0.0));
 
   if (u_shadowMappingMode > 0.5) {
     gl_Position = u_lightProjectionMatrix * u_lightViewMatrix * worldPosition;

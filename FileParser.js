@@ -12,12 +12,24 @@ class FileParser {
       method: "getInt32",
       size: 4,
     },
+    unsignedLong: {
+      method: "getUint32",
+      size: 4,
+    },
     short: {
       method: "getInt16",
       size: 2, // 2 * 8 bytes
     },
+    unsignedShort: {
+      method: "getUint16",
+      size: 2,
+    },
     integer: {
       method: "getInt8",
+      size: 1,
+    },
+    unsignedInteger: {
+      method: "getUint8",
       size: 1,
     },
   };
