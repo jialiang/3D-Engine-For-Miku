@@ -284,9 +284,6 @@ class PMD extends FileParser {
       // diffuse texture and sphere texture filenames are delimited by * for materials
       const filenames = material.filename.split("*");
 
-      // sphere maps not supported for now
-      if (filenames.length > 1) filenames.pop();
-
       filenames.forEach((filename) => {
         const filenameAlreadyIncluded = this.materialTextureImages.hash[filename] != null;
 
