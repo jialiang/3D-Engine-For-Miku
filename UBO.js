@@ -1,5 +1,29 @@
 class UBO {
-  static INDEX = 1;
+  // binding points are limited per context (spec guarantees only 24),
+  // so track them per context and reuse the ones released by dispose
+  static bindingPointsByContext = new WeakMap();
+
+  static allocateBindingPoint(gl) {
+    let state = UBO.bindingPointsByContext.get(gl);
+
+    if (!state) {
+      state = { next: 1, released: [] };
+      UBO.bindingPointsByContext.set(gl, state);
+    }
+
+    if (state.released.length > 0) return state.released.pop();
+
+    const bindingPoint = state.next;
+    state.next += 1;
+
+    return bindingPoint;
+  }
+
+  static releaseBindingPoint(gl, bindingPoint) {
+    const state = UBO.bindingPointsByContext.get(gl);
+
+    if (state) state.released.push(bindingPoint);
+  }
 
   gl;
   programs;
@@ -14,7 +38,11 @@ class UBO {
     this.programs = programs;
 
     const blockIndex = gl.getUniformBlockIndex(programs[0], blockName);
-    const blockSize = gl.getActiveUniformBlockParameter(programs[0], blockIndex, gl.UNIFORM_BLOCK_DATA_SIZE);
+    const blockSize = gl.getActiveUniformBlockParameter(
+      programs[0],
+      blockIndex,
+      gl.UNIFORM_BLOCK_DATA_SIZE,
+    );
 
     const uniformBuffer = gl.createBuffer();
 
@@ -22,8 +50,7 @@ class UBO {
     gl.bufferData(gl.UNIFORM_BUFFER, blockSize, gl.DYNAMIC_DRAW);
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 
-    const bindingPoint = UBO.INDEX;
-    UBO.INDEX += 1;
+    const bindingPoint = UBO.allocateBindingPoint(gl);
 
     gl.bindBufferBase(gl.UNIFORM_BUFFER, bindingPoint, uniformBuffer);
 
@@ -32,7 +59,11 @@ class UBO {
     }
 
     const blockVariableIndices = gl.getUniformIndices(programs[0], blockVariableNames);
-    const blockVariableOffsets = gl.getActiveUniforms(programs[0], blockVariableIndices, gl.UNIFORM_OFFSET);
+    const blockVariableOffsets = gl.getActiveUniforms(
+      programs[0],
+      blockVariableIndices,
+      gl.UNIFORM_OFFSET,
+    );
 
     const blockVariableIndicesArray = Array.from(blockVariableIndices);
     const blockVariableOffsetsArray = Array.from(blockVariableOffsets);
@@ -85,11 +116,20 @@ class UBO {
 
     return this;
   }
+
+  dispose() {
+    const { gl, uniformBuffer, bindingPoint } = this;
+
+    gl.deleteBuffer(uniformBuffer);
+    UBO.releaseBindingPoint(gl, bindingPoint);
+
+    this.uniformBuffer = null;
+  }
 }
 
 class CameraUbo extends UBO {
   getDefaultBlockVariableNames() {
-    return ["u_projectionMatrix", "u_viewMatrix"];
+    return ["u_projectionMatrix", "u_viewMatrix", "u_cameraPosition"];
   }
 
   updateCameraData(camera) {
@@ -101,6 +141,12 @@ class CameraUbo extends UBO {
       {
         name: "u_viewMatrix",
         value: camera.transform.viewMatrix,
+      },
+      {
+        // the translation column of the model matrix is the camera's
+        // world position, even after orbiting
+        name: "u_cameraPosition",
+        value: camera.transform.modelMatrix.slice(12, 15),
       },
     ]);
   }
@@ -170,7 +216,7 @@ class LightUbo extends UBO {
   getDefaultBlockVariableNames() {
     return [
       "u_lightColor",
-      "u_lightPosition",
+      "u_lightDirection",
       "u_lightProjectionMatrix",
       "u_lightViewMatrix",
       "u_lightTransformationMatrix",
@@ -180,7 +226,7 @@ class LightUbo extends UBO {
   updateLightData(light) {
     return this.updateData([
       { name: "u_lightColor", value: light.color },
-      { name: "u_lightPosition", value: light.transform.position },
+      { name: "u_lightDirection", value: light.transform.forward.slice(0, 3) },
       { name: "u_lightProjectionMatrix", value: light.projectionMatrix },
       { name: "u_lightViewMatrix", value: light.transform.viewMatrix },
       { name: "u_lightTransformationMatrix", value: light.transformationMatrix },

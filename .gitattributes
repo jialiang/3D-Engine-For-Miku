@@ -1,0 +1,15 @@
+# Normalize all text files to LF, both in the repo and on checkout
+* text=auto eol=lf
+
+# MMD binary data (some renamed to .js so GitHub Pages serves them)
+*.pmd binary
+*.pmd.js binary
+*.vmd binary
+*.vmd.js binary
+
+# Textures (.sph and .spa are sphere-map images) and audio
+*.bmp binary
+*.png binary
+*.sph binary
+*.spa binary
+*.mp3 binary

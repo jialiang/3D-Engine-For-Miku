@@ -1,5 +1,10 @@
 // https://stackoverflow.com/questions/4124041/is-opengl-coordinate-system-left-handed-or-right-handed
 
+// Memory quirks of this Ammo.js build (verified by direct test):
+// - btTransform.op_mul follows "*=" semantics: it mutates the callee in
+//   place and returns that same object, never a new one
+// - getters that return by value in C++ (like getRotation) return a pointer
+//   to a shared static temporary, which must never be passed to Ammo.destroy
 const initAmmo = async function () {
   return await Ammo().then((Ammo) => {
     // For some reason, the inverse() for btTransform in Ammo.js is broken
@@ -39,7 +44,6 @@ const initAmmo = async function () {
           width,
           height,
           depth,
-          type,
           weight,
           boneIndex,
           position,
@@ -74,7 +78,12 @@ const initAmmo = async function () {
         const rigidBodyTransform = boneTransform.op_mul(boneOffsetTransform);
         const motionState = new Ammo.btDefaultMotionState(rigidBodyTransform);
 
-        const constructionInfo = new Ammo.btRigidBodyConstructionInfo(weight, motionState, shape, localInertia);
+        const constructionInfo = new Ammo.btRigidBodyConstructionInfo(
+          weight,
+          motionState,
+          shape,
+          localInertia,
+        );
         constructionInfo.set_m_friction(friction);
         constructionInfo.set_m_restitution(recoil);
 
@@ -110,11 +119,14 @@ const initAmmo = async function () {
 
         Ammo.destroy(_rotation);
 
+        // op_mul mutates in place, so "transform" is just another handle to
+        // "motionTransform" (see the memory quirks note at the top of file)
         const transform = motionTransform.op_mul(boneOffsetTransform);
 
         const rigidBodyTransform = new Ammo.btTransform();
         rigidBody.getMotionState().getWorldTransform(rigidBodyTransform);
 
+        // points to a static temporary: do not destroy
         const rigidBodyRotation = rigidBodyTransform.getRotation();
 
         if (info.type === 2) transform.setRotation(rigidBodyRotation);
@@ -122,10 +134,7 @@ const initAmmo = async function () {
         rigidBody.getMotionState().setWorldTransform(transform);
 
         Ammo.destroy(motionTransform);
-        Ammo.destroy(transform);
-
         Ammo.destroy(rigidBodyTransform);
-        Ammo.destroy(rigidBodyRotation);
       }
 
       postSimulation(motions) {
@@ -135,8 +144,11 @@ const initAmmo = async function () {
 
         const transform = new Ammo.btTransform();
         rigidBody.getMotionState().getWorldTransform(transform);
+
+        // applies the offset inverse in place (op_mul mutates the callee)
         transform.op_mul(boneOffsetTransformInverse);
 
+        // points to a static temporary: do not destroy
         const newRotation = transform.getRotation();
         motion.rotation = [-newRotation.x(), -newRotation.y(), newRotation.z(), newRotation.w()];
 
@@ -161,7 +173,11 @@ const initAmmo = async function () {
           const { boneIndex: boneIndex_1 } = rigidBodyInfo_1;
           const { boneIndex: boneIndex_2 } = rigidBodyInfo_2;
 
-          if (boneIndex_1 > 0 && boneIndex_2 > 0 && bones[boneIndex_2].parentIndex === boneIndex_1) {
+          if (
+            boneIndex_1 > 0 &&
+            boneIndex_2 > 0 &&
+            bones[boneIndex_2].parentIndex === boneIndex_1
+          ) {
             rigidBodyInfo_2.type = 1;
           }
         }
@@ -190,12 +206,34 @@ const initAmmo = async function () {
         const frameInA = rigidBodyTransformInv_1.op_mul(transform);
         const frameInB = rigidBodyTransformInv_2.op_mul(transform);
 
-        const constraint = new Ammo.btGeneric6DofSpringConstraint(rigidBody_1, rigidBody_2, frameInA, frameInB, true);
+        const constraint = new Ammo.btGeneric6DofSpringConstraint(
+          rigidBody_1,
+          rigidBody_2,
+          frameInA,
+          frameInB,
+          true,
+        );
 
-        const linearLowerLimit = new Ammo.btVector3(translationLimit_1.x, translationLimit_1.y, -translationLimit_2.z);
-        const linearUpperLimit = new Ammo.btVector3(translationLimit_2.x, translationLimit_2.y, -translationLimit_1.z);
-        const angularLowerLimit = new Ammo.btVector3(-rotationLimit_2.x, -rotationLimit_2.y, rotationLimit_1.z);
-        const angularUpperLimit = new Ammo.btVector3(-rotationLimit_1.x, -rotationLimit_1.y, rotationLimit_2.z);
+        const linearLowerLimit = new Ammo.btVector3(
+          translationLimit_1.x,
+          translationLimit_1.y,
+          -translationLimit_2.z,
+        );
+        const linearUpperLimit = new Ammo.btVector3(
+          translationLimit_2.x,
+          translationLimit_2.y,
+          -translationLimit_1.z,
+        );
+        const angularLowerLimit = new Ammo.btVector3(
+          -rotationLimit_2.x,
+          -rotationLimit_2.y,
+          rotationLimit_1.z,
+        );
+        const angularUpperLimit = new Ammo.btVector3(
+          -rotationLimit_1.x,
+          -rotationLimit_1.y,
+          rotationLimit_2.z,
+        );
 
         constraint.setLinearLowerLimit(linearLowerLimit);
         constraint.setLinearUpperLimit(linearUpperLimit);
@@ -242,7 +280,13 @@ const initAmmo = async function () {
 
           if (!rigidBodyObject_1 || !rigidBodyObject_2) return;
 
-          return new PhysicsConstraint(world, joint, boneArray, rigidBodyObject_1, rigidBodyObject_2);
+          return new PhysicsConstraint(
+            world,
+            joint,
+            boneArray,
+            rigidBodyObject_1,
+            rigidBodyObject_2,
+          );
         });
 
         this.world = world;
@@ -255,7 +299,12 @@ const initAmmo = async function () {
         const dispatcher = new Ammo.btCollisionDispatcher(config);
         const overlappingPairCache = new Ammo.btDbvtBroadphase();
         const solver = new Ammo.btSequentialImpulseConstraintSolver();
-        const dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, config);
+        const dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(
+          dispatcher,
+          overlappingPairCache,
+          solver,
+          config,
+        );
 
         dynamicsWorld.setGravity(new Ammo.btVector3(0, -9.8, 0));
 
@@ -263,9 +312,14 @@ const initAmmo = async function () {
       }
 
       simulateFrame(motions, timeElapsed) {
-        var stepTime = timeElapsed / 1000;
-        var maxStepNum = 1;
-        var unitStep = 1 / 60;
+        // the first frame passes -1 as a sentinel, clamp it away so
+        // Bullet never receives a negative time step
+        const stepTime = Math.max(timeElapsed, 0) / 1000;
+
+        // enough substeps to not lose simulation time on high-refresh
+        // displays or frame drops, Bullet only runs the ones it needs
+        const maxStepNum = 10;
+        const unitStep = 1 / 60;
 
         const newMotions = motions.map((motion) => ({
           position: [...motion.position],

@@ -3,7 +3,12 @@ class Light {
   transform = new CameraTransform();
 
   constructor(gl, options = {}) {
-    const { color = [1, 1, 1], position = [0, 0, 0], rotation = [0, 0, 0], projectionSize = 1 } = options;
+    const {
+      color = [1, 1, 1],
+      position = [0, 0, 0],
+      rotation = [0, 0, 0],
+      projectionSize = 1,
+    } = options;
 
     this.color = color;
     this.transform.setTransformation({ position, rotation });

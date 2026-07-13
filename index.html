@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" />
@@ -53,8 +53,8 @@
         margin: auto;
         border-top: 5vh solid black;
         border-bottom: 5vh solid black;
-        background: white;
-        box-shadow: 0 0 10vmin rgba(0, 0, 0, 0.75) inset;
+        background: linear-gradient(to bottom, white 50%, #ccc 75%);
+        box-shadow: 0 0 10vmin rgba(0, 0, 0, 0.5) inset;
       }
 
       @media (max-aspect-ratio: 4 / 5) {
@@ -101,8 +101,8 @@
         height: 100%;
         padding: 0.5rem;
         text-align: center;
-        background: linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100%
-            10px,
+        background:
+          linear-gradient(to top, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 100%/100% 10px,
           linear-gradient(to right, rgba(0, 25, 25, 0.05) 1px, transparent 0) 0 0/10px 100%,
           linear-gradient(to right, rgba(119, 136, 136, 0.1) 1px, transparent 0) 0 0/100px 100%,
           linear-gradient(to top, rgba(0, 25, 25, 0.1) 1px, transparent 0) 0 100%/100% 100px,
@@ -657,7 +657,7 @@
     <script src="FileParser.js" defer></script>
     <script src="PMD.js" defer></script>
     <script src="VMD.js" defer></script>
-    <script src="Grid.js" defer></script>
+    <script src="Floor.js" defer></script>
 
     <script>
       window.addEventListener("error", handleError);
@@ -685,7 +685,8 @@
         const [
           Physics,
           [vertexShaderSource, fragmentShaderSource], //
-          [simpleVertexShaderSource, simpleFragmentShaderSource], //
+          [floorVertexShaderSource, floorFragmentShaderSource], //
+          shadowShaderChunk,
           [modelArraybuffer, motionArraybuffer], //
         ] = await Promise.all([
           initAmmo(),
@@ -694,14 +695,18 @@
             Utilities.fetch("shaders/fragment.glsl"), //
           ]),
           Promise.all([
-            Utilities.fetch("shaders/simple_vertex.glsl"), //
-            Utilities.fetch("shaders/simple_fragment.glsl"), //
+            Utilities.fetch("shaders/floor_vertex.glsl"), //
+            Utilities.fetch("shaders/floor_fragment.glsl"), //
           ]),
+          Utilities.fetch("shaders/shadow.glsl"),
           Promise.all([
             Utilities.fetch(modelUrl, { responseType: "arraybuffer" }), //
             Utilities.fetch(motionUrl, { responseType: "arraybuffer" }), //
           ]),
         ]);
+
+        const includeShadowChunk = (shaderSource) =>
+          shaderSource.replace("//#include shadow", shadowShaderChunk);
 
         //
 
@@ -710,11 +715,15 @@
 
         //
 
-        const program = GL.createProgram(gl, vertexShaderSource, fragmentShaderSource);
-        const simpleProgram = GL.createProgram(
+        const program = GL.createProgram(
           gl,
-          simpleVertexShaderSource,
-          simpleFragmentShaderSource
+          vertexShaderSource,
+          includeShadowChunk(fragmentShaderSource),
+        );
+        const floorProgram = GL.createProgram(
+          gl,
+          floorVertexShaderSource,
+          includeShadowChunk(floorFragmentShaderSource),
         );
 
         //
@@ -727,13 +736,21 @@
 
         gl.useProgram(program);
 
-        const mikuMaterialTextures = mikuPmd.materialTextureImages.array.map((image, index) => {
-          const texture = new Texture(gl, image);
-          texture.setTextureUnitIndex(index);
-          texture.bindTextureUnitToUniform(program, `u_materialTexture_${index}`, {
-            programBound: true,
-          });
-          return texture;
+        // all material textures live in one texture array, so any number
+        // of them fits in a single texture unit
+        const combinedMaterialImage = mikuPmd.materialTextureImages.combinedImage;
+        const materialTextureCount = mikuPmd.materialTextureImages.array.length;
+
+        const mikuMaterialTextures = new Texture(gl, combinedMaterialImage, {
+          width: combinedMaterialImage.width,
+          height: combinedMaterialImage.height / materialTextureCount,
+          imageCount: materialTextureCount,
+          isTextureArray: true,
+          generateMipmaps: false,
+        });
+        mikuMaterialTextures.setTextureUnitIndex(0);
+        mikuMaterialTextures.bindTextureUnitToUniform(program, "u_materialTextures", {
+          programBound: true,
         });
 
         const mikuToonTextures = new Texture(gl, mikuPmd.toonTextureImages.combinedImage, {
@@ -762,16 +779,16 @@
 
         //
 
-        const grid = new Grid(30);
-        const gridVao = new VAO(gl, grid.dataForAttributeBuffer, grid.verticesToDrawCount);
-        const gridModelUbo = new ModelUbo(gl, [simpleProgram], "Model");
+        const floor = new Floor(60);
+        const floorVao = new VAO(gl, floor.dataForAttributeBuffer, floor.verticesToDrawCount);
+        const floorModelUbo = new ModelUbo(gl, [floorProgram], "Model");
 
-        gridModelUbo.updateModelData(grid);
+        floorModelUbo.updateModelData(floor);
 
         //
 
         const camera = new Camera(gl);
-        const cameraUbo = new CameraUbo(gl, [program, simpleProgram], "Camera");
+        const cameraUbo = new CameraUbo(gl, [program, floorProgram], "Camera");
         const cameraController = new CameraController(gl, camera);
 
         camera.transform.setTransformation({ position: [0, 10, 25] });
@@ -781,10 +798,10 @@
 
         const light = new Light(gl, {
           position: [0, 10, 25],
-          rotation: [0, -15, 0],
-          projectionSize: 25,
+          rotation: [-45, -15, 0],
+          projectionSize: 30,
         });
-        const lightUbo = new LightUbo(gl, [program], "Light");
+        const lightUbo = new LightUbo(gl, [program, floorProgram], "Light");
 
         lightUbo.updateLightData(light);
 
@@ -795,8 +812,9 @@
 
         shadowFbo.depthTexture.setTextureUnitIndex(9);
         shadowFbo.depthTexture.bindTextureUnitToUniform(program, "u_shadowTexture");
+        shadowFbo.depthTexture.bindTextureUnitToUniform(floorProgram, "u_shadowTexture");
 
-        const shadowUbo = new ShadowUbo(gl, [program], "Shadow");
+        const shadowUbo = new ShadowUbo(gl, [program, floorProgram], "Shadow");
         const shadowMapTexelSize = [1 / canvas.width, 1 / canvas.height];
 
         //
@@ -804,12 +822,12 @@
         mikuModelUbo.bindUniformBlock();
         mikuBoneUbo.bindUniformBlock();
         mikuMaterialUbo.bindUniformBlock();
-        gridModelUbo.bindUniformBlock();
+        floorModelUbo.bindUniformBlock();
         cameraUbo.bindUniformBlock();
         lightUbo.bindUniformBlock();
         shadowUbo.bindUniformBlock();
 
-        mikuMaterialTextures.forEach((texture) => texture.addToTextureUnit());
+        mikuMaterialTextures.addToTextureUnit();
         mikuToonTextures.addToTextureUnit();
 
         //
@@ -817,22 +835,38 @@
         const bgm = document.querySelector("audio");
 
         let lastTime = 0;
-        let pauseAnimation = false;
+        let isManuallyPaused = false;
+        let isDrawScheduled = false;
+
+        const scheduleDraw = () => {
+          if (isDrawScheduled) return;
+
+          isDrawScheduled = true;
+          requestAnimationFrame(draw);
+        };
 
         const draw = async (currentTime) => {
-          if (pauseAnimation) return;
+          isDrawScheduled = false;
+
+          // a hidden tab stops the loop entirely, a manual pause only
+          // freezes the dance so the camera can still be rotated
+          if (document.hidden) return;
 
           let timeElapsed = lastTime === 0 ? -1 : currentTime - lastTime;
           lastTime = currentTime;
 
-          if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum && bgm.paused) {
-            requestAnimationFrame(draw);
+          const isDanceFinished = mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum;
+
+          if (!isDanceFinished && !isManuallyPaused && bgm.paused) {
+            scheduleDraw();
             return;
           }
 
-          if (mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum) {
+          // while frozen (paused or finished), the model does not change,
+          // so only re-render when the camera has moved
+          if (isDanceFinished || isManuallyPaused) {
             if (!cameraController.tainted) {
-              requestAnimationFrame(draw);
+              scheduleDraw();
               return;
             }
 
@@ -845,11 +879,14 @@
 
           gl.useProgram(program);
 
-          mikuPmd.updateAnimation(mikuVmd, timeElapsed);
-          mikuBoneUbo.updateBoneData(mikuPmd.dataForBoneUbo);
-          mikuVao.update({
-            morph: mikuPmd.dataForAttributeBuffer.morph,
-          });
+          if (!isManuallyPaused) {
+            mikuPmd.updateAnimation(mikuVmd, timeElapsed);
+            mikuBoneUbo.updateBoneData(mikuPmd.dataForBoneUbo);
+
+            mikuVao.update({
+              morph: mikuPmd.dataForAttributeBuffer.morph,
+            });
+          }
 
           gl.bindVertexArray(mikuVao.vao);
 
@@ -872,15 +909,25 @@
 
           gl.drawElements(gl.TRIANGLES, mikuVao.verticesToDrawCount, gl.UNSIGNED_SHORT, 0);
 
-          gl.useProgram(simpleProgram);
+          gl.useProgram(floorProgram);
 
-          gl.bindVertexArray(gridVao.vao);
-          gl.drawArrays(gl.LINES, 0, gridVao.verticesToDrawCount);
+          gl.bindVertexArray(floorVao.vao);
+          gl.drawArrays(gl.TRIANGLES, 0, floorVao.verticesToDrawCount);
 
-          if (!pauseAnimation) requestAnimationFrame(draw);
+          scheduleDraw();
         };
 
-        //
+        const resumeAnimation = () => {
+          lastTime = performance.now();
+
+          if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) {
+            // the browser may have revoked autoplay permission,
+            // keep animating without audio then
+            bgm.play().catch((error) => console.warn("Could not resume audio:", error));
+          }
+
+          scheduleDraw();
+        };
 
         const cover = document.querySelector("#cover");
 
@@ -893,18 +940,39 @@
           cover.style.display = "none";
 
           document.addEventListener("visibilitychange", () => {
-            pauseAnimation = document.hidden;
+            if (document.hidden) return bgm.pause();
 
-            // pause animation
-            if (pauseAnimation) return bgm.pause();
+            // returning to the tab must not override a manual pause,
+            // but the loop has to restart for the camera to stay usable
+            if (isManuallyPaused) return scheduleDraw();
 
-            // unpause animation
-            lastTime = performance.now();
+            resumeAnimation();
+          });
 
-            requestAnimationFrame(async (currentTime) => {
-              if (mikuVmd.lastConsumedFrameNum < mikuVmd.maxFrameNum) await bgm.play();
-              draw(currentTime);
-            });
+          // clicking the canvas pauses or resumes the dance,
+          // dragging rotates the camera and should not toggle pause
+          let isMoved = false;
+
+          canvas.addEventListener("mousedown", () => (isMoved = false));
+          canvas.addEventListener("mousemove", () => (isMoved = true));
+
+          canvas.addEventListener("mouseup", () => {
+            if (isMoved) return;
+
+            if (mikuVmd.lastConsumedFrameNum >= mikuVmd.maxFrameNum) {
+              mikuVmd.reset();
+
+              bgm.currentTime = 0;
+              bgm.play().catch((error) => console.warn("Could not restart audio:", error));
+
+              return;
+            }
+
+            isManuallyPaused = !isManuallyPaused;
+
+            if (isManuallyPaused) return bgm.pause();
+
+            resumeAnimation();
           });
 
           requestAnimationFrame(async (currentTime) => {
@@ -913,21 +981,24 @@
           });
         });
 
-        let canPlayThroughEvent;
-
         const signalReady = () => {
           loading.style.display = "none";
           ready.style.display = "block";
 
-          if (canPlayThroughEvent) bgm.removeEventListener(canPlayThroughEvent);
+          bgm.removeEventListener("canplay", signalReady);
         };
 
-        // loaded enough data to play without pause
-        if (bgm.readyState === 4) signalReady();
-        // still loading, not enough to play without pause
-        else if (bgm.networkState === 2)
-          canPlayThroughEvent = bgm.addEventListener("canplaythrough", signalReady);
-        // not enough data and not loading, probably preload disabled
+        // enough audio is buffered to start playing
+        // (the browser keeps downloading the rest during playback,
+        // so there is no need to wait for the full file)
+        if (bgm.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+          signalReady();
+        }
+        // still loading, wait until playback can start
+        else if (bgm.networkState === HTMLMediaElement.NETWORK_LOADING) {
+          bgm.addEventListener("canplay", signalReady);
+        }
+        // no data and not loading, probably preload disabled
         else signalReady();
       }
     </script>

@@ -108,24 +108,6 @@ class CameraTransform extends Transform {
     this.viewMatrix = mat4.create();
   }
 
-  panXYZ(x = 0, y = 0, z = 0) {
-    const { up } = this;
-
-    let newX = 0;
-    let newY = 0;
-    let newZ = 0;
-
-    // panY
-    newY += up[1] * y;
-
-    // panZ
-    newZ = z;
-
-    return this.setTransformation({
-      position: [newX, newY, newZ],
-    });
-  }
-
   updateMatrix() {
     const { modelMatrix, viewMatrix, position, rotation } = this;
     const { toRadian } = CameraTransform;

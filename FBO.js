@@ -26,7 +26,13 @@ class FBO {
       height: canvas.height,
     });
 
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture.texture, 0);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      colorTexture.texture,
+      0,
+    );
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -46,7 +52,13 @@ class FBO {
         height: canvas.height,
       });
 
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture.texture, 0);
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.DEPTH_ATTACHMENT,
+        gl.TEXTURE_2D,
+        depthTexture.texture,
+        0,
+      );
 
       this.depthTexture = depthTexture;
     }
@@ -67,14 +79,44 @@ class FBO {
     return this;
   };
 
+  isStatusChecked = false;
+
   draw(drawFunc) {
     const { gl, framebuffer } = this;
 
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
+
+    // an incomplete framebuffer silently renders nothing,
+    // so validate it once on first use
+    if (!this.isStatusChecked) {
+      const status = gl.checkFramebufferStatus(gl.DRAW_FRAMEBUFFER);
+
+      if (status !== gl.FRAMEBUFFER_COMPLETE) {
+        throw new Error(`Framebuffer is incomplete, status code ${status}.`);
+      }
+
+      this.isStatusChecked = true;
+    }
+
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
     drawFunc();
 
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  }
+
+  dispose() {
+    const { gl, framebuffer, colorTexture, depthbuffer, depthTexture } = this;
+
+    if (colorTexture) colorTexture.dispose();
+    if (depthTexture) depthTexture.dispose();
+    if (depthbuffer) gl.deleteRenderbuffer(depthbuffer);
+
+    gl.deleteFramebuffer(framebuffer);
+
+    this.colorTexture = null;
+    this.depthTexture = null;
+    this.depthbuffer = null;
+    this.framebuffer = null;
   }
 }

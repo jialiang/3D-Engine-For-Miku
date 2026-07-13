@@ -1,7 +1,5 @@
 #version 300 es
 
-precision highp sampler2DArray;
-
 layout(location = 0) in vec3 a_position;
 layout(location = 1) in vec4 a_color;
 layout(location = 2) in vec2 a_uv;
@@ -39,11 +37,12 @@ uniform Material {
 uniform Camera {
   mat4 u_projectionMatrix;
   mat4 u_viewMatrix;
+  vec3 u_cameraPosition;
 };
 
 uniform Light {
   vec3 u_lightColor;
-  vec3 u_lightPosition;
+  vec3 u_lightDirection;
   mat4 u_lightProjectionMatrix;
   mat4 u_lightViewMatrix;
   mat4 u_lightTransformationMatrix;
@@ -54,15 +53,13 @@ uniform Shadow {
   vec2 u_shadowMapTexelSize;
 };
 
-uniform sampler2DArray u_toonTextures;
-
 out vec2 v_uv;
 out vec4 v_color;
-out vec3 v_lighting;
+out vec3 v_worldNormal;
+out vec3 v_worldPosition;
 out vec4 v_shadow_uv;
-out float v_shadowMappingMode;
-out vec2 v_shadowMapTexelSize;
 
+flat out int v_material;
 flat out int v_diffuseTextureIndex;
 flat out int v_sphereTextureIndex;
 flat out int v_sphereTextureType;
@@ -98,7 +95,7 @@ void main() {
   vec3 normal = normalize(mix(normalRotatedByBone2, normalRotatedByBone1, a_boneWeight));
 
   vec4 worldPosition = (u_modelMatrix * vec4(position, 1.0));
-  vec4 worldNormal = (u_normalMatrix * vec4(normal, 1.0));
+  vec4 worldNormal = (u_normalMatrix * vec4(normal, 0.0));
 
   if (u_shadowMappingMode > 0.5) {
     gl_Position = u_lightProjectionMatrix * u_lightViewMatrix * worldPosition;
@@ -110,29 +107,14 @@ void main() {
   v_uv = a_uv;
   v_color = u_diffuseColor[a_material];
 
+  v_material = a_material;
   v_diffuseTextureIndex = int(u_diffuseTextureIndex[a_material].x);
   v_sphereTextureIndex = int(u_sphereTextureIndex[a_material].x);
   v_sphereTextureType = int(u_sphereTextureType[a_material].x);
   v_toonTextureIndex = int(u_toonTextureIndex[a_material].x);
 
-  v_shadowMappingMode = u_shadowMappingMode;
-  v_shadowMapTexelSize = u_shadowMapTexelSize;
-
-  vec3 normalDirection = normalize(worldNormal.xyz);
-  vec3 lightDirection = normalize(u_lightPosition - worldPosition.xyz);
-
-  float lightIntensity = dot(normalDirection, lightDirection);
-
-  if (lightIntensity < 0.1) lightIntensity = 0.1;
-
-  vec3 ambientLight = u_ambientColor[a_material].rgb;
-
-  v_lighting = u_lightColor * lightIntensity + ambientLight;
-
-  vec2 toon_uv = vec2(0.0, lightIntensity * 0.5 + 0.5);
-  vec4 toonColor = texture(u_toonTextures, vec3(toon_uv, v_toonTextureIndex));
-
-  v_lighting = v_lighting * 0.75 + v_lighting * toonColor.rgb * 0.25;
+  v_worldNormal = worldNormal.xyz;
+  v_worldPosition = worldPosition.xyz;
 
   v_shadow_uv = u_lightTransformationMatrix * worldPosition;
 }
