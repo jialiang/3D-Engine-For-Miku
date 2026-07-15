@@ -637,6 +637,8 @@
       </article>
     </div>
 
+    <audio src="audios/pv_743.ogg" preload="auto"></audio>
+
     <script src="Utilities.js" defer></script>
     <script src="glMatrix-mat4.js" defer></script>
 
@@ -670,7 +672,102 @@
         message.innerHTML += `<div>${e.message || e.toString()}</div>`;
       }
 
-      async function onload() {}
+      async function onload() {
+        const canvas = document.getElementsByTagName("canvas")[0];
+
+        //
+
+        let isDrawScheduled = false;
+
+        const scheduleDraw = () => {
+          if (isDrawScheduled) return;
+
+          isDrawScheduled = true;
+          requestAnimationFrame(draw);
+        };
+
+        // nothing is drawn yet: the loop just keeps a frame scheduled so the
+        // canvas is live once the model is added
+        const draw = () => {
+          isDrawScheduled = false;
+
+          if (document.hidden) return;
+
+          scheduleDraw();
+        };
+
+        //
+
+        const bgm = document.querySelector("audio");
+
+        const cover = document.querySelector("#cover");
+
+        const loading = document.querySelector(".loading-content");
+        const ready = document.querySelector(".ready-content");
+
+        const playButton = document.querySelector(".play");
+
+        // autoplay permission can be revoked, in which case the model still
+        // shows and only the sound is missing
+        const playAudio = () =>
+          bgm.play().catch((error) => console.warn("Could not play audio:", error));
+
+        let isPaused = false;
+
+        playButton.addEventListener("click", () => {
+          cover.style.display = "none";
+          playAudio();
+          scheduleDraw();
+
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) return bgm.pause();
+
+            // returning to the tab restarts the loop so the camera stays
+            // usable, and resumes the track unless the user paused it
+            scheduleDraw();
+            if (!isPaused) playAudio();
+          });
+
+          // a click pauses or resumes the track, a drag orbits the camera
+          let isMoved = false;
+
+          canvas.addEventListener("mousedown", () => (isMoved = false));
+          canvas.addEventListener("mousemove", () => (isMoved = true));
+
+          canvas.addEventListener("mouseup", () => {
+            if (isMoved) return;
+
+            // once the track has finished, a click restarts it from the top
+            if (bgm.ended) {
+              bgm.currentTime = 0;
+              isPaused = false;
+              playAudio();
+              return;
+            }
+
+            isPaused = !isPaused;
+
+            if (isPaused) bgm.pause();
+            else playAudio();
+          });
+        });
+
+        const signalReady = () => {
+          loading.style.display = "none";
+          ready.style.display = "block";
+
+          bgm.removeEventListener("canplay", signalReady);
+        };
+
+        // enough audio must be buffered before playback can start
+        if (bgm.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+          signalReady();
+        } else if (bgm.networkState === HTMLMediaElement.NETWORK_LOADING) {
+          bgm.addEventListener("canplay", signalReady);
+        } else {
+          signalReady();
+        }
+      }
     </script>
   </body>
 </html>
