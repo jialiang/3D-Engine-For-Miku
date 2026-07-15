@@ -56,6 +56,17 @@ class Utilities {
     });
   };
 
+  static loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error(`Could not load image ${src}`));
+
+      image.src = src;
+    });
+  };
+
   static clamp = (value, min, max) => {
     if (value < min) return min;
     if (value > max) return max;

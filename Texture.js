@@ -10,6 +10,7 @@ class Texture {
       width = 1,
       height = 1,
       imageCount = 1,
+      wrap = gl.CLAMP_TO_EDGE,
       depthTexture = false,
       isTextureArray = imageCount > 1,
     } = options;
@@ -23,11 +24,17 @@ class Texture {
     let maxFilterType = gl.LINEAR;
     let minFilterType = gl.LINEAR;
 
-    if (generateMipmaps && image) minFilterType = gl.LINEAR_MIPMAP_NEAREST;
+    // trilinear (LINEAR between mip levels), not LINEAR_MIPMAP_NEAREST:
+    // the latter snaps to one mip and bands where the level changes,
+    // which showed badly on the fine skirt lace when minified
+    if (generateMipmaps && image) minFilterType = gl.LINEAR_MIPMAP_LINEAR;
     if (depthTexture) {
       format = gl.DEPTH_COMPONENT16;
       internalFormat = gl.DEPTH_COMPONENT;
       type = gl.UNSIGNED_INT;
+
+      // a plain depth texture, sampled and compared by hand in the shader,
+      // must be NEAREST (WebGL cannot linear-filter a non-comparison depth texture)
       maxFilterType = gl.NEAREST;
       minFilterType = gl.NEAREST;
     }
@@ -57,10 +64,23 @@ class Texture {
 
     gl.texParameteri(bindingPoint, gl.TEXTURE_MAG_FILTER, maxFilterType);
     gl.texParameteri(bindingPoint, gl.TEXTURE_MIN_FILTER, minFilterType);
-    gl.texParameteri(bindingPoint, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(bindingPoint, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(bindingPoint, gl.TEXTURE_WRAP_S, wrap);
+    gl.texParameteri(bindingPoint, gl.TEXTURE_WRAP_T, wrap);
 
-    if (generateMipmaps && image) gl.generateMipmap(bindingPoint);
+    if (generateMipmaps && image) {
+      gl.generateMipmap(bindingPoint);
+
+      // anisotropic filtering keeps the mipmapped detail sharp where a surface is seen edge-on
+      // (the skirt lace at the sides of its ring),
+      // instead of the over-blurred smear isotropic minification gives there
+      const anisotropy = gl.getExtension("EXT_texture_filter_anisotropic");
+
+      if (anisotropy) {
+        const max = gl.getParameter(anisotropy.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+        gl.texParameterf(bindingPoint, anisotropy.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, max));
+      }
+    }
+
     if (depthTexture) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.NONE);
 
     this.gl = gl;

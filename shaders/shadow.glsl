@@ -1,150 +1,66 @@
-// Percentage-Closer Soft Shadows (PCSS), following the NVIDIA paper:
-// https://developer.download.nvidia.com/shaderlibrary/docs/shadow_PCSS.pdf
+// Simple shadow mapping with a soft, uniform PCF kernel:
+// a plain depth compare projects the caster's real silhouette
+// and the PCF softens the edge by a fixed amount everywhere.
 //
-// 1. blocker search: average the distance of occluders around the fragment
-// 2. penumbra estimation with the paper's parallel-planes formula:
-//    wPenumbra = (dReceiver - dBlocker) * wLight / dBlocker
-// 3. percentage-closer filtering with a kernel sized by the penumbra
+// The softness is uniform (no contact hardening), which suits the stylised look.
 //
-// This file is shared by every shadow-receiving fragment shader: it is
-// spliced in where a "//#include shadow" marker appears (see onload in
-// index.html). The sample counts (36 for the search, 64 for the filter)
-// are the ones the paper reports.
+// This file is shared by every shadow-receiving fragment shader: it is spliced
+// in where a "//#include shadow" marker appears (see onload in index.js).
 
-const int blockerSearchGridSize = 6;
-const int pcfGridSize = 8;
+// radius of the soft edge, in shadow-map texels
+const float pcfRadiusTexels = 8.0;
 
-// the paper's wLight: how wide the area light is, in world units
-// (the model is about 20 units tall), this is the one artistic knob
-// and larger values give softer shadows
-const float lightWorldSize = 3.0;
+const float shadowBias = 0.00125;
 
-// the light frustum set up in index.html and Light.js: mat4.ortho with
-// projectionSize 30 and near 0.1, far 100 (ortho depth is linear, so
-// these constants also convert [0, 1] depths back to distances)
-const float lightNearDistance = 0.1;
-const float lightFarDistance = 100.0;
-const float lightFrustumHeight = 30.0;
+// 32 samples on the unit disk in a Vogel (sunflower) spiral:
+// evenly spaced by construction, so the extra taps genuinely fill the kernel and cut banding,
+// rather than clumping the way a hand-picked point set can.
+const int sampleCount = 32;
+const vec2 sampleDisk[32] = vec2[](
+    vec2(0.125000, 0.000000), vec2(-0.159645, 0.146248),
+    vec2(0.024436, -0.278438), vec2(0.201222, 0.262459),
+    vec2(-0.369268, -0.065318), vec2(0.349802, -0.222516),
+    vec2(-0.117002, 0.435242), vec2(-0.223136, -0.429634),
+    vec2(0.484115, 0.176798), vec2(-0.503641, 0.207896),
+    vec2(0.242788, -0.518824), vec2(0.179414, 0.572001),
+    vec2(-0.540757, -0.313380), vec2(0.634370, -0.139464),
+    vec2(-0.387146, 0.550675), vec2(-0.089440, -0.690200),
+    vec2(0.549072, 0.462758), vec2(-0.738878, 0.030555),
+    vec2(0.538955, -0.536332), vec2(-0.036058, 0.779792),
+    vec2(-0.512818, -0.614527), vec2(0.812360, 0.109302),
+    vec2(-0.688311, 0.478909), vec2(0.188086, -0.836061),
+    vec2(0.435033, 0.759191), vec2(-0.850448, -0.271316),
+    vec2(0.826102, -0.381680), vec2(-0.357888, 0.855156),
+    vec2(-0.319407, -0.888034), vec2(0.849909, 0.446688),
+    vec2(-0.944035, 0.248845), vec2(0.536596, -0.834530)
+);
 
-// practical guards the paper leaves out: keep the sparse filter kernel
-// from spreading so wide that it bands, and never sharper than 1 texel
-const float minFilterRadiusTexels = 1.0;
-const float maxFilterRadiusTexels = 24.0;
+// plain depth sampler: each tap reads a depth and is compared by hand below.
+uniform highp sampler2D u_shadowTexture;
 
-// depth offset to stop surfaces from shadowing themselves
-const float shadowBias = 0.006;
-
-uniform sampler2D u_shadowTexture;
-
-float depthToDistance(float depth) {
-    return lightNearDistance + depth * (lightFarDistance - lightNearDistance);
-}
-
-// a stable pseudo random value per screen pixel
-// (interleaved gradient noise, Jimenez 2014)
-float interleavedGradientNoise(vec2 fragmentCoordinate) {
-    return fract(52.9829189 * fract(dot(fragmentCoordinate, vec2(0.06711056, 0.00583715))));
-}
-
-// rotating the sample grid by a random angle per pixel turns the
-// banding a regular grid produces into unobtrusive noise
-mat2 randomSampleRotation() {
-    float angle = interleavedGradientNoise(gl_FragCoord.xy) * 6.28318;
-    float sine = sin(angle);
-    float cosine = cos(angle);
-
-    return mat2(cosine, sine, -sine, cosine);
-}
-
-// how far one world unit reaches in shadow map UV, per axis
-// (the frustum is lightFrustumHeight tall and aspect ratio times
-// that wide, and the texel size vector encodes the same aspect ratio)
-vec2 uvPerWorldUnit(vec2 texelSize) {
-    return vec2(texelSize.x / texelSize.y, 1.0) / lightFrustumHeight;
-}
-
-// average distance of the shadow casters around the fragment,
-// or -1.0 when nothing blocks the light
-float averageBlockerDistance(vec2 uv, float receiverDistance, vec2 texelSize, mat2 rotation) {
-    // the search region is the light projected through the receiver
-    // onto the shadow map plane, as described in the paper
-    float searchWidth = lightWorldSize * (receiverDistance - lightNearDistance) / receiverDistance;
-    vec2 searchRadiusUv = 0.5 * searchWidth * uvPerWorldUnit(texelSize);
-
-    float gridCenter = float(blockerSearchGridSize - 1) * 0.5;
-
-    float distanceSum = 0.0;
-    float blockerCount = 0.0;
-
-    for (int x = 0; x < blockerSearchGridSize; x++) {
-        for (int y = 0; y < blockerSearchGridSize; y++) {
-            vec2 offset = rotation * ((vec2(x, y) - gridCenter) / gridCenter) * searchRadiusUv;
-            float sampleDistance = depthToDistance(texture(u_shadowTexture, uv + offset).r);
-
-            if (sampleDistance < receiverDistance) {
-                distanceSum += sampleDistance;
-                blockerCount += 1.0;
-            }
-        }
-    }
-
-    if (blockerCount == 0.0) return -1.0;
-
-    return distanceSum / blockerCount;
-}
-
-// fraction of the filter window that is in shadow
-float shadowedFraction(vec2 uv, float receiverDistance, vec2 filterRadiusUv, mat2 rotation) {
-    float gridCenter = float(pcfGridSize - 1) * 0.5;
-
-    float shadowedCount = 0.0;
-
-    for (int x = 0; x < pcfGridSize; x++) {
-        for (int y = 0; y < pcfGridSize; y++) {
-            vec2 offset = rotation * ((vec2(x, y) - gridCenter) / gridCenter) * filterRadiusUv;
-            float sampleDistance = depthToDistance(texture(u_shadowTexture, uv + offset).r);
-
-            if (sampleDistance < receiverDistance) shadowedCount += 1.0;
-        }
-    }
-
-    return shadowedCount / float(pcfGridSize * pcfGridSize);
-}
-
-// how much light reaches the fragment: 1.0 fully lit,
-// down to 0.33 fully shadowed
+// how much light reaches the fragment: 1.0 fully lit, down to 0.33 fully shadowed
 float shadowLightFactor(vec4 shadowPosition, vec2 texelSize) {
     vec3 shadowUv = shadowPosition.xyz / shadowPosition.w;
 
-    // outside the shadow map nothing is known about occluders, so the
-    // shadow fades out toward the border instead of ending in a hard
-    // cut where the light frustum ends
+    // outside the map nothing is known about occluders, so fade the shadow out
+    // toward the border instead of cutting hard where the light frustum ends
     vec2 borderDistance = min(shadowUv.xy, 1.0 - shadowUv.xy);
     float borderFade = smoothstep(0.0, 0.1, min(borderDistance.x, borderDistance.y));
 
     if (borderFade <= 0.0) return 1.0;
 
-    mat2 rotation = randomSampleRotation();
+    float receiverDepth = shadowUv.z - shadowBias;
+    vec2 radiusUv = pcfRadiusTexels * texelSize;
 
-    float receiverDistance = depthToDistance(shadowUv.z - shadowBias);
-    float blockerDistance =
-        averageBlockerDistance(shadowUv.xy, receiverDistance, texelSize, rotation);
+    float shadowedCount = 0.0;
 
-    if (blockerDistance < 0.0) return 1.0;
+    for (int i = 0; i < sampleCount; i++) {
+        float occluderDepth = texture(u_shadowTexture, shadowUv.xy + sampleDisk[i] * radiusUv).r;
 
-    // the paper's penumbra estimate, wLight scaled by how far the
-    // receiver sits behind its occluder
-    float penumbraWidth = (receiverDistance - blockerDistance) * lightWorldSize / blockerDistance;
+        if (receiverDepth > occluderDepth) shadowedCount += 1.0;
+    }
 
-    // the ortho projection maps world sizes onto the shadow map 1:1
-    vec2 filterRadiusUv = 0.5 * penumbraWidth * uvPerWorldUnit(texelSize);
+    float inShadow = shadowedCount / float(sampleCount);
 
-    vec2 minRadiusUv = minFilterRadiusTexels * texelSize;
-    vec2 maxRadiusUv = maxFilterRadiusTexels * texelSize;
-    filterRadiusUv = clamp(filterRadiusUv, minRadiusUv, maxRadiusUv);
-
-    float inShadowPercentage =
-        shadowedFraction(shadowUv.xy, receiverDistance, filterRadiusUv, rotation);
-
-    return 1.0 - inShadowPercentage * 0.67 * borderFade;
+    return 1.0 - inShadow * 0.67 * borderFade;
 }

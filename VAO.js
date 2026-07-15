@@ -85,9 +85,11 @@ class VAO {
     this.verticesToDrawCount = verticesToDrawCount;
 
     if (source.index) {
+      const array = ArrayBuffer.isView(source.index) ? source.index : new Uint16Array(source.index);
+
       const buffer = gl.createBuffer();
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(source.index), gl.STATIC_DRAW);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, array, gl.STATIC_DRAW);
       this.buffers.index = buffer;
     }
 

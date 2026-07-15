@@ -11,19 +11,26 @@ class FBO {
 
     this.gl = gl;
     this.framebuffer = framebuffer;
+    this.width = gl.canvas.width;
+    this.height = gl.canvas.height;
   }
 
-  addDepthbuffer = (mode = "renderbuffer") => {
+  addDepthbuffer = (mode = "renderbuffer", options = {}) => {
     const { gl, framebuffer } = this;
-    const canvas = gl.canvas;
+
+    const width = options.width ?? gl.canvas.width;
+    const height = options.height ?? gl.canvas.height;
+
+    this.width = width;
+    this.height = height;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
     if (mode === "texture") {
       const depthTexture = new Texture(gl, null, {
         depthTexture: true,
-        width: canvas.width,
-        height: canvas.height,
+        width,
+        height,
       });
 
       gl.framebufferTexture2D(
@@ -41,7 +48,7 @@ class FBO {
       const depthbuffer = gl.createRenderbuffer();
 
       gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
       gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer);
       gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
@@ -72,11 +79,15 @@ class FBO {
       this.isStatusChecked = true;
     }
 
+    // match the viewport to this buffer, which may differ from the canvas
+    // (the shadow map is a fixed resolution), then hand it back afterwards
+    gl.viewport(0, 0, this.width, this.height);
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
     drawFunc();
 
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   }
 
   dispose() {

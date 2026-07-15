@@ -2,7 +2,7 @@ class Light {
   color;
   transform = new CameraTransform();
 
-  constructor(gl, options = {}) {
+  constructor(options = {}) {
     const {
       color = [1, 1, 1],
       position = [0, 0, 0],
@@ -13,8 +13,8 @@ class Light {
     this.color = color;
     this.transform.setTransformation({ position, rotation });
 
-    const aspectRatio = gl.canvas.width / gl.canvas.height;
-    const width = projectionSize * aspectRatio;
+    // a square frustum to match the square shadow map
+    const width = projectionSize;
     const height = projectionSize;
 
     const projectionMatrix = mat4.create();

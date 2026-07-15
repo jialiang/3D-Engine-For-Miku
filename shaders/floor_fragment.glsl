@@ -2,10 +2,7 @@
 
 precision highp float;
 
-uniform Shadow {
-    float u_shadowMappingMode;
-    vec2 u_shadowMapTexelSize;
-};
+//#include uniforms
 
 //#include shadow
 
