@@ -184,34 +184,6 @@ class BoneArrayUbo extends UBO {
   }
 }
 
-class MaterialArrayUbo extends UBO {
-  getDefaultBlockVariableNames() {
-    return [
-      "u_diffuseColor[0]",
-      "u_diffuseTextureIndex[0]",
-      "u_sphereTextureIndex[0]",
-      "u_sphereTextureType[0]",
-      "u_toonTextureIndex[0]",
-      "u_ambientColor[0]",
-      "u_specularity[0]",
-      "u_specularColor[0]",
-    ];
-  }
-
-  updateMaterialData(materials) {
-    return this.updateData([
-      { name: "u_diffuseColor[0]", value: materials.diffuseColor },
-      { name: "u_diffuseTextureIndex[0]", value: materials.diffuseTextureIndex },
-      { name: "u_sphereTextureIndex[0]", value: materials.sphereTextureIndex },
-      { name: "u_sphereTextureType[0]", value: materials.sphereTextureType },
-      { name: "u_toonTextureIndex[0]", value: materials.toonTextureIndex },
-      { name: "u_ambientColor[0]", value: materials.ambientColor },
-      { name: "u_specularity[0]", value: materials.specularity },
-      { name: "u_specularColor[0]", value: materials.specularColor },
-    ]);
-  }
-}
-
 class LightUbo extends UBO {
   getDefaultBlockVariableNames() {
     return [

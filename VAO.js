@@ -5,10 +5,6 @@ class VAO {
       location: 0,
       size: 3,
     },
-    color: {
-      location: 1,
-      size: 4,
-    },
     uv: {
       location: 2,
       size: 2,
@@ -95,32 +91,6 @@ class VAO {
       this.buffers.index = buffer;
     }
 
-    gl.bindVertexArray(null);
-  }
-
-  update(source) {
-    const { gl, vao, buffers } = this;
-
-    gl.bindVertexArray(vao);
-
-    for (const key in source) {
-      if (key === "index") throw new Error("Updating of index is not supported yet.");
-
-      const buffer = buffers[key];
-
-      if (!buffer) throw new Error(`Attribute ${key} was not initialised in the constructor.`);
-
-      const { type = "float" } = VAO.AttributeInfo[key];
-      const array = type === "int" ? new Int16Array(source[key]) : new Float32Array(source[key]);
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
-      // update() runs every frame (morph targets), so hint the driver
-      // that this buffer's contents change often
-      gl.bufferData(gl.ARRAY_BUFFER, array, gl.DYNAMIC_DRAW);
-    }
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
   }
 

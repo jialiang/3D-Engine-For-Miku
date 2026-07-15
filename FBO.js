@@ -3,8 +3,6 @@ class FBO {
   gl;
   framebuffer;
 
-  colorTexture;
-
   depthbuffer;
   depthTexture;
 
@@ -14,30 +12,6 @@ class FBO {
     this.gl = gl;
     this.framebuffer = framebuffer;
   }
-
-  addColorbuffer = () => {
-    const { gl, framebuffer } = this;
-    const canvas = gl.canvas;
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-
-    const colorTexture = new Texture(gl, null, {
-      width: canvas.width,
-      height: canvas.height,
-    });
-
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      colorTexture.texture,
-      0,
-    );
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-    this.colorTexture = colorTexture;
-  };
 
   addDepthbuffer = (mode = "renderbuffer") => {
     const { gl, framebuffer } = this;
@@ -106,15 +80,13 @@ class FBO {
   }
 
   dispose() {
-    const { gl, framebuffer, colorTexture, depthbuffer, depthTexture } = this;
+    const { gl, framebuffer, depthbuffer, depthTexture } = this;
 
-    if (colorTexture) colorTexture.dispose();
     if (depthTexture) depthTexture.dispose();
     if (depthbuffer) gl.deleteRenderbuffer(depthbuffer);
 
     gl.deleteFramebuffer(framebuffer);
 
-    this.colorTexture = null;
     this.depthTexture = null;
     this.depthbuffer = null;
     this.framebuffer = null;
