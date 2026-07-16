@@ -4,4 +4,5 @@
 # Binary assets
 *.png binary
 *.glb binary
+*.bin binary
 *.ogg binary

@@ -1,0 +1,2975 @@
+{
+  "version": 1,
+  "name": "MIK",
+  "heelHeight": 0.10300000011920929,
+  "bones": [
+    {
+      "name": "n_hara_cp",
+      "parent": -1,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "positionRotation",
+        "parentId": null,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kg_hara_y",
+      "parent": 0,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 0,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_hara_xz",
+      "parent": 1,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 1,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_hara_etc",
+      "parent": 2,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 2,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_hara",
+      "parent": 3,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 3,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "cl_mune",
+      "parent": 4,
+      "position": null,
+      "control": {
+        "type": "headIkRotation",
+        "parentId": 4,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "j_mune_wj",
+      "parent": 5,
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "e_mune_cp",
+      "parent": 6,
+      "position": [
+        0.10999999940395355,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "n_mune_b",
+      "parent": 7,
+      "position": [
+        0.10999999940395355,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 5,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_mune_b_wj",
+      "parent": 8,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 6,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_kubi",
+      "parent": 9,
+      "position": [
+        0,
+        0.14499999582767487,
+        -0.04399999976158142
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 7,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kao",
+      "parent": 10,
+      "position": [
+        0,
+        0.07900000363588333,
+        0.004000000189989805
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 8,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "cl_kao",
+      "parent": 11,
+      "position": null,
+      "control": {
+        "type": "headIkRotation",
+        "parentId": 9,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "j_kao_wj",
+      "parent": 12,
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "e_kao_cp",
+      "parent": 13,
+      "position": [
+        0.1379999965429306,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "face_root",
+      "parent": 14,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 10,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_ago",
+      "parent": 15,
+      "position": [
+        0,
+        0.014279999770224094,
+        0.014000000432133675
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_ago_wj",
+      "parent": 16,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 12,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_tooth_under",
+      "parent": 17,
+      "position": [
+        0,
+        -0.014499999582767487,
+        0.04500000178813934
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 13,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_tooth_under_wj",
+      "parent": 18,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 14,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eye_l",
+      "parent": 15,
+      "position": [
+        0.027000000700354576,
+        0.061000000685453415,
+        0.014999999664723873
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_eye_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_eye_l",
+      "parent": 20,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 16,
+        "poleTargetId": null,
+        "mirror": "kl_eye_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eye_l_wj_ex",
+      "parent": 21,
+      "position": [
+        0.004999999888241291,
+        0,
+        0.05587000027298927
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 17,
+        "poleTargetId": null,
+        "mirror": "n_eye_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "kl_highlight_l_wj",
+      "parent": 22,
+      "position": [
+        0.04986000061035156,
+        -0.026920000091195107,
+        0.1379999965429306
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 18,
+        "poleTargetId": null,
+        "mirror": "kl_highlight_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eye_r",
+      "parent": 15,
+      "position": [
+        -0.027000000700354576,
+        0.061000000685453415,
+        0.014999999664723873
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_eye_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_eye_r",
+      "parent": 24,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 20,
+        "poleTargetId": null,
+        "mirror": "kl_eye_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eye_r_wj_ex",
+      "parent": 25,
+      "position": [
+        -0.004999999888241291,
+        0,
+        0.05587000027298927
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 21,
+        "poleTargetId": null,
+        "mirror": "n_eye_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "kl_highlight_r_wj",
+      "parent": 26,
+      "position": [
+        -0.046799998730421066,
+        -0.026920000091195107,
+        0.1408900022506714
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 22,
+        "poleTargetId": null,
+        "mirror": "kl_highlight_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eyelid_l_a",
+      "parent": 15,
+      "position": [
+        0.023600000888109207,
+        0.06549999862909317,
+        0.08439700305461884
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_eyelid_r_a",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_eyelid_l_a_wj",
+      "parent": 28,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 24,
+        "poleTargetId": null,
+        "mirror": "tl_eyelid_r_a_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eyelid_l_b",
+      "parent": 15,
+      "position": [
+        0.05209999904036522,
+        0.0794999971985817,
+        0.08340000361204147
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_eyelid_r_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_eyelid_l_b_wj",
+      "parent": 30,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 26,
+        "poleTargetId": null,
+        "mirror": "tl_eyelid_r_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eyelid_r_a",
+      "parent": 15,
+      "position": [
+        -0.023600000888109207,
+        0.06549999862909317,
+        0.08439700305461884
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_eyelid_l_a",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_eyelid_r_a_wj",
+      "parent": 32,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 28,
+        "poleTargetId": null,
+        "mirror": "tl_eyelid_l_a_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eyelid_r_b",
+      "parent": 15,
+      "position": [
+        -0.05209999904036522,
+        0.0794999971985817,
+        0.08340000361204147
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_eyelid_l_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_eyelid_r_b_wj",
+      "parent": 34,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 30,
+        "poleTargetId": null,
+        "mirror": "tl_eyelid_l_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_d",
+      "parent": 15,
+      "position": [
+        0,
+        -0.006719999946653843,
+        0.0820000022649765
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_d_wj",
+      "parent": 36,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 32,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_d_l",
+      "parent": 15,
+      "position": [
+        0.00800000037997961,
+        -0.00571999978274107,
+        0.07999999821186066
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_kuti_d_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_d_l_wj",
+      "parent": 38,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 34,
+        "poleTargetId": null,
+        "mirror": "tl_kuti_d_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_d_r",
+      "parent": 15,
+      "position": [
+        -0.00800000037997961,
+        -0.00571999978274107,
+        0.07999999821186066
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_kuti_d_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_d_r_wj",
+      "parent": 40,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 36,
+        "poleTargetId": null,
+        "mirror": "tl_kuti_d_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_l",
+      "parent": 15,
+      "position": [
+        0.014800000004470348,
+        -0.0017999999690800905,
+        0.07900000363588333
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_kuti_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_l_wj",
+      "parent": 42,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 38,
+        "poleTargetId": null,
+        "mirror": "tl_kuti_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_r",
+      "parent": 15,
+      "position": [
+        -0.014800000004470348,
+        -0.0017999999690800905,
+        0.07900000363588333
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_kuti_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_r_wj",
+      "parent": 44,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 40,
+        "poleTargetId": null,
+        "mirror": "tl_kuti_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_u",
+      "parent": 15,
+      "position": [
+        0,
+        0.0004799999878741801,
+        0.08799999952316284
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_u_wj",
+      "parent": 46,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 42,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_u_l",
+      "parent": 15,
+      "position": [
+        0.007000000216066837,
+        -0.0005200000014156103,
+        0.08500000089406967
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_kuti_u_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_u_l_wj",
+      "parent": 48,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 44,
+        "poleTargetId": null,
+        "mirror": "tl_kuti_u_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kuti_u_r",
+      "parent": 15,
+      "position": [
+        -0.007000000216066837,
+        -0.0005200000014156103,
+        0.08500000089406967
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_kuti_u_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_kuti_u_r_wj",
+      "parent": 50,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 46,
+        "poleTargetId": null,
+        "mirror": "tl_kuti_u_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_l_d_a",
+      "parent": 15,
+      "position": [
+        0.026000000536441803,
+        0.03728000074625015,
+        0.07699999958276749
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_r_d_a",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_l_d_a_wj",
+      "parent": 52,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 48,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_r_d_a_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_l_d_b",
+      "parent": 15,
+      "position": [
+        0.04500000178813934,
+        0.028279999271035194,
+        0.07400000095367432
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_r_d_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_l_d_b_wj",
+      "parent": 54,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 50,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_r_d_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_l_d_c",
+      "parent": 15,
+      "position": [
+        0.061000000685453415,
+        0.03830000013113022,
+        0.06599999964237213
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_r_d_c",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_l_d_c_wj",
+      "parent": 56,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 52,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_r_d_c_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_l_u_a",
+      "parent": 15,
+      "position": [
+        0.026000000536441803,
+        0.056279998272657394,
+        0.07999999821186066
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_r_u_a",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_l_u_a_wj",
+      "parent": 58,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 54,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_r_u_a_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_l_u_b",
+      "parent": 15,
+      "position": [
+        0.04600000008940697,
+        0.0692799985408783,
+        0.07900000363588333
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_r_u_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_l_u_b_wj",
+      "parent": 60,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 56,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_r_u_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eyelashes_l",
+      "parent": 61,
+      "position": [
+        0.004399999976158142,
+        0.004619999788701534,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 57,
+        "poleTargetId": null,
+        "mirror": "n_eyelashes_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_eyelashes_l_wj",
+      "parent": 62,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 58,
+        "poleTargetId": null,
+        "mirror": "tl_eyelashes_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_l_u_c",
+      "parent": 15,
+      "position": [
+        0.06400000303983688,
+        0.06027999892830849,
+        0.0689999982714653
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_r_u_c",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_l_u_c_wj",
+      "parent": 64,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 60,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_r_u_c_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_r_d_a",
+      "parent": 15,
+      "position": [
+        -0.026000000536441803,
+        0.03728000074625015,
+        0.07699999958276749
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_l_d_a",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_r_d_a_wj",
+      "parent": 66,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 62,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_l_d_a_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_r_d_b",
+      "parent": 15,
+      "position": [
+        -0.04500000178813934,
+        0.028279999271035194,
+        0.07400000095367432
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_l_d_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_r_d_b_wj",
+      "parent": 68,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 64,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_l_d_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_r_d_c",
+      "parent": 15,
+      "position": [
+        -0.061000000685453415,
+        0.03830000013113022,
+        0.06599999964237213
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_l_d_c",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_r_d_c_wj",
+      "parent": 70,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 66,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_l_d_c_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_r_u_a",
+      "parent": 15,
+      "position": [
+        -0.026000000536441803,
+        0.056279998272657394,
+        0.07999999821186066
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_l_u_a",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_r_u_a_wj",
+      "parent": 72,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 68,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_l_u_a_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_r_u_b",
+      "parent": 15,
+      "position": [
+        -0.04600000008940697,
+        0.0692799985408783,
+        0.07900000363588333
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_l_u_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_r_u_b_wj",
+      "parent": 74,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 70,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_l_u_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_eyelashes_r",
+      "parent": 75,
+      "position": [
+        -0.004399999976158142,
+        0.004619999788701534,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 71,
+        "poleTargetId": null,
+        "mirror": "n_eyelashes_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_eyelashes_r_wj",
+      "parent": 76,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 72,
+        "poleTargetId": null,
+        "mirror": "tl_eyelashes_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mabu_r_u_c",
+      "parent": 15,
+      "position": [
+        -0.06400000303983688,
+        0.06027999892830849,
+        0.0689999982714653
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mabu_l_u_c",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mabu_r_u_c_wj",
+      "parent": 78,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 74,
+        "poleTargetId": null,
+        "mirror": "tl_mabu_l_u_c_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mayu_l",
+      "parent": 15,
+      "position": [
+        0.017999999225139618,
+        0.08327999711036682,
+        0.09399999678134918
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mayu_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mayu_l_wj",
+      "parent": 80,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 76,
+        "poleTargetId": null,
+        "mirror": "tl_mayu_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mayu_l_b",
+      "parent": 15,
+      "position": [
+        0.04500000178813934,
+        0.09628000110387802,
+        0.08699999749660492
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mayu_r_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mayu_l_b_wj",
+      "parent": 82,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 78,
+        "poleTargetId": null,
+        "mirror": "tl_mayu_r_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mayu_l_c",
+      "parent": 15,
+      "position": [
+        0.06499999761581421,
+        0.08928000181913376,
+        0.07599999755620956
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mayu_r_c",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mayu_l_c_wj",
+      "parent": 84,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 80,
+        "poleTargetId": null,
+        "mirror": "tl_mayu_r_c_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mayu_r",
+      "parent": 15,
+      "position": [
+        -0.017999999225139618,
+        0.08327999711036682,
+        0.09399999678134918
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mayu_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mayu_r_wj",
+      "parent": 86,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 82,
+        "poleTargetId": null,
+        "mirror": "tl_mayu_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mayu_r_b",
+      "parent": 15,
+      "position": [
+        -0.04500000178813934,
+        0.09628000110387802,
+        0.08699999749660492
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mayu_l_b",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mayu_r_b_wj",
+      "parent": 88,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 84,
+        "poleTargetId": null,
+        "mirror": "tl_mayu_l_b_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_mayu_r_c",
+      "parent": 15,
+      "position": [
+        -0.06499999761581421,
+        0.08928000181913376,
+        0.07599999755620956
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": "n_mayu_l_c",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_mayu_r_c_wj",
+      "parent": 90,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 86,
+        "poleTargetId": null,
+        "mirror": "tl_mayu_l_c_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_tooth_upper",
+      "parent": 15,
+      "position": [
+        0,
+        0.002400000113993883,
+        0.05900000035762787
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 11,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_tooth_upper_wj",
+      "parent": 92,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 88,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kubi_wj_ex",
+      "parent": 10,
+      "position": [
+        0,
+        -0.010999999940395355,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 8,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_waki_l",
+      "parent": 9,
+      "position": [
+        0.019999999552965164,
+        0.1289999932050705,
+        -0.05299999937415123
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 7,
+        "poleTargetId": null,
+        "mirror": "n_waki_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_waki_l_wj",
+      "parent": 95,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 91,
+        "poleTargetId": null,
+        "mirror": "kl_waki_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_up_kata_l",
+      "parent": 9,
+      "position": [
+        0.2813889980316162,
+        0.02135000005364418,
+        -0.3561600148677826
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 7,
+        "poleTargetId": null,
+        "mirror": "tl_up_kata_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "c_kata_l",
+      "parent": 96,
+      "position": null,
+      "control": {
+        "type": "armIkRotation",
+        "parentId": 92,
+        "poleTargetId": 93,
+        "mirror": "c_kata_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "j_kata_l_wj_cu",
+      "parent": 98,
+      "position": [
+        -0.009999999776482582,
+        0,
+        0.08299999684095383
+      ]
+    },
+    {
+      "name": "j_ude_l_wj",
+      "parent": 99,
+      "position": [
+        0.20800000429153442,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "e_ude_l_cp",
+      "parent": 100,
+      "position": [
+        0.20999999344348907,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "kl_te_l_wj",
+      "parent": 101,
+      "position": [
+        0.20999999344348907,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 96,
+        "poleTargetId": null,
+        "mirror": "kl_te_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_hito_l_ex",
+      "parent": 102,
+      "position": [
+        0.06400000303983688,
+        -0.017999999225139618,
+        0.008999999612569809
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 97,
+        "poleTargetId": null,
+        "mirror": "n_hito_r_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_hito_l_wj",
+      "parent": 103,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 98,
+        "poleTargetId": null,
+        "mirror": "nl_hito_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_hito_b_l_wj",
+      "parent": 104,
+      "position": [
+        0.028999999165534973,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 99,
+        "poleTargetId": null,
+        "mirror": "nl_hito_b_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_hito_c_l_wj",
+      "parent": 105,
+      "position": [
+        0.017000000923871994,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 100,
+        "poleTargetId": null,
+        "mirror": "nl_hito_c_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_ko_l_ex",
+      "parent": 102,
+      "position": [
+        0.05999999865889549,
+        0.026000000536441803,
+        0.00800000037997961
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 97,
+        "poleTargetId": null,
+        "mirror": "n_ko_r_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_ko_l_wj",
+      "parent": 107,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 102,
+        "poleTargetId": null,
+        "mirror": "nl_ko_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_ko_b_l_wj",
+      "parent": 108,
+      "position": [
+        0.024000000208616257,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 103,
+        "poleTargetId": null,
+        "mirror": "nl_ko_b_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_ko_c_l_wj",
+      "parent": 109,
+      "position": [
+        0.014299999922513962,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 104,
+        "poleTargetId": null,
+        "mirror": "nl_ko_c_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kusu_l_ex",
+      "parent": 102,
+      "position": [
+        0.06400000303983688,
+        0.012000000104308128,
+        0.011500000022351742
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 97,
+        "poleTargetId": null,
+        "mirror": "n_kusu_r_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_kusu_l_wj",
+      "parent": 111,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 106,
+        "poleTargetId": null,
+        "mirror": "nl_kusu_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_kusu_b_l_wj",
+      "parent": 112,
+      "position": [
+        0.03150000050663948,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 107,
+        "poleTargetId": null,
+        "mirror": "nl_kusu_b_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_kusu_c_l_wj",
+      "parent": 113,
+      "position": [
+        0.01899999938905239,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 108,
+        "poleTargetId": null,
+        "mirror": "nl_kusu_c_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_naka_l_ex",
+      "parent": 102,
+      "position": [
+        0.06499999761581421,
+        -0.003000000026077032,
+        0.012000000104308128
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 97,
+        "poleTargetId": null,
+        "mirror": "n_naka_r_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_naka_l_wj",
+      "parent": 115,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 110,
+        "poleTargetId": null,
+        "mirror": "nl_naka_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_naka_b_l_wj",
+      "parent": 116,
+      "position": [
+        0.03299799934029579,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 111,
+        "poleTargetId": null,
+        "mirror": "nl_naka_b_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_naka_c_l_wj",
+      "parent": 117,
+      "position": [
+        0.019500000402331352,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 112,
+        "poleTargetId": null,
+        "mirror": "nl_naka_c_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_oya_l_ex",
+      "parent": 102,
+      "position": [
+        0.010499999858438969,
+        -0.013000000268220901,
+        -0.0035000001080334187
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 97,
+        "poleTargetId": null,
+        "mirror": "n_oya_r_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_oya_l_wj",
+      "parent": 119,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 114,
+        "poleTargetId": null,
+        "mirror": "nl_oya_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_oya_b_l_wj",
+      "parent": 120,
+      "position": [
+        0.03500000014901161,
+        -0.003000000026077032,
+        0.003000000026077032
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 115,
+        "poleTargetId": null,
+        "mirror": "nl_oya_b_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_oya_c_l_wj",
+      "parent": 121,
+      "position": [
+        0.020999999716877937,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 116,
+        "poleTargetId": null,
+        "mirror": "nl_oya_c_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_ste_l_wj_ex",
+      "parent": 101,
+      "position": [
+        0.20999999344348907,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 96,
+        "poleTargetId": null,
+        "mirror": "n_ste_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_sude_l_wj_ex",
+      "parent": 100,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 96,
+        "poleTargetId": null,
+        "mirror": "n_sude_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_sude_b_l_wj_ex",
+      "parent": 124,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 119,
+        "poleTargetId": null,
+        "mirror": "n_sude_b_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_hiji_l_wj_ex",
+      "parent": 99,
+      "position": [
+        0.20800000429153442,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 95,
+        "poleTargetId": null,
+        "mirror": "n_hiji_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_up_kata_l_ex",
+      "parent": 99,
+      "position": [
+        0,
+        0.10000000149011612,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 95,
+        "poleTargetId": null,
+        "mirror": "n_up_kata_r_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_skata_l_wj_cd_ex",
+      "parent": 98,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 94,
+        "poleTargetId": null,
+        "mirror": "n_skata_r_wj_cd_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_skata_b_l_wj_cd_cu_ex",
+      "parent": 128,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 123,
+        "poleTargetId": null,
+        "mirror": "n_skata_b_r_wj_cd_cu_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_skata_c_l_wj_cd_cu_ex",
+      "parent": 129,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 124,
+        "poleTargetId": null,
+        "mirror": "n_skata_c_r_wj_cd_cu_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_waki_r",
+      "parent": 9,
+      "position": [
+        -0.019999999552965164,
+        0.1289999932050705,
+        -0.05299999937415123
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 7,
+        "poleTargetId": null,
+        "mirror": "n_waki_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_waki_r_wj",
+      "parent": 131,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 126,
+        "poleTargetId": null,
+        "mirror": "kl_waki_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "tl_up_kata_r",
+      "parent": 9,
+      "position": [
+        -0.2813889980316162,
+        0.02135000005364418,
+        -0.3561600148677826
+      ],
+      "control": {
+        "type": "position",
+        "parentId": 7,
+        "poleTargetId": null,
+        "mirror": "tl_up_kata_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "c_kata_r",
+      "parent": 132,
+      "position": null,
+      "control": {
+        "type": "armIkRotation",
+        "parentId": 127,
+        "poleTargetId": 128,
+        "mirror": "c_kata_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "j_kata_r_wj_cu",
+      "parent": 134,
+      "position": [
+        -0.009999999776482582,
+        0,
+        -0.08299999684095383
+      ]
+    },
+    {
+      "name": "j_ude_r_wj",
+      "parent": 135,
+      "position": [
+        0.20800000429153442,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "e_ude_r_cp",
+      "parent": 136,
+      "position": [
+        0.20999999344348907,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "kl_te_r_wj",
+      "parent": 137,
+      "position": [
+        0.20999999344348907,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 131,
+        "poleTargetId": null,
+        "mirror": "kl_te_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_hito_r_ex",
+      "parent": 138,
+      "position": [
+        0.06400000303983688,
+        -0.017999999225139618,
+        -0.008999999612569809
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 132,
+        "poleTargetId": null,
+        "mirror": "n_hito_l_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_hito_r_wj",
+      "parent": 139,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 133,
+        "poleTargetId": null,
+        "mirror": "nl_hito_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_hito_b_r_wj",
+      "parent": 140,
+      "position": [
+        0.028999999165534973,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 134,
+        "poleTargetId": null,
+        "mirror": "nl_hito_b_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_hito_c_r_wj",
+      "parent": 141,
+      "position": [
+        0.017000000923871994,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 135,
+        "poleTargetId": null,
+        "mirror": "nl_hito_c_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_ko_r_ex",
+      "parent": 138,
+      "position": [
+        0.05999999865889549,
+        0.026000000536441803,
+        -0.00800000037997961
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 132,
+        "poleTargetId": null,
+        "mirror": "n_ko_l_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_ko_r_wj",
+      "parent": 143,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 137,
+        "poleTargetId": null,
+        "mirror": "nl_ko_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_ko_b_r_wj",
+      "parent": 144,
+      "position": [
+        0.024000000208616257,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 138,
+        "poleTargetId": null,
+        "mirror": "nl_ko_b_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_ko_c_r_wj",
+      "parent": 145,
+      "position": [
+        0.014299999922513962,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 139,
+        "poleTargetId": null,
+        "mirror": "nl_ko_c_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_kusu_r_ex",
+      "parent": 138,
+      "position": [
+        0.06400000303983688,
+        0.012000000104308128,
+        -0.011500000022351742
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 132,
+        "poleTargetId": null,
+        "mirror": "n_kusu_l_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_kusu_r_wj",
+      "parent": 147,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 141,
+        "poleTargetId": null,
+        "mirror": "nl_kusu_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_kusu_b_r_wj",
+      "parent": 148,
+      "position": [
+        0.03150000050663948,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 142,
+        "poleTargetId": null,
+        "mirror": "nl_kusu_b_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_kusu_c_r_wj",
+      "parent": 149,
+      "position": [
+        0.01899999938905239,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 143,
+        "poleTargetId": null,
+        "mirror": "nl_kusu_c_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_naka_r_ex",
+      "parent": 138,
+      "position": [
+        0.06499999761581421,
+        -0.003000000026077032,
+        -0.012000000104308128
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 132,
+        "poleTargetId": null,
+        "mirror": "n_naka_l_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_naka_r_wj",
+      "parent": 151,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 145,
+        "poleTargetId": null,
+        "mirror": "nl_naka_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_naka_b_r_wj",
+      "parent": 152,
+      "position": [
+        0.03299799934029579,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 146,
+        "poleTargetId": null,
+        "mirror": "nl_naka_b_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_naka_c_r_wj",
+      "parent": 153,
+      "position": [
+        0.019500000402331352,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 147,
+        "poleTargetId": null,
+        "mirror": "nl_naka_c_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_oya_r_ex",
+      "parent": 138,
+      "position": [
+        0.010499999858438969,
+        -0.013000000268220901,
+        0.0035000001080334187
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 132,
+        "poleTargetId": null,
+        "mirror": "n_oya_l_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "nl_oya_r_wj",
+      "parent": 155,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 149,
+        "poleTargetId": null,
+        "mirror": "nl_oya_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_oya_b_r_wj",
+      "parent": 156,
+      "position": [
+        0.03500000014901161,
+        -0.003000000026077032,
+        -0.003000000026077032
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 150,
+        "poleTargetId": null,
+        "mirror": "nl_oya_b_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "nl_oya_c_r_wj",
+      "parent": 157,
+      "position": [
+        0.020999999716877937,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 151,
+        "poleTargetId": null,
+        "mirror": "nl_oya_c_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_ste_r_wj_ex",
+      "parent": 137,
+      "position": [
+        0.20999999344348907,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 131,
+        "poleTargetId": null,
+        "mirror": "n_ste_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_sude_r_wj_ex",
+      "parent": 136,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 131,
+        "poleTargetId": null,
+        "mirror": "n_sude_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_sude_b_r_wj_ex",
+      "parent": 160,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 154,
+        "poleTargetId": null,
+        "mirror": "n_sude_b_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_hiji_r_wj_ex",
+      "parent": 135,
+      "position": [
+        0.20800000429153442,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 130,
+        "poleTargetId": null,
+        "mirror": "n_hiji_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_up_kata_r_ex",
+      "parent": 135,
+      "position": [
+        0,
+        0.10000000149011612,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 130,
+        "poleTargetId": null,
+        "mirror": "n_up_kata_l_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_skata_r_wj_cd_ex",
+      "parent": 134,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 129,
+        "poleTargetId": null,
+        "mirror": "n_skata_l_wj_cd_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_skata_b_r_wj_cd_cu_ex",
+      "parent": 164,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 158,
+        "poleTargetId": null,
+        "mirror": "n_skata_b_l_wj_cd_cu_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_skata_c_r_wj_cd_cu_ex",
+      "parent": 165,
+      "position": [
+        0.06930000334978104,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 159,
+        "poleTargetId": null,
+        "mirror": "n_skata_c_l_wj_cd_cu_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "kl_kosi_y",
+      "parent": 4,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 4,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_kosi_xz",
+      "parent": 167,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 161,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_kosi_etc_wj",
+      "parent": 168,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 162,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "cl_momo_l",
+      "parent": 169,
+      "position": null,
+      "control": {
+        "type": "legIkRotation",
+        "parentId": 163,
+        "poleTargetId": null,
+        "mirror": "cl_momo_r",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "j_momo_l_wj",
+      "parent": 170,
+      "position": [
+        0.04600000008940697,
+        -0.15000000596046448,
+        0.06499999761581421
+      ]
+    },
+    {
+      "name": "j_sune_l_wj",
+      "parent": 171,
+      "position": [
+        0.38999998569488525,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "e_sune_l_cp",
+      "parent": 172,
+      "position": [
+        0.4129999876022339,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "kl_asi_l_wj_co",
+      "parent": 173,
+      "position": [
+        0.4129999876022339,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 166,
+        "poleTargetId": null,
+        "mirror": "kl_asi_r_wj_co",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_toe_l_wj",
+      "parent": 174,
+      "position": [
+        0.05000000074505806,
+        -0.1000019982457161,
+        -0.010999999940395355
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 167,
+        "poleTargetId": null,
+        "mirror": "kl_toe_r_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_hiza_l_wj_ex",
+      "parent": 171,
+      "position": [
+        0.38999998569488525,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 165,
+        "poleTargetId": null,
+        "mirror": "n_hiza_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "cl_momo_r",
+      "parent": 169,
+      "position": null,
+      "control": {
+        "type": "legIkRotation",
+        "parentId": 163,
+        "poleTargetId": null,
+        "mirror": "cl_momo_l",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "j_momo_r_wj",
+      "parent": 177,
+      "position": [
+        0.04600000008940697,
+        -0.15000000596046448,
+        -0.06499999761581421
+      ]
+    },
+    {
+      "name": "j_sune_r_wj",
+      "parent": 178,
+      "position": [
+        0.38999998569488525,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "e_sune_r_cp",
+      "parent": 179,
+      "position": [
+        0.4129999876022339,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "kl_asi_r_wj_co",
+      "parent": 180,
+      "position": [
+        0.4129999876022339,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 172,
+        "poleTargetId": null,
+        "mirror": "kl_asi_l_wj_co",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "kl_toe_r_wj",
+      "parent": 181,
+      "position": [
+        0.05000000074505806,
+        -0.10000000149011612,
+        0.010999999940395355
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 173,
+        "poleTargetId": null,
+        "mirror": "kl_toe_l_wj",
+        "isMotAnimDisabled": false
+      }
+    },
+    {
+      "name": "n_hiza_r_wj_ex",
+      "parent": 178,
+      "position": [
+        0.38999998569488525,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 171,
+        "poleTargetId": null,
+        "mirror": "n_hiza_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_momo_a_l_wj_cd_ex",
+      "parent": 169,
+      "position": [
+        0.04600000008940697,
+        -0.15000000596046448,
+        0.06499999761581421
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 163,
+        "poleTargetId": null,
+        "mirror": "n_momo_a_r_wj_cd_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_momo_b_l_wj_ex",
+      "parent": 184,
+      "position": [
+        0,
+        -0.12999999523162842,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 176,
+        "poleTargetId": null,
+        "mirror": "n_momo_b_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_momo_c_l_wj_ex",
+      "parent": 185,
+      "position": [
+        0,
+        -0.12999999523162842,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 177,
+        "poleTargetId": null,
+        "mirror": "n_momo_c_r_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_momo_a_r_wj_cd_ex",
+      "parent": 169,
+      "position": [
+        0.04600000008940697,
+        -0.15000000596046448,
+        -0.06499999761581421
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 163,
+        "poleTargetId": null,
+        "mirror": "n_momo_a_l_wj_cd_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_momo_b_r_wj_ex",
+      "parent": 187,
+      "position": [
+        0,
+        -0.12999999523162842,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 179,
+        "poleTargetId": null,
+        "mirror": "n_momo_b_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_momo_c_r_wj_ex",
+      "parent": 188,
+      "position": [
+        0,
+        -0.12999999523162842,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 180,
+        "poleTargetId": null,
+        "mirror": "n_momo_c_l_wj_ex",
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_hara_cd_ex",
+      "parent": 4,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 4,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_hara_b_wj_ex",
+      "parent": 190,
+      "position": [
+        0,
+        0.03669999912381172,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 182,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "n_hara_c_wj_ex",
+      "parent": 190,
+      "position": [
+        0,
+        0.07339999824762344,
+        0
+      ],
+      "control": {
+        "type": "rotation",
+        "parentId": 182,
+        "poleTargetId": null,
+        "mirror": null,
+        "isMotAnimDisabled": true
+      }
+    },
+    {
+      "name": "gblctr",
+      "parent": -1,
+      "position": null,
+      "control": {
+        "type": "globalPosition"
+      }
+    },
+    {
+      "name": "kg_ya_ex",
+      "parent": -1,
+      "position": null,
+      "control": {
+        "type": "globalRotation"
+      }
+    }
+  ]
+}
