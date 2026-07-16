@@ -1,8 +1,12 @@
 // Minimal loader for a binary glTF (.glb): per-primitive positions, normals,
-// texture coordinates, triangle indices and each material's base-colour
-// image. Skips skinning, animation and metallic-roughness.
+// texture coordinates, triangle indices, 4-bone skinning attributes and each
+// material's base-colour image, plus the skin (joint names + inverse bind
+// matrices) and the node hierarchy needed to pose it.
+// Skips animation and metallic-roughness.
 class GLTF {
   primitives = [];
+  nodes = [];
+  skin = null;
 
   // How many bytes one component of an accessor takes, keyed by the glTF
   // componentType enum (5120 signed byte ... 5126 float).
@@ -82,6 +86,17 @@ class GLTF {
     return values;
   }
 
+  // The skinning attributes, which every primitive this engine draws is expected to carry.
+  // Named separately so a mesh exported without them says so, rather than failing inside
+  // readAccessor on an accessor that is not there.
+  static readSkinAccessor(json, binary, accessorIndex, attribute) {
+    if (json.accessors[accessorIndex] === undefined) {
+      throw new Error(`a primitive has no ${attribute}: every primitive here must be skinned.`);
+    }
+
+    return GLTF.readAccessor(json, binary, accessorIndex);
+  }
+
   static async loadImage(json, binary, imageIndex) {
     const image = json.images[imageIndex];
     const bufferView = json.bufferViews[image.bufferView];
@@ -115,6 +130,30 @@ class GLTF {
     const model = new GLTF();
     const pendingImages = [];
 
+    model.nodes = json.nodes.map((node) => {
+      // this loader reads the TRS node form only. Falling back to identity
+      // would deform every descendant silently, so fail loudly instead
+      if (node.matrix) throw new Error(`Node ${node.name} uses the matrix form, not TRS.`);
+
+      return {
+        name: node.name,
+        translation: node.translation ?? [0, 0, 0],
+        rotation: node.rotation ?? [0, 0, 0, 1],
+        scale: node.scale ?? [1, 1, 1],
+        children: node.children ?? [],
+      };
+    });
+
+    const skin = json.skins?.[0];
+
+    if (skin) {
+      model.skin = {
+        jointNodeIndices: skin.joints,
+        jointNames: skin.joints.map((nodeIndex) => json.nodes[nodeIndex].name),
+        inverseBindMatrices: GLTF.readAccessor(json, binary, skin.inverseBindMatrices),
+      };
+    }
+
     for (const mesh of json.meshes) {
       for (const primitive of mesh.primitives) {
         const attributes = primitive.attributes;
@@ -129,6 +168,11 @@ class GLTF {
             position: GLTF.readAccessor(json, binary, attributes.POSITION),
             normal: GLTF.readAccessor(json, binary, attributes.NORMAL),
             uv: GLTF.readAccessor(json, binary, attributes.TEXCOORD_0),
+            // Read through a guard: readAccessor dereferences the accessor without
+            // checking it exists, so an unskinned primitive dies on a bare TypeError
+            // instead of the explicit error every other missing input here raises.
+            boneIndices: GLTF.readSkinAccessor(json, binary, attributes.JOINTS_0, "JOINTS_0"),
+            boneWeights: GLTF.readSkinAccessor(json, binary, attributes.WEIGHTS_0, "WEIGHTS_0"),
             index: GLTF.readAccessor(json, binary, primitive.indices),
           },
 

@@ -107,7 +107,9 @@ class UBO {
     uniformList.forEach((uniform) => {
       const { name, value } = uniform;
       const info = blockVariableInfo[name];
-      const array = new Float32Array(value);
+      // already-typed values (the per-frame bone palette especially) upload
+      // as-is. The copy only converts plain arrays
+      const array = value instanceof Float32Array ? value : new Float32Array(value);
 
       gl.bufferSubData(gl.UNIFORM_BUFFER, info.offset, array);
     });
@@ -173,14 +175,12 @@ class ModelUbo extends UBO {
 
 class BoneArrayUbo extends UBO {
   getDefaultBlockVariableNames() {
-    return ["u_boneTranslation[0]", "u_boneRotation[0]"];
+    return ["u_bones[0]"];
   }
 
-  updateBoneData(bones) {
-    return this.updateData([
-      { name: "u_boneTranslation[0]", value: bones.boneTranslation },
-      { name: "u_boneRotation[0]", value: bones.boneRotation },
-    ]);
+  // one mat4 per skinned joint (the skinning palette), as a flat Float32Array
+  updateBoneData(boneMatrices) {
+    return this.updateData([{ name: "u_bones[0]", value: boneMatrices }]);
   }
 }
 

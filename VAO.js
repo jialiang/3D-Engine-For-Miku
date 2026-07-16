@@ -1,5 +1,7 @@
 // Vertex Array Object
 class VAO {
+  // boneIndices/boneWeights are the 4-bone matrix-palette skinning inputs
+  // (glTF JOINTS_0/WEIGHTS_0); they replaced the old 2-bone quaternion slots
   static AttributeInfo = {
     position: {
       location: 0,
@@ -13,36 +15,14 @@ class VAO {
       location: 3,
       size: 3,
     },
-    morph: {
+    boneIndices: {
       location: 4,
-      size: 3,
+      size: 4,
+      type: "int",
     },
-    material: {
+    boneWeights: {
       location: 5,
-      size: 1,
-      type: "int",
-    },
-    boneWeight: {
-      location: 6,
-      size: 1,
-    },
-    distanceFromBone_1: {
-      location: 7,
-      size: 3,
-    },
-    distanceFromBone_2: {
-      location: 8,
-      size: 3,
-    },
-    boneIndex_1: {
-      location: 9,
-      size: 1,
-      type: "int",
-    },
-    boneIndex_2: {
-      location: 10,
-      size: 1,
-      type: "int",
+      size: 4,
     },
   };
 

@@ -23,7 +23,7 @@ async function onload() {
     [uniformsShaderChunk, shadowShaderChunk],
   ] = await Promise.all([
     Promise.all([
-      Utilities.fetch("shaders/static_vertex.glsl"), //
+      Utilities.fetch("shaders/skinned_vertex.glsl"), //
       Utilities.fetch("shaders/static_fragment.glsl"), //
     ]),
     Promise.all([

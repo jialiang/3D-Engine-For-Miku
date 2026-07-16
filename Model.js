@@ -152,6 +152,60 @@ class Model {
     this.modelUbo = new ModelUbo(gl, [program], "Model");
     this.modelUbo.updateModelData(this);
     this.modelUbo.bindUniformBlock();
+
+    // the skinning palette, at bind pose for now: animation will refresh it
+    // per frame once the runtime rig lands
+    this.boneUbo = new BoneArrayUbo(gl, [program], "Bone");
+    this.boneUbo.updateBoneData(Model.buildBindPosePalette(gltf));
+    this.boneUbo.bindUniformBlock();
+  }
+
+  // One palette entry per skinned joint: jointWorld * inverseBind, walked
+  // from the glb node hierarchy. At bind pose the product is identity to
+  // within float precision, but computing the real product exercises the
+  // exact math the animated pose will use.
+  static buildBindPosePalette(gltf) {
+    const { nodes, skin } = gltf;
+
+    if (!skin) throw new Error("The glb has no skin: the skinned render path needs one.");
+
+    // the shader's Bone block holds 192 palette slots (see skinned_vertex)
+    if (skin.jointNames.length > 192) {
+      throw new Error(`Skin has ${skin.jointNames.length} joints, the palette holds 192.`);
+    }
+
+    const worldMatrices = new Array(nodes.length).fill(null);
+    const localMatrix = mat4.create();
+
+    const resolveWorld = (nodeIndex, parentWorld) => {
+      const node = nodes[nodeIndex];
+      mat4.fromRotationTranslationScale(localMatrix, node.rotation, node.translation, node.scale);
+
+      const world = mat4.create();
+      if (parentWorld) mat4.multiply(world, parentWorld, localMatrix);
+      else world.set(localMatrix);
+
+      worldMatrices[nodeIndex] = world;
+      for (const child of node.children) resolveWorld(child, world);
+    };
+
+    const childNodeIndices = new Set(nodes.flatMap((node) => node.children));
+    nodes.forEach((node, index) => {
+      if (!childNodeIndices.has(index)) resolveWorld(index, null);
+    });
+
+    const palette = new Float32Array(skin.jointNames.length * 16);
+
+    skin.jointNodeIndices.forEach((nodeIndex, joint) => {
+      const inverseBind = skin.inverseBindMatrices.subarray(joint * 16, joint * 16 + 16);
+      mat4.multiply(
+        palette.subarray(joint * 16, joint * 16 + 16),
+        worldMatrices[nodeIndex],
+        inverseBind,
+      );
+    });
+
+    return palette;
   }
 
   drawPart(part) {
