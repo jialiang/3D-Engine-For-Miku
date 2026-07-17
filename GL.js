@@ -3,7 +3,7 @@ class GL {
   static UNIFORM_LOCATION_CACHE = {};
 
   static init(canvas) {
-    const gl = canvas.getContext("webgl2");
+    const gl = canvas.getContext("webgl2", { powerPreference: "high-performance" });
 
     if (!gl) throw new Error("Your browser doesn't support WebGL 2.0.");
 
@@ -14,16 +14,19 @@ class GL {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
-    const realWidth = width * devicePixelRatio;
-    const realHeight = height * devicePixelRatio;
+    // UNCAPPED. This was clamped to 2, which throws away resolution on the displays most
+    // likely to show up the fine costume trim: a 3x phone or a 2.5x laptop panel rendered
+    // softer than the hardware could. The cost is real and quadratic, since the shadow map is
+    // sized from these dimensions too (see index.js), so a 3x device asks for nine times the
+    // fragments. Put the ceiling back here if that proves too much on a phone.
+    const pixelRatio = devicePixelRatio;
+
+    const realWidth = width * pixelRatio;
+    const realHeight = height * pixelRatio;
 
     canvas.width = realWidth;
     canvas.height = realHeight;
     gl.viewport(0, 0, realWidth, realHeight);
-
-    // gl.cullFace(gl.BACK);
-    // gl.frontFace(gl.CCW);
-    // gl.enable(gl.CULL_FACE);
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
