@@ -63,6 +63,14 @@ async function onload() {
 
   const miku = await Model.load(gl, program, "models/pierretta");
 
+  const [skeletonJson, animationBuffer] = await Promise.all([
+    Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
+    Utilities.fetch("motions/pv_743.bin", { responseType: "arraybuffer" }),
+  ]);
+
+  const animation = new Animation("motions/pv_743.bin", animationBuffer);
+  const skeleton = new Skeleton(skeletonJson, animation, miku.skin, miku.nodes);
+
   //
 
   const floor = new Floor(60);
@@ -140,6 +148,13 @@ async function onload() {
 
     cameraUbo.updateCameraData(camera);
 
+    // the audio clock drives the dance, smoothed across the browser's coarse
+    // currentTime updates (see AudioClock); a paused or ended track holds its
+    // pose, a restarted track rewinds the sampling cursors automatically
+    const frame = Math.min(clock.read() * animation.frameRate, animation.frameCount - 1);
+    skeleton.pose(animation, frame);
+    miku.boneUbo.updateBoneData(skeleton.palette);
+
     gl.useProgram(program);
 
     shadowFbo.draw(() => {
@@ -172,6 +187,7 @@ async function onload() {
   //
 
   const bgm = document.querySelector("audio");
+  const clock = new AudioClock(bgm);
 
   const cover = document.querySelector("#cover");
 

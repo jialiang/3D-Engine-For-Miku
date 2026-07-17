@@ -73,6 +73,10 @@ class Model {
   constructor(gl, program, gltf, rampImages, specImages) {
     this.gl = gl;
 
+    // the skeleton runtime maps its bones onto these by name
+    this.skin = gltf.skin;
+    this.nodes = gltf.nodes;
+
     this.isOverlayLocation = GL.getUniformLocation(program, "u_isOverlay");
     this.hasSpecLocation = GL.getUniformLocation(program, "u_hasSpec");
     this.alphaToCoverageLocation = GL.getUniformLocation(program, "u_alphaToCoverage");
