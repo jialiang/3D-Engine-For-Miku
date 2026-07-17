@@ -46,6 +46,8 @@ async function onload() {
   const canvas = document.getElementsByTagName("canvas")[0];
   const gl = GL.init(canvas);
 
+  const frameCounter = document.querySelector("#frame-counter");
+
   //
 
   const program = GL.createProgram(
@@ -160,6 +162,9 @@ async function onload() {
     // pose, a restarted track rewinds the sampling cursors automatically
     const frame = Math.min(clock.read() * animation.frameRate, animation.frameCount - 1);
     skeleton.pose(animation, frame);
+
+    const seconds = (frame / animation.frameRate).toFixed(2);
+    frameCounter.textContent = `frame ${Math.round(frame)}  t=${seconds}s`;
     miku.boneUbo.updateBoneData(skeleton.palette);
 
     gl.useProgram(program);

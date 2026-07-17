@@ -74,6 +74,18 @@
         transform: scaleX(-1);
       }
 
+      #frame-counter {
+        font-family: monospace;
+        font-size: 16px;
+        position: absolute;
+        z-index: 10;
+        top: 4px;
+        left: 8px;
+        pointer-events: none;
+        color: white;
+        text-shadow: 0 0 4px black;
+      }
+
       .text {
         font-size: 1.35rem;
         text-shadow: 0.05rem 0.05rem 0.15rem rgba(0, 0, 0, 0.1);
@@ -352,6 +364,7 @@
   <body>
     <div class="canvas-container">
       <canvas></canvas>
+      <div id="frame-counter"></div>
       <div id="cover">
         <div class="content">
           <div class="loading-content">
