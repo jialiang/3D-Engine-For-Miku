@@ -35,6 +35,9 @@ export default [
       // vendored libraries
       "external/",
       "glMatrix-mat4.js",
+
+      // untracked local tooling (gitignored)
+      ".ignored/",
     ],
   },
 

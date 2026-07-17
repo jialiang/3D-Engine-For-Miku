@@ -1,1 +1,4 @@
 node_modules/
+
+# local tooling that stays out of the repo (verification harness etc.)
+.ignored/
