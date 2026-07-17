@@ -66,4 +66,14 @@ export default [
       "no-unused-vars": ["warn", { varsIgnorePattern: "^[A-Z]" }],
     },
   },
+
+  {
+    // the offline grounding bake is a Node CommonJS script, not a browser
+    // classic script like the rest of the repo
+    files: ["tools/**/*.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: globals.node,
+    },
+  },
 ];

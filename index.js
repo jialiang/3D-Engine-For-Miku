@@ -63,12 +63,19 @@ async function onload() {
 
   const miku = await Model.load(gl, program, "models/pierretta");
 
-  const [skeletonJson, animationBuffer] = await Promise.all([
+  // Grounding is baked offline: an override file carries corrected leg
+  // IK-target heights that land the feet (the game's own data floats
+  // them, see the dump repo's tools/ground.js).
+  const [skeletonJson, animationBuffer, groundingBuffer] = await Promise.all([
     Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
     Utilities.fetch("motions/pv_743.bin", { responseType: "arraybuffer" }),
+    Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
   ]);
 
   const animation = new Animation("motions/pv_743.bin", animationBuffer);
+
+  animation.override(new Animation("motions/pv_743_grounding.bin", groundingBuffer));
+
   const skeleton = new Skeleton(skeletonJson, animation, miku.skin, miku.nodes);
 
   //

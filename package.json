@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "http-server -c-1 -o",
+    "grounding": "node tools/ground.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

@@ -71,6 +71,31 @@ class Animation {
     this.trackValues = new Float32Array(this.tracks.length);
   }
 
+  // Replace tracks with a partner file's corrected versions, matched by
+  // bone and channel. The grounding override bakes corrected leg IK-target
+  // heights offline (the dump repo's tools/ground.js) so the plain pose
+  // loop lands the feet without any runtime foot pass.
+  override(other) {
+    if (other.frameRate !== this.frameRate || other.frameCount !== this.frameCount) {
+      throw new Error("The override does not match the animation's timeline.");
+    }
+
+    for (const replacement of other.tracks) {
+      const index = this.tracks.findIndex(
+        (track) =>
+          track.boneIndex === replacement.boneIndex &&
+          track.channel === replacement.channel &&
+          track.axis === replacement.axis,
+      );
+
+      if (index < 0) {
+        throw new Error(`No track matches the override for bone ${replacement.boneIndex}.`);
+      }
+
+      this.tracks[index] = replacement;
+    }
+  }
+
   // Sample every track at the given (fractional) frame.
   // Returns the shared trackValues buffer, one value per track in track order.
   sample(frame) {
