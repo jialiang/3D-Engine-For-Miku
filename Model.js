@@ -41,10 +41,16 @@ class Model {
     face_CH_CHARA_SD001Z1: "face_s",
   };
 
-  // Fetch and build the model from its directory: the glb (geometry plus the base-colour images)
-  // and the loose toon and spec PNGs beside it.
-  static async load(gl, program, directory) {
-    const arraybuffer = await Utilities.fetch(`${directory}/pierretta.glb`, {
+  // Fetch and build a model from its directory: the glb (named after the
+  // directory, geometry plus the base-colour images) and the loose toon and
+  // spec PNGs beside it. The material tables default to the character's;
+  // other models (the mic prop) pass their own.
+  static async load(gl, program, directory, materials = {}) {
+    const { toonRampByMaterial = Model.toonRampByMaterial, specByMaterial = Model.specByMaterial } =
+      materials;
+
+    const name = directory.split("/").pop();
+    const arraybuffer = await Utilities.fetch(`${directory}/${name}.glb`, {
       responseType: "arraybuffer",
     });
     const gltf = await GLTF.load(arraybuffer);
@@ -63,14 +69,17 @@ class Model {
     };
 
     const [rampImages, specImages] = await Promise.all([
-      fetchImagesByName(Model.toonRampByMaterial, "toon"),
-      fetchImagesByName(Model.specByMaterial, "spec"),
+      fetchImagesByName(toonRampByMaterial, "toon"),
+      fetchImagesByName(specByMaterial, "spec"),
     ]);
 
-    return new Model(gl, program, gltf, rampImages, specImages);
+    return new Model(gl, program, gltf, rampImages, specImages, {
+      toonRampByMaterial,
+      specByMaterial,
+    });
   }
 
-  constructor(gl, program, gltf, rampImages, specImages) {
+  constructor(gl, program, gltf, rampImages, specImages, { toonRampByMaterial, specByMaterial }) {
     this.gl = gl;
 
     // the skeleton runtime maps its bones onto these by name
@@ -96,13 +105,16 @@ class Model {
       const baseTexture = new Texture(gl, primitive.image, { flipY: false, wrap });
       baseTexture.setTextureUnitIndex(Model.baseColorUnit);
 
-      const rampTexture = new Texture(gl, rampImages[Model.toonRampByMaterial[primitive.name]], {
+      const rampImage = rampImages[toonRampByMaterial[primitive.name]];
+      if (!rampImage) throw new Error(`Material ${primitive.name} maps to no toon ramp.`);
+
+      const rampTexture = new Texture(gl, rampImage, {
         flipY: false,
         generateMipmaps: false,
       });
       rampTexture.setTextureUnitIndex(Model.toonRampUnit);
 
-      const specName = Model.specByMaterial[primitive.name];
+      const specName = specByMaterial[primitive.name];
       let specTexture = dummySpecTexture;
 
       if (specName) {
@@ -161,6 +173,13 @@ class Model {
     // per frame once the runtime rig lands
     this.boneUbo = new BoneArrayUbo(gl, [program], "Bone");
     this.boneUbo.updateBoneData(Model.buildBindPosePalette(gltf));
+    this.boneUbo.bindUniformBlock();
+  }
+
+  // Two models share the program but each owns a Model and Bone buffer, so
+  // the blocks must point at this model's buffers again before it draws.
+  bindUniformBlocks() {
+    this.modelUbo.bindUniformBlock();
     this.boneUbo.bindUniformBlock();
   }
 

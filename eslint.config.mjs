@@ -19,6 +19,7 @@ const crossFileGlobals = {
   GLTF: "readonly",
   Light: "readonly",
   Model: "readonly",
+  PropRig: "readonly",
   Skeleton: "readonly",
   Texture: "readonly",
   Transform: "readonly",

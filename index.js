@@ -65,20 +65,34 @@ async function onload() {
 
   const miku = await Model.load(gl, program, "models/pierretta");
 
+  // the stand-mic prop: the take is choreographed around it (she lifts the
+  // mic off the stand and back). A flat neutral ramp stands in for the
+  // game's BLINN item shading; the chrome envmap is not reproduced.
+  const mic = await Model.load(gl, program, "models/mic", {
+    toonRampByMaterial: { lambert_IZ: "neutral" },
+    specByMaterial: {},
+  });
+
   // Grounding is baked offline: an override file carries corrected leg
   // IK-target heights that land the feet (the game's own data floats
   // them, see the dump repo's tools/ground.js).
-  const [skeletonJson, animationBuffer, groundingBuffer] = await Promise.all([
-    Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
-    Utilities.fetch("motions/pv_743.bin", { responseType: "arraybuffer" }),
-    Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
-  ]);
+  const [skeletonJson, animationBuffer, groundingBuffer, micSkeletonJson, micAnimationBuffer] =
+    await Promise.all([
+      Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
+      Utilities.fetch("motions/pv_743.bin", { responseType: "arraybuffer" }),
+      Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
+      Utilities.fetch("motions/mic_skeleton.json", { responseType: "json" }),
+      Utilities.fetch("motions/pv_743_mic.bin", { responseType: "arraybuffer" }),
+    ]);
 
   const animation = new Animation("motions/pv_743.bin", animationBuffer);
 
   animation.override(new Animation("motions/pv_743_grounding.bin", groundingBuffer));
 
   const skeleton = new Skeleton(skeletonJson, animation, miku.skin, miku.nodes);
+
+  const micAnimation = new Animation("motions/pv_743_mic.bin", micAnimationBuffer);
+  const micRig = new PropRig(micSkeletonJson, micAnimation, mic.skin);
 
   //
 
@@ -166,6 +180,7 @@ async function onload() {
     const seconds = (frame / animation.frameRate).toFixed(2);
     frameCounter.textContent = `frame ${Math.round(frame)}  t=${seconds}s`;
     miku.boneUbo.updateBoneData(skeleton.palette);
+    mic.boneUbo.updateBoneData(micRig.pose(micAnimation, frame));
 
     gl.useProgram(program);
 
@@ -177,7 +192,11 @@ async function onload() {
 
       shadowFbo.depthTexture.removeFromTextureUnit();
 
+      miku.bindUniformBlocks();
       miku.draw({ includeOverlays: false, isShadowPass: true });
+
+      mic.bindUniformBlocks();
+      mic.draw({ includeOverlays: false, isShadowPass: true });
     });
 
     shadowFbo.depthTexture.addToTextureUnit();
@@ -186,7 +205,11 @@ async function onload() {
       shadowMapTexelSize,
     });
 
+    miku.bindUniformBlocks();
     miku.draw({ includeOverlays: true });
+
+    mic.bindUniformBlocks();
+    mic.draw({ includeOverlays: true });
 
     gl.useProgram(floorProgram);
 
