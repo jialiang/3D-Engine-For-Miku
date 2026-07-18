@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "name": "ITMPV743_STMIC_00",
+  "bones": [
+    {
+      "name": "OBJHRC_ITMPV743_STMIC_00",
+      "parent": -1,
+      "position": null
+    },
+    {
+      "name": "gblctr",
+      "parent": 0,
+      "position": null
+    },
+    {
+      "name": "j_mic_00_wj",
+      "parent": 1,
+      "position": null
+    },
+    {
+      "name": "j_neck_wj",
+      "parent": 1,
+      "position": null
+    }
+  ]
+}
