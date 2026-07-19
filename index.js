@@ -76,22 +76,19 @@ async function onload() {
   // Grounding is baked offline: an override file carries corrected leg
   // IK-target heights that land the feet (the game's own data floats
   // them, see the dump repo's tools/ground.js).
-  const [skeletonJson, animationBuffer, groundingBuffer, micSkeletonJson, micAnimationBuffer] =
+  const [skeletonJson, animation, micSkeletonJson, micAnimation, groundingBuffer] =
     await Promise.all([
       Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
-      Utilities.fetch("motions/pv_743.bin", { responseType: "arraybuffer" }),
-      Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
+      StreamedAnimation.load("motions/pv_743"),
       Utilities.fetch("motions/mic_skeleton.json", { responseType: "json" }),
-      Utilities.fetch("motions/pv_743_mic.bin", { responseType: "arraybuffer" }),
+      StreamedAnimation.load("motions/pv_743_mic"),
+      Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
     ]);
-
-  const animation = new Animation("motions/pv_743.bin", animationBuffer);
 
   animation.override(new Animation("motions/pv_743_grounding.bin", groundingBuffer));
 
   const skeleton = new Skeleton(skeletonJson, animation, miku.skin, miku.nodes);
 
-  const micAnimation = new Animation("motions/pv_743_mic.bin", micAnimationBuffer);
   const micRig = new PropRig(micSkeletonJson, micAnimation, mic.skin);
 
   //
@@ -175,12 +172,27 @@ async function onload() {
     // currentTime updates (see AudioClock); a paused or ended track holds its
     // pose, a restarted track rewinds the sampling cursors automatically
     const frame = Math.min(clock.read() * animation.frameRate, animation.frameCount - 1);
-    skeleton.pose(animation, frame);
 
-    const seconds = (frame / animation.frameRate).toFixed(2);
-    frameCounter.textContent = `frame ${Math.round(frame)}  t=${seconds}s`;
-    miku.boneUbo.updateBoneData(skeleton.palette);
-    mic.boneUbo.updateBoneData(micRig.pose(micAnimation, frame));
+    // the motion streams in a window at a time (see StreamedAnimation): if the
+    // window under the playhead has not arrived yet, hold the audio and the
+    // pose (the model keeps its last palette) until it has, then resume
+    if (animation.isReady(frame) && micAnimation.isReady(frame)) {
+      if (isBuffering) {
+        isBuffering = false;
+        if (!isPaused && !bgm.ended) playAudio();
+      }
+
+      skeleton.pose(animation, frame);
+
+      const seconds = (frame / animation.frameRate).toFixed(2);
+      frameCounter.textContent = `frame ${Math.round(frame)}  t=${seconds}s`;
+      miku.boneUbo.updateBoneData(skeleton.palette);
+      mic.boneUbo.updateBoneData(micRig.pose(micAnimation, frame));
+    } else {
+      if (!isPaused && !bgm.paused) bgm.pause();
+      isBuffering = true;
+      frameCounter.textContent = "buffering...";
+    }
 
     gl.useProgram(program);
 
@@ -236,6 +248,7 @@ async function onload() {
   const playAudio = () => bgm.play().catch((error) => console.warn("Could not play audio:", error));
 
   let isPaused = false;
+  let isBuffering = false;
 
   playButton.addEventListener("click", () => {
     cover.style.display = "none";
@@ -268,11 +281,16 @@ async function onload() {
         return;
       }
 
+      // A STALL IS NOT A PAUSE, and a stopped track cannot tell them apart: the draw loop
+      // stops the audio itself while a window arrives. So the toggle tracks the user's own
+      // intent, or the next tap does the opposite of what it looks like.
       isPaused = !isPaused;
 
       if (isPaused) return bgm.pause();
 
-      playAudio();
+      // Nothing to resume while buffering: the draw loop starts the track again by itself
+      // once the window lands and calling play() into a stall only warns.
+      if (!isBuffering) playAudio();
     });
   });
 

@@ -21,10 +21,14 @@ const crossFileGlobals = {
   Model: "readonly",
   PropRig: "readonly",
   Skeleton: "readonly",
+  StreamedAnimation: "readonly",
   Texture: "readonly",
   Transform: "readonly",
   Utilities: "readonly",
   VAO: "readonly",
+
+  // index.js declares it and anything loading in the background reports through it
+  handleError: "readonly",
 
   UBO: "readonly",
   BoneArrayUbo: "readonly",

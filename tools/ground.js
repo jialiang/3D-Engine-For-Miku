@@ -25,8 +25,9 @@
 // The bake runs our own classes headless (Skeleton, Animation, GLTF)
 // against models/pierretta/pierretta.glb, so the corrected channel values
 // reproduce exactly through the solver. Inputs are this repo's motions/:
-// mik_skeleton.json plus pv_743.bin (the converted body motion, copied in
-// from the dump repo). Output: motions/pv_743_grounding.bin.
+// mik_skeleton.json plus the pv_743/ motion chunks (copied in from the dump
+// repo), which the bake stitches back into the full timeline it analyzes.
+// Output: motions/pv_743_grounding.bin.
 //
 // usage: node tools/ground.js
 
@@ -309,6 +310,76 @@ const serializeMot1 = (tracks, frameRate, frameCount) => {
   return buffer;
 };
 
+const parseMot1 = (buffer) => {
+  const trackCount = buffer.readUInt32LE(16);
+  const tracks = [];
+  let offset = 20;
+
+  for (let track = 0; track < trackCount; track++) {
+    const boneIndex = buffer.readUInt16LE(offset);
+    const channelAxis = buffer.readUInt8(offset + 2);
+    const kind = buffer.readUInt8(offset + 3);
+    const keyCount = buffer.readUInt32LE(offset + 4);
+    offset += 8;
+
+    const frames = [];
+    const values = [];
+    const tangents = [];
+    for (let key = 0; key < keyCount; key++) frames.push(buffer.readUInt16LE(offset + key * 2));
+    offset += keyCount * 2;
+    for (let key = 0; key < keyCount; key++) values.push(buffer.readFloatLE(offset + key * 4));
+    offset += keyCount * 4;
+    for (let key = 0; key < keyCount; key++) tangents.push(buffer.readFloatLE(offset + key * 4));
+    offset += keyCount * 4;
+
+    tracks.push({ boneIndex, channelAxis, kind, frames, values, tangents });
+  }
+
+  return tracks;
+};
+
+// Stitch a windowed motion (per-window MOT1 chunks, see the dump repo's
+// convert.js) back into one whole-timeline MOT1 buffer for the bake to
+// analyze: each track's curve is the interior keys of every window in order,
+// dropping the anchor keys the chunks keep past their edges (each anchor
+// duplicates a neighbouring window's key). Returns an ArrayBuffer the
+// Animation can load.
+const loadMergedMotion = (clipDirectory) => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(clipDirectory, "manifest.json"), "utf8"));
+  const { frameRate, frameCount, windowSize, chunks } = manifest;
+
+  const tracksByChannel = new Map();
+
+  chunks.forEach((name, windowIndex) => {
+    const windowStart = windowIndex * windowSize;
+    const windowEnd = Math.min(windowStart + windowSize, frameCount);
+
+    for (const track of parseMot1(fs.readFileSync(path.join(clipDirectory, name)))) {
+      const channel = `${track.boneIndex}:${track.channelAxis}`;
+      let merged = tracksByChannel.get(channel);
+
+      if (!merged) {
+        merged = {
+          boneIndex: track.boneIndex,
+          channelAxis: track.channelAxis,
+          kind: track.kind,
+          keys: [],
+        };
+        tracksByChannel.set(channel, merged);
+      }
+
+      track.frames.forEach((frame, key) => {
+        if (frame >= windowStart && frame < windowEnd) {
+          merged.keys.push({ frame, value: track.values[key], tangent: track.tangents[key] });
+        }
+      });
+    }
+  });
+
+  const buffer = serializeMot1([...tracksByChannel.values()], frameRate, frameCount);
+  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.length);
+};
+
 const main = async () => {
   const { Utilities, GLTF, Animation, Skeleton } = loadClasses();
   Utilities.loadImage = async () => null;
@@ -320,7 +391,7 @@ const main = async () => {
 
   const gltf = await GLTF.load(readBuffer(path.join(ROOT, "models/pierretta/pierretta.glb")));
   const skeletonJson = JSON.parse(fs.readFileSync(path.join(MOTIONS, "mik_skeleton.json"), "utf8"));
-  const baseBuffer = readBuffer(path.join(MOTIONS, "pv_743.bin"));
+  const baseBuffer = loadMergedMotion(path.join(MOTIONS, "pv_743"));
 
   const animation = new Animation("pv_743.bin", baseBuffer);
   const frameCount = animation.frameCount;
