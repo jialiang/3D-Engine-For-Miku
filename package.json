@@ -9,10 +9,11 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "quantize": "node tools/quantize.js models/pierretta/pierretta.glb"
+    "quantize": "gltf-transform quantize models/pierretta/pierretta.glb models/pierretta/pierretta.glb --quantize-weight 8 --quantize-normal 8 --pattern {NORMAL,WEIGHTS_0}"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@gltf-transform/cli": "^4.4.2",
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
     "http-server": "^14.1.1",
