@@ -76,10 +76,11 @@ async function onload() {
   // Grounding is baked offline: an override file carries corrected leg
   // IK-target heights that land the feet (the game's own data floats
   // them, see the dump repo's tools/ground.js).
-  const [skeletonJson, animation, micSkeletonJson, micAnimation, groundingBuffer] =
+  const [skeletonJson, animation, faceAnimation, micSkeletonJson, micAnimation, groundingBuffer] =
     await Promise.all([
       Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
       StreamedAnimation.load("motions/pv_743"),
+      StreamedAnimation.load("motions/pv_743_face"),
       Utilities.fetch("motions/mic_skeleton.json", { responseType: "json" }),
       StreamedAnimation.load("motions/pv_743_mic"),
       Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
@@ -88,6 +89,11 @@ async function onload() {
   animation.override(new Animation("motions/pv_743_grounding.bin", groundingBuffer));
 
   const skeleton = new Skeleton(skeletonJson, animation, miku.skin, miku.nodes);
+
+  // The facial performance is a second clip on the same rig: it drives only
+  // face bones, which the body take leaves at rest, so the two clips never
+  // touch the same channel.
+  skeleton.addClip(faceAnimation);
 
   const micRig = new PropRig(micSkeletonJson, micAnimation, mic.skin);
 
@@ -176,7 +182,7 @@ async function onload() {
     // the motion streams in a window at a time (see StreamedAnimation): if the
     // window under the playhead has not arrived yet, hold the audio and the
     // pose (the model keeps its last palette) until it has, then resume
-    if (animation.isReady(frame) && micAnimation.isReady(frame)) {
+    if (animation.isReady(frame) && faceAnimation.isReady(frame) && micAnimation.isReady(frame)) {
       if (isBuffering) {
         isBuffering = false;
         if (!isPaused && !bgm.ended) playAudio();

@@ -82,13 +82,12 @@ class Skeleton {
 
     this.ikTargets = new Float32Array(bones.length * 3);
 
-    this.trackSlots = animation.tracks.map((track) => {
-      const offset = track.boneIndex * 3 + track.axis;
+    this.trackSlots = this.buildTrackSlots(animation);
 
-      if (track.channel === Animation.Channels.rotation) return { buffer: this.rotations, offset };
-      if (track.channel === Animation.Channels.position) return { buffer: this.positions, offset };
-      return { buffer: this.ikTargets, offset };
-    });
+    // clips that play alongside the main take on this same rig, bound through
+    // addClip: the baked face performance drives 35 bones the body take never
+    // keys, so its tracks simply fill in more channels
+    this.extraClips = [];
 
     // IK chains: node0 = the control bone, then the j_/e_ descendants.
     // The chain root translates by node1's rest (the control bone has no
@@ -558,6 +557,25 @@ class Skeleton {
     if (constraintStep) constraintStep(world);
   }
 
+  // Where each of a clip's tracks writes: one channel slot per track, picked by
+  // the track's channel and resolved to an offset by its bone and axis.
+  buildTrackSlots(animation) {
+    return animation.tracks.map((track) => {
+      const offset = track.boneIndex * 3 + track.axis;
+
+      if (track.channel === Animation.Channels.rotation) return { buffer: this.rotations, offset };
+      if (track.channel === Animation.Channels.position) return { buffer: this.positions, offset };
+      return { buffer: this.ikTargets, offset };
+    });
+  }
+
+  // Play another clip on this rig alongside the main take. Clips are expected
+  // to drive disjoint channels (the face bake does); where two overlap, the
+  // clip bound last wins.
+  addClip(animation) {
+    this.extraClips.push({ animation, slots: this.buildTrackSlots(animation) });
+  }
+
   pose(animation, frame) {
     const values = animation.sample(frame);
     const { trackSlots, bones, rotations, positions, worldMatrices, globalMatrix } = this;
@@ -565,6 +583,15 @@ class Skeleton {
     for (let track = 0; track < trackSlots.length; track++) {
       const slot = trackSlots[track];
       if (slot) slot.buffer[slot.offset] = values[track];
+    }
+
+    for (const clip of this.extraClips) {
+      const clipValues = clip.animation.sample(frame);
+
+      for (let track = 0; track < clip.slots.length; track++) {
+        const slot = clip.slots[track];
+        if (slot) slot.buffer[slot.offset] = clipValues[track];
+      }
     }
 
     // global pre-root transform: translate by gblctr, rotate by kg_ya_ex
