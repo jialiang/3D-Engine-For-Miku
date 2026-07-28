@@ -20,9 +20,13 @@ class VAO {
       size: 4,
       type: "int",
     },
+    // canQuantize: the asset may store these as normalized bytes instead of
+    // floats (tools/quantize.js), which the GPU scales back to 0..1 on the way
+    // to the shader. Only values that live in 0..1 can be stored that way.
     boneWeights: {
       location: 5,
       size: 4,
+      canQuantize: true,
     },
   };
 
@@ -43,9 +47,19 @@ class VAO {
 
       if (!attributeInfo) throw new Error(`Invalid attribute ${key} supplied.`);
 
-      const { location, size, type = "float" } = attributeInfo;
+      const { location, size, type = "float", canQuantize = false } = attributeInfo;
 
-      const array = type === "int" ? new Int16Array(source[key]) : new Float32Array(source[key]);
+      // a quantized attribute is uploaded as the bytes it already is; every
+      // other one is widened to float, which also covers the hand-built floor
+      // geometry arriving as a plain array
+      const isQuantized = canQuantize && source[key] instanceof Uint8Array;
+
+      const array =
+        type === "int"
+          ? new Int16Array(source[key])
+          : isQuantized
+            ? source[key]
+            : new Float32Array(source[key]);
 
       const buffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -53,6 +67,7 @@ class VAO {
       gl.enableVertexAttribArray(location);
 
       if (type === "int") gl.vertexAttribIPointer(location, size, gl.SHORT, 0, 0);
+      else if (isQuantized) gl.vertexAttribPointer(location, size, gl.UNSIGNED_BYTE, true, 0, 0);
       else gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
 
       this.buffers[key] = buffer;
