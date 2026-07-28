@@ -3,6 +3,7 @@
 
 # Binary assets
 *.png binary
+*.webp binary
 *.glb binary
 *.bin binary
 *.ogg binary

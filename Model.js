@@ -65,9 +65,11 @@ class Model {
   };
 
   // Fetch and build a model from its directory: the glb (named after the
-  // directory, geometry and rig) and the loose base, toon and spec PNGs beside
-  // it. The material tables default to the character's; other models (the mic
-  // prop) pass their own.
+  // directory, geometry and rig) and the loose base, toon and spec textures
+  // beside it. Those ship as WebP, lossy for the colour and specular maps and
+  // lossless for the toon curves, with the PNG masters kept beside them for
+  // re-encoding. The material tables default to the character's. Other models
+  // (the mic prop) pass their own.
   static async load(gl, program, directory, materials = {}) {
     const {
       baseByMaterial = Model.baseByMaterial,
@@ -87,7 +89,7 @@ class Model {
 
       await Promise.all(
         names.map(async (name) => {
-          images[name] = await Utilities.loadImage(`${directory}/${subdirectory}/${name}.png`);
+          images[name] = await Utilities.loadImage(`${directory}/${subdirectory}/${name}.webp`);
         }),
       );
 
