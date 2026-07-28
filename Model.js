@@ -41,13 +41,39 @@ class Model {
     face_CH_CHARA_SD001Z1: "face_s",
   };
 
+  // Base colour per material. These are loose files too, so the glb stays a
+  // mesh and rig container and every texture can be recompressed or reformatted
+  // without re-exporting the model (merge_armatures.py --textures writes the
+  // whole set). A model that gives no table here keeps its base colours inside
+  // its glb instead, which is what the mic prop still does.
+  static baseByMaterial = {
+    body_CH_CHARA_SD001Z: "body",
+    hand_CH_CHARA_SD001Z: "hand",
+    sleeve_CH_CHARA_SD001Z: "sleeve",
+    shoes_CH_CHARA_SD001Z: "shoes",
+    m07skirt_CH_CHARA_SD001Z: "skirt",
+    skirtlace_CH_CHARA_SD001Z: "lace",
+    tights_CH_CHARA_SD001Z: "tights",
+    hairfront607_CH_CHARA_SD002Z: "hair",
+    hairtail607_CH_CHARA_SD002Z: "hairtail",
+    m607hoodset_CH_CHARA_SD001Z: "hoodset",
+    face_CH_CHARA_SD001Z1: "face",
+    facenose_CH_CHARA_SD001Z: "facenose",
+    eye_CH_CHARA_SD001Z: "eye",
+    eye_dropshadow_CH_CHARA_SD001Z: "eyeshadow",
+    eyeblow_CH_CHARA_SD001Z: "eyebrow",
+  };
+
   // Fetch and build a model from its directory: the glb (named after the
-  // directory, geometry plus the base-colour images) and the loose toon and
-  // spec PNGs beside it. The material tables default to the character's;
-  // other models (the mic prop) pass their own.
+  // directory, geometry and rig) and the loose base, toon and spec PNGs beside
+  // it. The material tables default to the character's; other models (the mic
+  // prop) pass their own.
   static async load(gl, program, directory, materials = {}) {
-    const { toonRampByMaterial = Model.toonRampByMaterial, specByMaterial = Model.specByMaterial } =
-      materials;
+    const {
+      baseByMaterial = Model.baseByMaterial,
+      toonRampByMaterial = Model.toonRampByMaterial,
+      specByMaterial = Model.specByMaterial,
+    } = materials;
 
     const name = directory.split("/").pop();
     const arraybuffer = await Utilities.fetch(`${directory}/${name}.glb`, {
@@ -68,18 +94,28 @@ class Model {
       return images;
     };
 
-    const [rampImages, specImages] = await Promise.all([
+    const [baseImages, rampImages, specImages] = await Promise.all([
+      fetchImagesByName(baseByMaterial, "base"),
       fetchImagesByName(toonRampByMaterial, "toon"),
       fetchImagesByName(specByMaterial, "spec"),
     ]);
 
-    return new Model(gl, program, gltf, rampImages, specImages, {
+    return new Model(gl, program, gltf, baseImages, rampImages, specImages, {
+      baseByMaterial,
       toonRampByMaterial,
       specByMaterial,
     });
   }
 
-  constructor(gl, program, gltf, rampImages, specImages, { toonRampByMaterial, specByMaterial }) {
+  constructor(
+    gl,
+    program,
+    gltf,
+    baseImages,
+    rampImages,
+    specImages,
+    { baseByMaterial, toonRampByMaterial, specByMaterial },
+  ) {
     this.gl = gl;
 
     // the skeleton runtime maps its bones onto these by name
@@ -102,7 +138,13 @@ class Model {
       // colour and specular maps must repeat rather than clamp (see Texture)
       const wrap = primitive.name.startsWith("skirtlace") ? gl.REPEAT : gl.CLAMP_TO_EDGE;
 
-      const baseTexture = new Texture(gl, primitive.image, { flipY: false, wrap });
+      // loose when the model lists the material, otherwise whatever its glb
+      // embedded (see baseByMaterial)
+      const baseName = baseByMaterial[primitive.name];
+      const baseImage = baseName ? baseImages[baseName] : primitive.image;
+      if (!baseImage) throw new Error(`Material ${primitive.name} has no base colour image.`);
+
+      const baseTexture = new Texture(gl, baseImage, { flipY: false, wrap });
       baseTexture.setTextureUnitIndex(Model.baseColorUnit);
 
       const rampImage = rampImages[toonRampByMaterial[primitive.name]];

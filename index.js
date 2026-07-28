@@ -67,8 +67,10 @@ async function onload() {
 
   // the stand-mic prop: the take is choreographed around it (she lifts the
   // mic off the stand and back). A flat neutral ramp stands in for the
-  // game's BLINN item shading; the chrome envmap is not reproduced.
+  // game's BLINN item shading. The chrome envmap is not reproduced. Its one
+  // base colour is still embedded in its glb, so it lists no base material.
   const mic = await Model.load(gl, program, "models/mic", {
+    baseByMaterial: {},
     toonRampByMaterial: { lambert_IZ: "neutral" },
     specByMaterial: {},
   });
