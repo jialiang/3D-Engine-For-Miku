@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "quantize": "gltf-transform quantize models/pierretta/pierretta.glb models/pierretta/pierretta.glb --quantize-weight 8 --quantize-normal 8 --pattern {NORMAL,WEIGHTS_0}"
+    "quantize": "gltf-transform quantize models/pierretta/pierretta.glb models/pierretta/pierretta.glb --quantize-weight 8 --quantize-normal 8 --pattern {NORMAL,WEIGHTS_0}",
+    "audio": "tools\\audio.bat"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

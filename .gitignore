@@ -2,3 +2,6 @@ node_modules/
 
 # local tooling that stays out of the repo (verification harness etc.)
 .ignored/
+
+# the concert disc tools/audio.bat cuts the song from
+*.m2ts

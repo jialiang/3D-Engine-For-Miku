@@ -6,4 +6,5 @@
 *.webp binary
 *.glb binary
 *.bin binary
+*.mp3 binary
 *.ogg binary
