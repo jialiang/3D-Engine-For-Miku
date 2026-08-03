@@ -78,15 +78,25 @@ async function onload() {
   // Grounding is baked offline: an override file carries corrected leg
   // IK-target heights that land the feet (the game's own data floats
   // them, see the dump repo's tools/ground.js).
-  const [skeletonJson, animation, faceAnimation, micSkeletonJson, micAnimation, groundingBuffer] =
-    await Promise.all([
-      Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
-      StreamedAnimation.load("motions/pv_743"),
-      StreamedAnimation.load("motions/pv_743_face"),
-      Utilities.fetch("motions/mic_skeleton.json", { responseType: "json" }),
-      StreamedAnimation.load("motions/pv_743_mic"),
-      Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
-    ]);
+  const [
+    skeletonJson,
+    animation,
+    faceAnimation,
+    micSkeletonJson,
+    micAnimation,
+    osageSkeletonJson,
+    osageAnimation,
+    groundingBuffer,
+  ] = await Promise.all([
+    Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
+    StreamedAnimation.load("motions/pv_743"),
+    StreamedAnimation.load("motions/pv_743_face"),
+    Utilities.fetch("motions/mic_skeleton.json", { responseType: "json" }),
+    StreamedAnimation.load("motions/pv_743_mic"),
+    Utilities.fetch("motions/osage_skeleton.json", { responseType: "json" }),
+    StreamedAnimation.load("motions/pv_743_osage"),
+    Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
+  ]);
 
   animation.override(new Animation("motions/pv_743_grounding.bin", groundingBuffer));
 
@@ -96,6 +106,12 @@ async function onload() {
   // face bones, which the body take leaves at rest, so the two clips never
   // touch the same channel.
   skeleton.addClip(faceAnimation);
+
+  // The skirt panels and hair tails swing on their own small rig hanging off
+  // the body's (see OsageRig). This clip is the game's own precomputed
+  // performance for them; the parts it ships no bake for stay rigid until
+  // tools/springs.js covers them.
+  skeleton.addOsageRig(osageSkeletonJson, osageAnimation);
 
   const micRig = new PropRig(micSkeletonJson, micAnimation, mic.skin);
 
@@ -184,7 +200,13 @@ async function onload() {
     // the motion streams in a window at a time (see StreamedAnimation): if the
     // window under the playhead has not arrived yet, hold the audio and the
     // pose (the model keeps its last palette) until it has, then resume
-    if (animation.isReady(frame) && faceAnimation.isReady(frame) && micAnimation.isReady(frame)) {
+    const isMotionReady =
+      animation.isReady(frame) &&
+      faceAnimation.isReady(frame) &&
+      micAnimation.isReady(frame) &&
+      osageAnimation.isReady(frame);
+
+    if (isMotionReady) {
       if (isBuffering) {
         isBuffering = false;
         if (!isPaused && !bgm.ended) playAudio();

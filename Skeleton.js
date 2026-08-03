@@ -41,6 +41,8 @@
 // rigidly attached to its nearest animated ancestor and a rigid
 // attachment's palette entry collapses to a copy of that ancestor's entry
 // (world * relativeBind * inverseBind = ancestorWorld * ancestorInverseBind).
+// Rigid is only the default: addOsageRig hands the joints of a chain rig
+// (OsageRig) over to it and those swing instead.
 class Skeleton {
   // The objset couples these mesh bones to control-rig bones (the game's
   // skin ex-data, which the glb export cannot carry): the foot deform
@@ -88,6 +90,10 @@ class Skeleton {
     // addClip: the baked face performance drives 35 bones the body take never
     // keys, so its tracks simply fill in more channels
     this.extraClips = [];
+
+    // chain rigs hanging off this one, bound through addOsageRig (see
+    // OsageRig): the swinging parts, which this rig has no bones for
+    this.osageRigs = [];
 
     // IK chains: node0 = the control bone, then the j_/e_ descendants.
     // The chain root translates by node1's rest (the control bone has no
@@ -576,6 +582,26 @@ class Skeleton {
     this.extraClips.push({ animation, slots: this.buildTrackSlots(animation) });
   }
 
+  // Hang a chain rig off this one (see OsageRig). The joints it drives stop
+  // being rigid attachments here, so the chain's own motion reaches the mesh
+  // instead of the bone it hangs off and pose runs it after the body bones
+  // because it reads their world matrices.
+  addOsageRig(skeletonJson, animation) {
+    const rig = new OsageRig(skeletonJson, animation, this);
+
+    for (const joint of rig.joints) {
+      if (this.jointMotionBones[joint] >= 0) {
+        throw new Error(`Joint ${this.skin.jointNames[joint]} is already a motion bone.`);
+      }
+
+      this.jointPaletteSources[joint] = -1;
+    }
+
+    this.osageRigs.push(rig);
+
+    return rig;
+  }
+
   pose(animation, frame) {
     const values = animation.sample(frame);
     const { trackSlots, bones, rotations, positions, worldMatrices, globalMatrix } = this;
@@ -638,6 +664,9 @@ class Skeleton {
 
       palette.copyWithin(joint * 16, source * 16, source * 16 + 16);
     }
+
+    // the chains read the body bones they hang off, so they pose last
+    for (const rig of this.osageRigs) rig.pose(frame);
 
     return palette;
   }
