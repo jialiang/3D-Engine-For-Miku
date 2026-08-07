@@ -144,6 +144,13 @@ async function onload() {
   camera.transform.setTransformation({ position: [0, 10, 25] });
   cameraUbo.updateCameraData(camera);
 
+  // What the camera and the shadow both track, rewritten each frame. The Y stays at the
+  // height the shot was framed for. Only X and Z follow. See the frame loop.
+  const hipsBone = skeleton.bones.findIndex((bone) => bone.name === "kl_kosi_y");
+  const followPivot = [0, 0, 0];
+
+  if (hipsBone < 0) throw new Error("no kl_kosi_y bone to follow");
+
   //
 
   const light = new Light({
@@ -223,6 +230,32 @@ async function onload() {
       }
 
       skeleton.pose(animation, frame);
+
+      // THE CAMERA AND THE SHADOW FOLLOW HER. She travels nearly 2 metres, which the 12.5x
+      // model scale turns into about 24 scene units, so a camera orbiting the world origin
+      // loses her sideways and a 30-unit shadow frustum fixed there stops covering her
+      // altogether. Both now pivot on the same point.
+      //
+      // THE HIPS, not the rig's gblctr channel: that reads a constant 0,10,0 all take, so all
+      // of the travel is inside the bone hierarchy. Through the model matrix rather than by
+      // multiplying by 12.5, so this keeps working if the model is ever moved as well as scaled.
+      //
+      // X AND Z ONLY. The hips rise and fall with every step and a camera that follows that
+      // bobs the whole frame. The height stays where the shot was framed.
+      const hips = skeleton.worldMatrices[hipsBone];
+      const subject = Utilities.multiplyVecByMat4(
+        [hips[12], hips[13], hips[14], 1],
+        miku.transform.modelMatrix,
+      );
+
+      followPivot[0] = subject[0];
+      followPivot[2] = subject[2];
+
+      camera.transform.setPivot(followPivot);
+      cameraUbo.updateCameraData(camera);
+
+      light.follow(followPivot);
+      lightUbo.updateLightData(light);
 
       const seconds = (frame / animation.frameRate).toFixed(2);
       frameCounter.textContent = `frame ${Math.round(frame)}  t=${seconds}s`;

@@ -102,18 +102,36 @@ class Transform {
 class CameraTransform extends Transform {
   viewMatrix;
 
+  // What the rotation turns AROUND, in world space. `position` is applied after the rotation,
+  // so it is an offset in the turned frame and cannot express "orbit something over there":
+  // that is what this is for. Left at the origin it changes nothing.
+  pivot;
+
   constructor() {
     super();
 
     this.viewMatrix = mat4.create();
+    this.pivot = [0, 0, 0];
+  }
+
+  // Absolute and deliberately not routed through setTransformation, whose position and
+  // rotation are incremental by default. A subject's position is a place, not a delta.
+  setPivot(pivot) {
+    this.pivot = pivot;
+    this.updateMatrix();
+
+    return this;
   }
 
   updateMatrix() {
-    const { modelMatrix, viewMatrix, position, rotation } = this;
+    const { modelMatrix, viewMatrix, position, rotation, pivot } = this;
     const { toRadian } = CameraTransform;
 
-    // Order important!
+    // Order important! The pivot goes FIRST so the rotation happens about it rather than
+    // about the world origin and `position` stays the offset out from whatever is being
+    // watched.
     mat4.identity(modelMatrix);
+    mat4.translate(modelMatrix, modelMatrix, pivot);
     mat4.rotateZ(modelMatrix, modelMatrix, toRadian(rotation[2]));
     mat4.rotateY(modelMatrix, modelMatrix, toRadian(rotation[1]));
     mat4.rotateX(modelMatrix, modelMatrix, toRadian(rotation[0]));
