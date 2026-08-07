@@ -124,9 +124,17 @@ class Model {
     this.skin = gltf.skin;
     this.nodes = gltf.nodes;
 
+    // Kept so RibbonBasis can prove the basis was baked against THIS mesh: its rows are
+    // indexed by gl_VertexID, so a re-export that reorders vertices invalidates every one
+    // of them with no other symptom than a wrongly deformed ribbon. See RibbonBasis.load.
+    this.ribbonBindPositions = gltf.primitives.find((entry) =>
+      entry.name.startsWith("m607hoodset"),
+    )?.attributeBuffer.position;
+
     this.isOverlayLocation = GL.getUniformLocation(program, "u_isOverlay");
     this.hasSpecLocation = GL.getUniformLocation(program, "u_hasSpec");
     this.alphaToCoverageLocation = GL.getUniformLocation(program, "u_alphaToCoverage");
+    this.ribbonModesLocation = GL.getUniformLocation(program, "u_ribbonModes");
 
     // a 1x1 stand-in on the spec unit for materials with no map,
     // so the sampler stays valid even though the shader skips it
@@ -188,6 +196,10 @@ class Model {
         // either. Everything else casts and every part receives, so the
         // hair fringe still darkens the forehead.
         castsShadow: !/^(face|eye|skirtlace)/.test(primitive.name),
+        // The only part with a baked cloth basis. Its vertex ids index the basis
+        // texture's rows, so every other part must switch it off or it would read
+        // the hood's rows.
+        hasRibbonBasis: primitive.name.startsWith("m607hoodset"),
       };
     });
 
@@ -285,6 +297,14 @@ class Model {
     part.baseTexture.addToTextureUnit();
     part.rampTexture.addToTextureUnit();
     part.specTexture.addToTextureUnit();
+
+    // SWITCHED OFF ON THE PROGRAM, not through the basis, because the basis is optional and
+    // the program is not. Every model here shares one program, so a model with no basis of
+    // its own (the mic) would otherwise inherit whatever the last hood part left set and
+    // index the hood's rows by its own vertex ids. Correct today only because the hood is
+    // never drawn last, which is not something a draw order should have to promise.
+    if (part.hasRibbonBasis) this.ribbonBasis.setActive(true);
+    else gl.uniform1f(this.ribbonModesLocation, 0);
 
     gl.bindVertexArray(part.vao.vao);
     gl.drawElements(gl.TRIANGLES, part.vao.verticesToDrawCount, part.indexType, 0);

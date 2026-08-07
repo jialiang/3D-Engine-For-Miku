@@ -13,6 +13,9 @@ class Texture {
       wrap = gl.CLAMP_TO_EDGE,
       depthTexture = false,
       isTextureArray = imageCount > 1,
+      // Raw float triples rather than an image: a lookup table the vertex shader
+      // fetches by index, not a picture. Used for the ribbon's mode basis.
+      floatData = null,
     } = options;
 
     const bindingPoint = isTextureArray ? gl.TEXTURE_2D_ARRAY : gl.TEXTURE_2D;
@@ -28,6 +31,18 @@ class Texture {
     // the latter snaps to one mip and bands where the level changes,
     // which showed badly on the fine skirt lace when minified
     if (generateMipmaps && image) minFilterType = gl.LINEAR_MIPMAP_LINEAR;
+    // NEAREST is not a preference here: a 32-bit float texture is not linearly
+    // filterable in WebGL2 without OES_texture_float_linear and a data table wants
+    // exact fetches anyway.
+    if (floatData) {
+      format = gl.RGB32F;
+      internalFormat = gl.RGB;
+      type = gl.FLOAT;
+
+      maxFilterType = gl.NEAREST;
+      minFilterType = gl.NEAREST;
+    }
+
     if (depthTexture) {
       format = gl.DEPTH_COMPONENT16;
       internalFormat = gl.DEPTH_COMPONENT;
@@ -45,7 +60,9 @@ class Texture {
     gl.bindTexture(bindingPoint, texture);
 
     if (!isTextureArray) {
-      if (image) gl.texImage2D(bindingPoint, 0, format, internalFormat, type, image);
+      if (floatData) {
+        gl.texImage2D(bindingPoint, 0, format, width, height, 0, internalFormat, type, floatData);
+      } else if (image) gl.texImage2D(bindingPoint, 0, format, internalFormat, type, image);
       else gl.texImage2D(bindingPoint, 0, format, width, height, 0, internalFormat, type, null);
     } else {
       gl.texImage3D(

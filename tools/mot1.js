@@ -3,7 +3,7 @@
 // MOT1 is not a game format: the dump repo's convert.js writes it and its
 // byte layout is documented there (FORMATS.md, "MOT1"). Animation.js parses it
 // at runtime. These are the pieces a bake needs on the Node side, shared by
-// tools/ground.js and tools/springs.js.
+// tools/ground.js and tools/softbody.js.
 //
 // Exposed as a module: serializeMot1, parseMot1 and loadMergedMotion.
 
@@ -73,7 +73,7 @@ const parseMot1 = (buffer) => {
 // neighbouring window's key). Returns an ArrayBuffer an Animation can load.
 //
 // ONLY SAFE FOR CLIPS NOBODY UNWRAPPED. The body motion qualifies. The
-// recorded osage clip does NOT: tools/osage.js absorbs each Euler channel's
+// recorded osage clip does NOT. Whatever wrote it absorbs each Euler channel's
 // turns into a running offset per window file, so two keys either side of a
 // seam can sit a whole turn apart and a cubic through them spins the part
 // right around. The runtime never hits this because StreamedAnimation samples

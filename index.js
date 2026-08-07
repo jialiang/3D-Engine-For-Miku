@@ -109,9 +109,19 @@ async function onload() {
 
   // The skirt panels and hair tails swing on their own small rig hanging off
   // the body's (see OsageRig). This clip is the game's own precomputed
-  // performance for them; the parts it ships no bake for stay rigid until
-  // tools/springs.js covers them.
+  // performance for them.
   skeleton.addOsageRig(osageSkeletonJson, osageAnimation);
+
+  // The hood ribbons' swing, simulated as CLOTH offline (tools/softbody.js) and compressed to
+  // vertex modes (see RibbonBasis). It replaces the baked bone swing above for those two
+  // chains: tools/rebind-ribbon.js bound their vertices to the head alone, so nothing else
+  // moves them and the spring rig above is inert for them.
+  miku.ribbonBasis = await RibbonBasis.load(
+    gl,
+    program,
+    "models/pierretta/ribbon",
+    miku.ribbonBindPositions,
+  );
 
   const micRig = new PropRig(micSkeletonJson, micAnimation, mic.skin);
 
@@ -217,6 +227,10 @@ async function onload() {
       const seconds = (frame / animation.frameRate).toFixed(2);
       frameCounter.textContent = `frame ${Math.round(frame)}  t=${seconds}s`;
       miku.boneUbo.updateBoneData(skeleton.palette);
+
+      // Once a frame, not once a part: the shadow pass and the lit pass want the same
+      // weights and the uniform belongs to the program rather than to a draw.
+      miku.ribbonBasis.update(frame);
       mic.boneUbo.updateBoneData(micRig.pose(micAnimation, frame));
     } else {
       if (!isPaused && !bgm.paused) bgm.pause();
