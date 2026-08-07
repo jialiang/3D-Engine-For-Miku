@@ -342,13 +342,37 @@ async function onload() {
       if (!isPaused && !bgm.ended) playAudio();
     });
 
-    // a click pauses or resumes the track, a drag orbits the camera
+    // A tap or click pauses or resumes the track, a drag orbits the camera.
+    //
+    // POINTER EVENTS, to match CameraController. These were mouse events and the camera
+    // calls preventDefault on pointerdown to claim the drag, which by specification also
+    // suppresses the compatibility mouse events: mousedown and mouseup stopped arriving and
+    // clicking stopped pausing. Two listeners on one gesture have to agree on the model.
+    //
+    // A DISTANCE THRESHOLD rather than "moved at all", because a finger never holds still.
+    // The old boolean meant any single pixel of travel counted as a drag, which a mouse
+    // mostly avoids and a touchscreen never does.
+    const TAP_SLOP = 6;
+    let pressedAt = null;
     let isMoved = false;
 
-    canvas.addEventListener("mousedown", () => (isMoved = false));
-    canvas.addEventListener("mousemove", () => (isMoved = true));
+    canvas.addEventListener("pointerdown", (event) => {
+      pressedAt = { x: event.clientX, y: event.clientY };
+      isMoved = false;
+    });
 
-    canvas.addEventListener("mouseup", () => {
+    canvas.addEventListener("pointermove", (event) => {
+      if (!pressedAt) return;
+      if (Math.hypot(event.clientX - pressedAt.x, event.clientY - pressedAt.y) > TAP_SLOP) {
+        isMoved = true;
+      }
+    });
+
+    canvas.addEventListener("pointercancel", () => (pressedAt = null));
+
+    canvas.addEventListener("pointerup", () => {
+      pressedAt = null;
+
       if (isMoved) return;
 
       if (bgm.ended) {
