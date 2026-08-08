@@ -199,11 +199,15 @@ async function onload() {
     requestAnimationFrame(draw);
   };
 
+  // NO CHECK FOR A HIDDEN TAB HERE, deliberately. The browser already stops calling us: a
+  // hidden document gets no animation frames at all, measured at zero in three seconds while
+  // timers kept ticking. So the check bought nothing and cost the one case where a hidden tab
+  // IS asked to draw, which is a screenshot: capturing forces a burst of frames (nine per
+  // capture, measured) and returning early meant the shot caught whatever stale buffer was
+  // there. Worse, returning before scheduleDraw below killed the loop outright, so the tab
+  // never drew again without a visibilitychange.
   const draw = () => {
     isDrawScheduled = false;
-
-    // a hidden tab stops the loop, visibilitychange restarts it
-    if (document.hidden) return;
 
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 
@@ -332,12 +336,29 @@ async function onload() {
     playAudio();
     scheduleDraw();
 
+    // LEAVING THE TAB DOES NOT PAUSE THE TRACK. It used to, which meant the song
+    // stopped the moment anything else took focus and picked up mid-bar on the way
+    // back. Whether audio keeps running in a background tab is the browser's call to
+    // make (it has the power and autoplay policy to weigh, we do not), so nothing
+    // here second-guesses it.
+    //
+    // THE POSE FOLLOWS THE MUSIC RATHER THAN THE OTHER WAY AROUND, which is what
+    // makes that safe. A hidden tab gets no animation frames at all, so the dance
+    // does not advance while it is away, but the clock reads the track's own
+    // currentTime (see AudioClock) rather than counting frames. So whatever the
+    // browser did with the audio meanwhile, the first frame back lands on the pose
+    // the music is actually at instead of resuming where it left off.
+    //
+    // No timer is used to force draws while hidden. It would burn a GPU on something
+    // nobody is looking at and the one case that wants a background frame, a
+    // screenshot, already gets one: see the note above draw().
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) return bgm.pause();
+      if (document.hidden) return;
 
-      // returning to the tab restarts the loop so the camera stays usable,
-      // and resumes the track unless the user paused it or it has already
-      // finished (a finished track only restarts by click)
+      // Coming back restarts the loop so the camera stays usable and asks for the
+      // track again in case the browser was the one that stopped it. Not if the user
+      // paused it and not if it has already finished: a finished track only restarts
+      // by click.
       scheduleDraw();
       if (!isPaused && !bgm.ended) playAudio();
     });
