@@ -44,6 +44,11 @@
 // Rigid is only the default: addOsageRig hands the joints of a chain rig
 // (OsageRig) over to it and those swing instead.
 class Skeleton {
+  // How close an IK target may come to its chain root before the aim is abandoned and the
+  // chain keeps its default pose, in metres. The game writes 1e-6 but tests it against a
+  // SQUARED length, so its real threshold is the millimetre this states outright.
+  static minimumAimDistance = 1e-3;
+
   // The objset couples these mesh bones to control-rig bones (the game's
   // skin ex-data, which the glb export cannot carry): the foot deform
   // bones follow the ankle and toe of the runtime rig. Without the
@@ -65,10 +70,7 @@ class Skeleton {
 
     const boneIndexByName = new Map(bones.map((bone, index) => [bone.name, index]));
 
-    // the evaluation loop assumes parents come first (game table order)
-    bones.forEach((bone, index) => {
-      if (bone.parent >= index) throw new Error(`Bone ${bone.name} comes before its parent.`);
-    });
+    Rig.assertParentsFirst(bones, "Bone");
 
     this.globalPositionBone = boneIndexByName.get("gblctr");
     this.globalRotationBone = boneIndexByName.get("kg_ya_ex");
@@ -253,7 +255,7 @@ class Skeleton {
       const wrist = boneIndexByName.get(`kl_te_${side}_wj`) * 3;
       expression(`n_ste_${side}_wj_ex`, (o) => setRotation(o, rotations[wrist], 0, 0));
 
-      const forearmTwist = (o) => setRotation(o, Skeleton.limitAngle(rotations[wrist]) / 3, 0, 0);
+      const forearmTwist = (o) => setRotation(o, BoneMath.limitAngle(rotations[wrist]) / 3, 0, 0);
       expression(`n_sude_${side}_wj_ex`, forearmTwist);
       expression(`n_sude_b_${side}_wj_ex`, forearmTwist);
 
@@ -265,7 +267,7 @@ class Skeleton {
 
       const hip = boneIndexByName.get(`cl_momo_${side}`) * 3;
       const thighTwist = (o) =>
-        setRotation(o, 0, Skeleton.limitAngle(rotations[hip + 1] + rotations[hip]) / 3, 0);
+        setRotation(o, 0, BoneMath.limitAngle(rotations[hip + 1] + rotations[hip]) / 3, 0);
       expression(`n_momo_b_${side}_wj_ex`, thighTwist);
       expression(`n_momo_c_${side}_wj_ex`, thighTwist);
 
@@ -273,22 +275,22 @@ class Skeleton {
       // the knee and the b/c shoulder helpers lean toward n_up_kata
       constraint(`n_skata_${side}_wj_cd_ex`, (world) => {
         const elbow = worldMatrices[armChain.nodes[2]];
-        Skeleton.expSetDir(world, elbow[12], elbow[13], elbow[14], scratchVector);
+        BoneMath.expSetDir(world, elbow[12], elbow[13], elbow[14], scratchVector);
       });
 
       constraint(`n_momo_a_${side}_wj_cd_ex`, (world) => {
         const knee = worldMatrices[legChain.nodes[2]];
-        Skeleton.inverseTransformPoint(world, [knee[12], knee[13], knee[14]], scratchVector);
+        BoneMath.inverseTransformPoint(world, [knee[12], knee[13], knee[14]], scratchVector);
         scratchVector[0] = -scratchVector[0];
         scratchVector[1] = -scratchVector[1];
         scratchVector[2] = -scratchVector[2];
-        Skeleton.expSetDirZX(world, scratchVector);
+        BoneMath.expSetDirZX(world, scratchVector);
       });
 
       const upperShoulder = boneIndexByName.get(`n_up_kata_${side}_ex`);
       const shoulderLean = (factor) => (world) => {
         const target = worldMatrices[upperShoulder];
-        Skeleton.expSetRot(world, target[12], target[13], target[14], factor, scratchVector);
+        BoneMath.expSetRot(world, target[12], target[13], target[14], factor, scratchVector);
       };
       constraint(`n_skata_b_${side}_wj_cd_cu_ex`, shoulderLean(0.333));
       constraint(`n_skata_c_${side}_wj_cd_cu_ex`, shoulderLean(0.5));
@@ -304,8 +306,8 @@ class Skeleton {
       mat4.rotateZ(local, local, rotations[head + 2]);
       mat4.rotateY(local, local, rotations[head + 1]);
       mat4.rotateX(local, local, rotations[head]);
-      Skeleton.rotateZSinCos(local, headChain.aim[0], headChain.aim[1]);
-      Skeleton.rotateYSinCos(local, headChain.aim[2], headChain.aim[3]);
+      BoneMath.rotateZSinCos(local, headChain.aim[0], headChain.aim[1]);
+      BoneMath.rotateYSinCos(local, headChain.aim[2], headChain.aim[3]);
 
       let yaw = Math.atan2(local[1], local[0]);
       if (yaw < -Math.PI / 2) yaw += Math.PI * 2;
@@ -325,124 +327,9 @@ class Skeleton {
     const chestBone = boneIndexByName.get("kl_mune_b_wj");
     constraint("n_hara_cd_ex", (world) => {
       const target = worldMatrices[chestBone];
-      Skeleton.inverseTransformPoint(world, [target[12], target[13], target[14]], scratchVector);
-      Skeleton.expSetDirZX(world, scratchVector);
+      BoneMath.inverseTransformPoint(world, [target[12], target[13], target[14]], scratchVector);
+      BoneMath.expSetDirZX(world, scratchVector);
     });
-  }
-
-  static limitAngle(angle) {
-    const wrapped = ((Math.abs(angle) + Math.PI) % (Math.PI * 2)) - Math.PI;
-    return angle < 0 ? -wrapped : wrapped;
-  }
-
-  // aim the matrix's local +X at a world target (ReDIVA exp_set_dir,
-  // including its hacky Gram-Schmidt for the secondary axes)
-  static expSetDir(world, targetX, targetY, targetZ, scratch) {
-    Skeleton.inverseTransformPoint(world, [targetX, targetY, targetZ], scratch);
-
-    const x = Skeleton.normalize(scratch);
-    if (!x) return;
-
-    const z = [-x[0] * x[2] - x[2], -x[2] * x[1], x[0] * x[0] + x[1] * x[1] + x[0]];
-    if (!Skeleton.normalize(z)) return;
-
-    const y = [z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0]];
-
-    Skeleton.applyRotationColumns(world, x, y, z);
-  }
-
-  // aim the matrix's local +Y along a direction given in local space
-  // (ReDIVA exp_set_dir_zx)
-  static expSetDirZX(world, direction) {
-    const y = Skeleton.normalize(direction);
-    if (!y) return;
-
-    const z = [-y[0] * y[2], -y[2] * y[1] - y[2], y[1] * y[1] + y[0] * y[0] + y[1]];
-    if (!Skeleton.normalize(z)) return;
-
-    const x = [y[1] * z[2] - y[2] * z[1], y[2] * z[0] - y[0] * z[2], y[0] * z[1] - y[1] * z[0]];
-
-    Skeleton.applyRotationColumns(world, x, y, z);
-  }
-
-  // lean the matrix about its local X by a fraction of the angle toward a
-  // world target (ReDIVA exp_set_rot)
-  static expSetRot(world, targetX, targetY, targetZ, factor, scratch) {
-    Skeleton.inverseTransformPoint(world, [targetX, targetY, targetZ], scratch);
-
-    const length = Math.hypot(scratch[1], scratch[2]);
-    if (length <= 1e-6) return;
-
-    const angle = Math.atan2(scratch[2], scratch[1]) * factor;
-    Skeleton.rotateXSinCos(world, Math.sin(angle), Math.cos(angle));
-  }
-
-  static normalize(vector) {
-    const length = Math.hypot(vector[0], vector[1], vector[2]);
-    if (length * length <= 1e-6) return null;
-
-    vector[0] /= length;
-    vector[1] /= length;
-    vector[2] /= length;
-    return vector;
-  }
-
-  // multiply a rotation given by its three column vectors onto the matrix
-  static applyRotationColumns(matrix, x, y, z) {
-    for (let row = 0; row < 3; row++) {
-      const a = matrix[row];
-      const b = matrix[4 + row];
-      const c = matrix[8 + row];
-      matrix[row] = a * x[0] + b * x[1] + c * x[2];
-      matrix[4 + row] = a * y[0] + b * y[1] + c * y[2];
-      matrix[8 + row] = a * z[0] + b * z[1] + c * z[2];
-    }
-  }
-
-  // append rotations given as sine/cosine pairs onto a column-major matrix
-  // (the solver works in sine/cosine directly, as the game does)
-  static rotateZSinCos(matrix, sin, cos) {
-    for (let i = 0; i < 4; i++) {
-      const a = matrix[i];
-      const b = matrix[4 + i];
-      matrix[i] = a * cos + b * sin;
-      matrix[4 + i] = b * cos - a * sin;
-    }
-  }
-
-  static rotateYSinCos(matrix, sin, cos) {
-    for (let i = 0; i < 4; i++) {
-      const a = matrix[i];
-      const b = matrix[8 + i];
-      matrix[i] = a * cos - b * sin;
-      matrix[8 + i] = a * sin + b * cos;
-    }
-  }
-
-  static rotateXSinCos(matrix, sin, cos) {
-    for (let i = 0; i < 4; i++) {
-      const a = matrix[4 + i];
-      const b = matrix[8 + i];
-      matrix[4 + i] = a * cos + b * sin;
-      matrix[8 + i] = b * cos - a * sin;
-    }
-  }
-
-  static translateX(matrix, x) {
-    matrix[12] += matrix[0] * x;
-    matrix[13] += matrix[1] * x;
-    matrix[14] += matrix[2] * x;
-  }
-
-  // rigid inverse: rotate the offset from the matrix's translation back
-  // through the transposed rotation
-  static inverseTransformPoint(matrix, point, out) {
-    const x = point[0] - matrix[12];
-    const y = point[1] - matrix[13];
-    const z = point[2] - matrix[14];
-    out[0] = matrix[0] * x + matrix[1] * y + matrix[2] * z;
-    out[1] = matrix[4] * x + matrix[5] * y + matrix[6] * z;
-    out[2] = matrix[8] * x + matrix[9] * y + matrix[10] * z;
   }
 
   // The game's solve (ReDIVA RobBlock::solve_ik): aim the chain root's +X
@@ -466,31 +353,35 @@ class Skeleton {
       globalMatrix[2] * x + globalMatrix[6] * y + globalMatrix[10] * z + globalMatrix[14];
 
     scratchMatrix.set(worldMatrices[root]);
-    Skeleton.inverseTransformPoint(scratchMatrix, [targetX, targetY, targetZ], scratchVector);
+    BoneMath.inverseTransformPoint(scratchMatrix, [targetX, targetY, targetZ], scratchVector);
 
     const lengthXY = Math.hypot(scratchVector[0], scratchVector[1]);
     const length = Math.hypot(scratchVector[0], scratchVector[1], scratchVector[2]);
 
     chain.aim.set([0, 1, 0, 1]);
 
-    if (lengthXY > 1e-6 && length > 1e-6) {
+    // COMPARED AGAINST A DISTANCE, not a squared one. The game guards the same divisions
+    // with 1e-6 against a SQUARED length, which is a millimetre rather than a micron and
+    // taking its constant across unchanged would leave the dead zone a thousand times
+    // narrower than the code it copies.
+    if (lengthXY > Skeleton.minimumAimDistance && length > Skeleton.minimumAimDistance) {
       chain.aim[0] = scratchVector[1] / lengthXY;
       chain.aim[1] = scratchVector[0] / lengthXY;
       chain.aim[2] = -scratchVector[2] / length;
       chain.aim[3] = lengthXY / length;
-      Skeleton.rotateZSinCos(scratchMatrix, chain.aim[0], chain.aim[1]);
-      Skeleton.rotateYSinCos(scratchMatrix, chain.aim[2], chain.aim[3]);
+      BoneMath.rotateZSinCos(scratchMatrix, chain.aim[0], chain.aim[1]);
+      BoneMath.rotateYSinCos(scratchMatrix, chain.aim[2], chain.aim[3]);
     }
 
     // roll the aimed chain about its axis so the elbow leans toward the
     // up-vector bone (already posed: it precedes the chain in table order)
     if (chain.poleBone >= 0) {
       const pole = worldMatrices[chain.poleBone];
-      Skeleton.inverseTransformPoint(scratchMatrix, [pole[12], pole[13], pole[14]], scratchVector);
+      BoneMath.inverseTransformPoint(scratchMatrix, [pole[12], pole[13], pole[14]], scratchVector);
 
       const lengthYZ = Math.hypot(scratchVector[1], scratchVector[2]);
       if (lengthYZ > 1e-6) {
-        Skeleton.rotateXSinCos(
+        BoneMath.rotateXSinCos(
           scratchMatrix,
           scratchVector[2] / lengthYZ,
           scratchVector[1] / lengthYZ,
@@ -504,7 +395,7 @@ class Skeleton {
     if (chain.nodes.length === 3) {
       const world2 = worldMatrices[node2];
       world2.set(world1);
-      Skeleton.translateX(world2, chain.lengths[0]);
+      BoneMath.translateX(world2, chain.lengths[0]);
       return;
     }
 
@@ -514,7 +405,7 @@ class Skeleton {
     let sin1 = 0;
     let cos1 = -1;
 
-    if (length > 1e-6) {
+    if (length > Skeleton.minimumAimDistance) {
       const projected = (length * length - length1 * length1) / length0;
       cos0 = Utilities.clamp((projected + length0) / (2 * length), -1, 1);
       cos1 = Utilities.clamp((projected - length0) / (2 * length1), -1, 1);
@@ -529,16 +420,16 @@ class Skeleton {
     // the elbow/knee twist helpers follow half of this bend
     chain.bendAngle = Math.atan2(sin1, cos1);
 
-    Skeleton.rotateZSinCos(world1, sin0, cos0);
+    BoneMath.rotateZSinCos(world1, sin0, cos0);
 
     const world2 = worldMatrices[node2];
     world2.set(world1);
-    Skeleton.translateX(world2, length0);
-    Skeleton.rotateZSinCos(world2, sin1, cos1);
+    BoneMath.translateX(world2, length0);
+    BoneMath.rotateZSinCos(world2, sin1, cos1);
 
     const world3 = worldMatrices[node3];
     world3.set(world2);
-    Skeleton.translateX(world3, length1);
+    BoneMath.translateX(world3, length1);
   }
 
   // one bone's compose: expression step, world = parent * T * Rz * Ry * Rx,
@@ -555,9 +446,7 @@ class Skeleton {
 
     world.set(parent < 0 ? this.globalMatrix : worldMatrices[parent]);
     mat4.translate(world, world, this.fkTranslations[bone]);
-    mat4.rotateZ(world, world, rotations[offset + 2]);
-    mat4.rotateY(world, world, rotations[offset + 1]);
-    mat4.rotateX(world, world, rotations[offset + 0]);
+    Rig.applyEuler(world, rotations, offset);
 
     const constraintStep = this.constraintSteps[bone];
     if (constraintStep) constraintStep(world);
@@ -606,10 +495,7 @@ class Skeleton {
     const values = animation.sample(frame);
     const { trackSlots, bones, rotations, positions, worldMatrices, globalMatrix } = this;
 
-    for (let track = 0; track < trackSlots.length; track++) {
-      const slot = trackSlots[track];
-      if (slot) slot.buffer[slot.offset] = values[track];
-    }
+    Rig.writeTrackValues(trackSlots, values);
 
     for (const clip of this.extraClips) {
       const clipValues = clip.animation.sample(frame);
@@ -653,9 +539,7 @@ class Skeleton {
     for (let joint = 0; joint < jointMotionBones.length; joint++) {
       if (jointMotionBones[joint] < 0) continue;
 
-      const inverseBind = skin.inverseBindMatrices.subarray(joint * 16, joint * 16 + 16);
-      const entry = palette.subarray(joint * 16, joint * 16 + 16);
-      mat4.multiply(entry, worldMatrices[jointMotionBones[joint]], inverseBind);
+      Rig.writePaletteEntry(palette, skin, joint, worldMatrices[jointMotionBones[joint]]);
     }
 
     for (let joint = 0; joint < jointPaletteSources.length; joint++) {

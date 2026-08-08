@@ -35,6 +35,8 @@ const loadClasses = () => {
     "GLTF.js",
     "Animation.js",
     "OsageRig.js",
+    "BoneMath.js",
+    "Rig.js",
     "Skeleton.js",
   ]
     .map((file) => fs.readFileSync(path.join(ROOT, file), "utf8"))

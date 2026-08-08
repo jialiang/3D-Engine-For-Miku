@@ -29,22 +29,18 @@ class OsageRig {
     this.animation = animation;
     this.skeleton = skeleton;
 
-    // the pose loop is a single forward pass, so a joint's parent has to be
-    // posed by the time we reach it
-    bones.forEach((bone, index) => {
-      if (bone.parent >= index) throw new Error(`Chain bone ${bone.name} precedes its parent.`);
-    });
+    Rig.assertParentsFirst(bones, "Chain bone");
 
     this.rotations = new Float32Array(bones.length * 3);
 
-    // rest offsets never animate, so the only channels are rotations and
-    // each track writes one slot
+    // rest offsets never animate, so the only channels are rotations. Stated in the same
+    // {buffer, offset} shape the other rigs use, so Rig.writeTrackValues serves all three.
     this.trackSlots = animation.tracks.map((track) => {
       if (track.channel !== Animation.Channels.rotation) {
         throw new Error(`A chain track drives unsupported channel ${track.channel}.`);
       }
 
-      return track.boneIndex * 3 + track.axis;
+      return { buffer: this.rotations, offset: track.boneIndex * 3 + track.axis };
     });
 
     this.worldMatrices = bones.map(() => mat4.create());
@@ -71,12 +67,9 @@ class OsageRig {
   }
 
   pose(frame) {
-    const values = this.animation.sample(frame);
     const { bones, rotations, trackSlots, worldMatrices, mountBones, joints } = this;
 
-    for (let track = 0; track < trackSlots.length; track++) {
-      rotations[trackSlots[track]] = values[track];
-    }
+    Rig.writeTrackValues(trackSlots, this.animation.sample(frame));
 
     const { worldMatrices: bodyMatrices, skin, palette } = this.skeleton;
 
@@ -96,20 +89,10 @@ class OsageRig {
 
       mat4.translate(world, world, bone.position);
 
-      if (bone.rotation) {
-        mat4.rotateZ(world, world, bone.rotation[2]);
-        mat4.rotateY(world, world, bone.rotation[1]);
-        mat4.rotateX(world, world, bone.rotation[0]);
-      }
+      if (bone.rotation) Rig.applyEuler(world, bone.rotation, 0);
 
-      mat4.rotateZ(world, world, rotations[offset + 2]);
-      mat4.rotateY(world, world, rotations[offset + 1]);
-      mat4.rotateX(world, world, rotations[offset + 0]);
-
-      const joint = joints[index];
-      const inverseBind = skin.inverseBindMatrices.subarray(joint * 16, joint * 16 + 16);
-
-      mat4.multiply(palette.subarray(joint * 16, joint * 16 + 16), world, inverseBind);
+      Rig.applyEuler(world, rotations, offset);
+      Rig.writePaletteEntry(palette, skin, joints[index], world);
     }
   }
 }

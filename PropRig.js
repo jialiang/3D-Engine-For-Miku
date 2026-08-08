@@ -17,10 +17,7 @@ class PropRig {
     const { bones } = skeletonJson;
     this.bones = bones;
 
-    // the evaluation loop assumes parents come first
-    bones.forEach((bone, index) => {
-      if (bone.parent >= index) throw new Error(`Node ${bone.name} comes before its parent.`);
-    });
+    Rig.assertParentsFirst(bones, "Node");
 
     this.rotations = new Float32Array(bones.length * 3);
     this.positions = new Float32Array(bones.length * 3);
@@ -50,13 +47,9 @@ class PropRig {
   }
 
   pose(animation, frame) {
-    const values = animation.sample(frame);
     const { trackSlots, bones, rotations, positions, worldMatrices } = this;
 
-    for (let track = 0; track < trackSlots.length; track++) {
-      const slot = trackSlots[track];
-      slot.buffer[slot.offset] = values[track];
-    }
+    Rig.writeTrackValues(trackSlots, animation.sample(frame));
 
     for (let bone = 0; bone < bones.length; bone++) {
       const world = worldMatrices[bone];
@@ -67,18 +60,13 @@ class PropRig {
       else world.set(worldMatrices[parent]);
 
       mat4.translate(world, world, positions.subarray(offset, offset + 3));
-      mat4.rotateZ(world, world, rotations[offset + 2]);
-      mat4.rotateY(world, world, rotations[offset + 1]);
-      mat4.rotateX(world, world, rotations[offset + 0]);
+      Rig.applyEuler(world, rotations, offset);
     }
 
     const { skin, palette, jointBones } = this;
 
     for (let joint = 0; joint < jointBones.length; joint++) {
-      const inverseBind = skin.inverseBindMatrices.subarray(joint * 16, joint * 16 + 16);
-      const entry = palette.subarray(joint * 16, joint * 16 + 16);
-
-      mat4.multiply(entry, worldMatrices[jointBones[joint]], inverseBind);
+      Rig.writePaletteEntry(palette, skin, joint, worldMatrices[jointBones[joint]]);
     }
 
     return palette;
