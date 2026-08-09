@@ -75,9 +75,9 @@ async function onload() {
     specByMaterial: {},
   });
 
-  // Grounding is baked offline: an override file carries corrected leg
-  // IK-target heights that land the feet (the game's own data floats
-  // them, see the dump repo's tools/ground.js).
+  // The feet are already grounded in the clip. The game's own data floats them, so
+  // tools/ground.js solves corrected leg IK-target heights offline and writes them into
+  // these windows, against the authored copy it keeps beside them. Nothing to apply here.
   const [
     skeletonJson,
     animation,
@@ -86,7 +86,6 @@ async function onload() {
     micAnimation,
     osageSkeletonJson,
     osageAnimation,
-    groundingBuffer,
   ] = await Promise.all([
     Utilities.fetch("motions/mik_skeleton.json", { responseType: "json" }),
     StreamedAnimation.load("motions/pv_743"),
@@ -95,10 +94,7 @@ async function onload() {
     StreamedAnimation.load("motions/pv_743_mic"),
     Utilities.fetch("motions/osage_skeleton.json", { responseType: "json" }),
     StreamedAnimation.load("motions/pv_743_osage"),
-    Utilities.fetch("motions/pv_743_grounding.bin", { responseType: "arraybuffer" }),
   ]);
-
-  animation.override(new Animation("motions/pv_743_grounding.bin", groundingBuffer));
 
   const skeleton = new Skeleton(skeletonJson, animation, miku.skin, miku.nodes);
 

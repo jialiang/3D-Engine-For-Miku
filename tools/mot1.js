@@ -10,13 +10,17 @@
 const fs = require("fs");
 const path = require("path");
 
-// TANGENTS ARE INT16, values are not, which is the opposite of the obvious split. A
-// tangent is a derivative and barely compresses, so it costs 4.70MB gzipped of the set
-// against the values' 3.37MB, while the rig is far less sensitive to it: quantised
-// tangents move the bones 0.14mm at worst, quantised values 0.42mm, and quantising both
-// saves LESS over the wire than tangents alone because float32 values hold structure gzip
-// exploits and int16 packs it away. One scale per track, since a finger curl and a hip
-// swing do not share a range.
+// TANGENTS ARE INT16, VALUES ARE NOT, which is the opposite of the obvious split. A tangent
+// is a derivative and barely compresses, costing 4.70MB gzipped of the motion set against
+// the values' 3.37MB, while the rig is far less sensitive to it: 0.14mm of bone travel
+// against 0.42mm. Quantising the values as well saves LESS over the wire, because float32
+// values hold structure gzip exploits and int16 packs it away.
+//
+// ONE LAYOUT, deliberately. A curve with a key on every frame could drop both the frame
+// numbers and the tangents and store values alone, at 2 bytes a key against 8, which is
+// worth about 4x on such a file. Nothing here is one: the grounding bake was the only
+// candidate and it writes keyframes into the clip instead. A second encoding that no file
+// used would be a branch nothing exercises.
 const serializeMot1 = (tracks, frameRate, frameCount) => {
   const totalKeys = tracks.reduce((sum, track) => sum + track.keys.length, 0);
   const buffer = Buffer.alloc(20 + tracks.length * 12 + totalKeys * 8);
@@ -30,6 +34,7 @@ const serializeMot1 = (tracks, frameRate, frameCount) => {
   offset = buffer.writeUInt32LE(tracks.length, offset);
 
   for (const track of tracks) {
+    // one scale per track, since a finger curl and a hip swing do not share a range
     const peak = track.keys.reduce((most, key) => Math.max(most, Math.abs(key.tangent)), 0);
     const scale = peak === 0 ? 1 : peak / 32767;
 
@@ -50,7 +55,7 @@ const serializeMot1 = (tracks, frameRate, frameCount) => {
   return buffer;
 };
 
-// Hands back plain floats whatever the file holds, so a bake never sees the storage.
+// Hands back plain floats, so a bake never sees how the tangents were stored.
 const parseMot1 = (buffer) => {
   const version = buffer.readUInt32LE(4);
   if (version !== 2) throw new Error(`Unsupported MOT1 version ${version}.`);
@@ -70,6 +75,7 @@ const parseMot1 = (buffer) => {
     const frames = [];
     const values = [];
     const tangents = [];
+
     for (let key = 0; key < keyCount; key++) frames.push(buffer.readUInt16LE(offset + key * 2));
     offset += keyCount * 2;
     for (let key = 0; key < keyCount; key++) values.push(buffer.readFloatLE(offset + key * 4));

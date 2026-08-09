@@ -72,10 +72,6 @@ const verifyHeadOnly = async (file, indices) => {
   const skeletonJson = JSON.parse(fs.readFileSync(path.join(motions, "mik_skeleton.json"), "utf8"));
 
   const animation = new Animation("pv_743.bin", loadMergedMotion(path.join(motions, "pv_743")));
-  animation.override(
-    new Animation("grounding.bin", readBuffer(path.join(motions, "pv_743_grounding.bin"))),
-  );
-
   // No ribbon chain rig: it was retired with the spring bake this rebind replaced. The
   // comparison does not need it either, since what it checks is that these vertices follow
   // the head and nothing else.

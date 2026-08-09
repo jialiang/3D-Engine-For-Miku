@@ -37,7 +37,6 @@ class StreamedAnimation {
 
     // windows that ran out of retries: a hole to play across rather than one to wait on
     this.abandonedWindows = new Set();
-    this.overrideAnimation = null;
   }
 
   // Window 0 is loaded before the rig binds, so its tracks define the layout every later
@@ -64,8 +63,6 @@ class StreamedAnimation {
         throw new Error(`${url} does not carry the window-0 track layout`);
       }
     }
-
-    if (this.overrideAnimation) chunk.override(this.overrideAnimation);
 
     this.chunks[windowIndex] = chunk;
   }
@@ -123,15 +120,5 @@ class StreamedAnimation {
 
   sample(frame) {
     return this.chunkFor(frame).sample(frame);
-  }
-
-  // apply a whole-timeline override (e.g. the grounding tracks) to every
-  // chunk, both the ones already loaded and the ones still streaming in
-  override(other) {
-    this.overrideAnimation = other;
-
-    for (const chunk of this.chunks) {
-      if (chunk) chunk.override(other);
-    }
   }
 }

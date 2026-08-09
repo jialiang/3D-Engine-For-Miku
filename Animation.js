@@ -34,8 +34,8 @@ class Animation {
         channelAxis: { type: "unsignedInteger" },
         kind: { type: "unsignedInteger" },
         keyCount: { type: "unsignedLong" },
-        // The tangents are int16 against this, one scale per track. See tools/mot1.js for
-        // why the derivative is the half worth quantising and the values are not.
+        // The tangents are int16 against this, one scale per track. tools/mot1.js has why
+        // the derivative is the half worth quantising and the values are not.
         tangentScale: { type: "float" },
         frames: { type: "unsignedShort", length: "keyCount" },
         values: { type: "float", length: "keyCount" },
@@ -72,31 +72,6 @@ class Animation {
     }));
 
     this.trackValues = new Float32Array(this.tracks.length);
-  }
-
-  // Replace tracks with a partner file's corrected versions, matched by
-  // bone and channel. The grounding override bakes corrected leg IK-target
-  // heights offline (the dump repo's tools/ground.js) so the plain pose
-  // loop lands the feet without any runtime foot pass.
-  override(other) {
-    if (other.frameRate !== this.frameRate || other.frameCount !== this.frameCount) {
-      throw new Error("The override does not match the animation's timeline.");
-    }
-
-    for (const replacement of other.tracks) {
-      const index = this.tracks.findIndex(
-        (track) =>
-          track.boneIndex === replacement.boneIndex &&
-          track.channel === replacement.channel &&
-          track.axis === replacement.axis,
-      );
-
-      if (index < 0) {
-        throw new Error(`No track matches the override for bone ${replacement.boneIndex}.`);
-      }
-
-      this.tracks[index] = replacement;
-    }
   }
 
   // Sample every track at the given (fractional) frame.

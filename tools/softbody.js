@@ -264,10 +264,6 @@ const main = async () => {
   const skeletonJson = JSON.parse(fs.readFileSync(path.join(MOTIONS, "mik_skeleton.json"), "utf8"));
 
   const animation = new Animation("pv_743.bin", loadMergedMotion(path.join(MOTIONS, "pv_743")));
-  animation.override(
-    new Animation("grounding.bin", readBuffer(path.join(MOTIONS, "pv_743_grounding.bin"))),
-  );
-
   const skeleton = new Skeleton(skeletonJson, animation, gltf.skin, gltf.nodes);
 
   const proxies = JSON.parse(fs.readFileSync(proxyPath, "utf8"));

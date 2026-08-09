@@ -1,33 +1,34 @@
-// Bake the foot-grounding override for the Cat Food body motion into
-// motions/pv_743_grounding.bin, a small MOT1 file carrying corrected
-// left/right leg IK-target height tracks. index.js loads it on top of the
-// body motion (Animation.override), so the plain pose loop lands the feet
-// and no runtime foot pass exists. The motion itself stays a faithful
-// conversion of the game data.
+// Ground the feet of the Cat Food body motion, in place.
 //
-// Why an override is needed at all: the take was authored against the
-// game's foot-bottom model (heel point + toe-tip probe, ReDIVA
-// get_ashi_pos), whose height disagrees with the costume's real sole by
-// bind-measured offsets and the game only ever LIFTS feet out of the
-// floor (AshiOidashiColle), never plants them. Held poses therefore
-// hover up to ~4.5cm.
+// The corrected left/right leg IK-target heights are written straight into the clip's own
+// windows (motions/pv_743), so the plain pose loop lands the feet and the runtime applies
+// nothing on top. There used to be a separate override file for this; there is not one now.
 //
-// The policy: a downward movement whose FINAL value is below 4.5cm rests
-// on the floor instead. Concretely the bake plants sustained
-// quasi-static HOLDS of the foot-bottom curve and leaves every moving
-// frame exactly raw, easing in and out across short transitions. Holds
-// are what hover visibly (the ending pose floats 3.5cm for nine
-// seconds). Motion, upward or downward, keeps its authored trajectory
-// (low footwork excursions reach ~4cm inside otherwise-low stretches
-// and must survive). All the temporal logic and the solver iteration
-// happen here, offline, where they cannot jitter.
+// THE AUTHORED LEG TRACKS ARE KEPT BESIDE THE CLIP, in pv_743-legs-authored.bin, and every
+// run solves from them. Without that the second run would ground the already-grounded clip.
+// It is the same arrangement as the PNG masters beside the WebP and the lossless audio
+// beside the mp3: keep the source, ship the derived thing, never serve the source.
 //
-// The bake runs our own classes headless (Skeleton, Animation, GLTF)
-// against models/pierretta/pierretta.glb, so the corrected channel values
-// reproduce exactly through the solver. Inputs are this repo's motions/:
-// mik_skeleton.json plus the pv_743/ motion chunks (copied in from the dump
-// repo), which the bake stitches back into the full timeline it analyzes.
-// Output: motions/pv_743_grounding.bin.
+// Why grounding is needed at all: the take was authored against the game's foot-bottom
+// model (heel point + toe-tip probe, ReDIVA get_ashi_pos), whose height disagrees with the
+// costume's real sole by bind-measured offsets, and the game only ever LIFTS feet out of
+// the floor (AshiOidashiColle), never plants them. Held poses therefore hover up to ~4.5cm.
+//
+// The policy: a downward movement whose FINAL value is below 4.5cm rests on the floor
+// instead. Concretely the bake plants sustained quasi-static HOLDS of the foot-bottom curve
+// and leaves every moving frame exactly raw, easing in and out across short transitions.
+// Holds are what hover visibly (the ending pose floats 3.5cm for nine seconds). Motion,
+// upward or downward, keeps its authored trajectory (low footwork excursions reach ~4cm
+// inside otherwise-low stretches and must survive). All the temporal logic and the solver
+// iteration happen here, offline, where they cannot jitter.
+//
+// The solve runs per frame but its result goes back onto the keys the animator already
+// wrote, with keys added only where those cannot follow it: about twice the authored count,
+// against the 18,351 a key-per-frame curve would need.
+//
+// The bake runs our own classes headless (Skeleton, Animation, GLTF) against
+// models/pierretta/pierretta.glb, so the corrected channel values reproduce exactly through
+// the solver.
 //
 // usage: node tools/ground.js
 
@@ -35,7 +36,7 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
-const { serializeMot1, loadMergedMotion } = require("./mot1");
+const { serializeMot1, parseMot1, loadMergedMotion } = require("./mot1");
 
 const ROOT = path.join(__dirname, "..");
 const MOTIONS = path.join(ROOT, "motions");
@@ -286,6 +287,200 @@ const buildHoldWeights = (holds, frameCount) => {
   return weights;
 };
 
+// How far the fitted curve may sit from the solved heights, in metres. Effectively zero:
+// the fit is refined until it reproduces the solve exactly at every frame, and the verify
+// then reports the same figures the old separate per-frame file did, untouched frames
+// included.
+//
+// WHAT THAT COSTS, since the number looks extravagant. Loosening to a hundredth of a
+// millimetre would save 1.8kB gzipped on the critical path and 152kB across the whole clip,
+// and every figure the verify prints would be identical bar one: untouched frames would read
+// 0.01mm instead of 0.00mm. Loosening to half a millimetre saves another 6.6kB up front and
+// doubles the hold error, which is where it stops being free.
+//
+// It cannot go tighter than this. The refinement only adds keys at frames that do not
+// already carry one, so it stops at a key per frame plus the authored corner pairs.
+const FIT_TOLERANCE = 1e-9;
+
+// A runtime track in the shape serializeMot1 wants.
+const toWritableTrack = (track) => ({
+  boneIndex: track.boneIndex,
+  channelAxis: track.channel * 3 + track.axis,
+  kind: 3,
+  keys: [...track.frames].map((frame, index) => ({
+    frame,
+    value: track.values[index],
+    tangent: track.tangents[index],
+  })),
+});
+
+// The solved heights expressed as keys rather than one per frame.
+//
+// The authored keys come first and keep their own tangents, which describe the shape of the
+// motion and still fit after the curve is lifted. A frame the fit misses gets a key of its
+// own, and the pass repeats until nothing misses: two rounds usually, four at most.
+// Duplicated frames are the format's way of writing a corner, so they travel in pairs and
+// each half keeps the tangent it was written with.
+// A FRAME THE SOLVE NEVER MOVED KEEPS ITS AUTHORED KEY EXACTLY, value and tangent. Only the
+// stretches the solve actually lifted are refitted, and keys are only ever added inside
+// them. Refitting everywhere would leave the take drifting by the fit tolerance in places
+// the grounding has no business touching, which is what the verify's untouched-frame figure
+// exists to catch.
+const fitKeyframes = (authored, solved, frameCount, Animation) => {
+  const isTouched = new Uint8Array(frameCount);
+
+  for (let frame = 0; frame < frameCount; frame++) {
+    if (Math.abs(solved[frame] - Animation.sampleTrack(authored, frame)) > 1e-9) {
+      isTouched[frame] = 1;
+    }
+  }
+
+  // a key on the shoulder of a lifted run belongs to it, or the cubic leading in still
+  // aims at the authored height
+  const isInPlay = (frame) =>
+    isTouched[frame] ||
+    (frame > 0 && isTouched[frame - 1]) ||
+    (frame + 1 < frameCount && isTouched[frame + 1]);
+
+  const authoredAt = new Map();
+
+  authored.frames.forEach((frame, index) => {
+    if (!authoredAt.has(frame)) authoredAt.set(frame, []);
+    authoredAt
+      .get(frame)
+      .push({ value: authored.values[index], tangent: authored.tangents[index] });
+  });
+
+  // THE AUTHORED FRAMES ARE A LIST, NOT A SET. A frame written twice is this format's step
+  // discontinuity, the pair carrying the tangent arriving and the tangent leaving, and this
+  // track has 1,270 of them. Refining through a Set of frame numbers collapses every pair
+  // and flattens every corner in the take.
+  const authoredFrames = [...authored.frames];
+  const isAuthoredFrame = new Set(authoredFrames);
+  const addedFrames = new Set();
+
+  const currentFrames = () =>
+    [...authoredFrames, ...addedFrames].sort((first, second) => first - second);
+
+  let frames = currentFrames();
+
+  const buildTrack = () => {
+    const taken = new Map();
+    const values = [];
+    const tangents = [];
+
+    frames.forEach((frame) => {
+      const written = authoredAt.get(frame);
+      const used = taken.get(frame) ?? 0;
+      if (written) taken.set(frame, used + 1);
+
+      const authoredKey = written && used < written.length ? written[used] : null;
+
+      if (authoredKey && !isInPlay(frame)) {
+        values.push(authoredKey.value);
+        tangents.push(authoredKey.tangent);
+        return;
+      }
+
+      values.push(solved[frame]);
+      tangents.push(authoredKey ? authoredKey.tangent : null);
+    });
+
+    tangents.forEach((tangent, index) => {
+      if (tangent !== null) return;
+
+      const before = Math.max(index - 1, 0);
+      const after = Math.min(index + 1, frames.length - 1);
+      const span = frames[after] - frames[before];
+
+      tangents[index] = span === 0 ? 0 : (values[after] - values[before]) / span;
+    });
+
+    return {
+      frames: Float32Array.from(frames),
+      values: Float32Array.from(values),
+      tangents: Float32Array.from(tangents),
+      cursor: 0,
+    };
+  };
+
+  const missedFrames = (track) => {
+    const missing = [];
+
+    // checked at EVERY frame, not only the lifted ones: an untouched frame with no key of
+    // its own sits between a kept key and a moved one, and drifts unless the fit pins it
+    for (let frame = 0; frame < frameCount; frame++) {
+      if (Math.abs(Animation.sampleTrack(track, frame) - solved[frame]) > FIT_TOLERANCE) {
+        missing.push(frame);
+      }
+    }
+
+    return missing;
+  };
+
+  let track = buildTrack();
+
+  for (let round = 0; round < 8; round++) {
+    const missing = missedFrames(track);
+    if (!missing.length) break;
+
+    for (const frame of missing) {
+      if (!isAuthoredFrame.has(frame)) addedFrames.add(frame);
+    }
+
+    frames = currentFrames();
+    track = buildTrack();
+  }
+
+  let worst = 0;
+  for (let frame = 0; frame < frameCount; frame++) {
+    worst = Math.max(worst, Math.abs(Animation.sampleTrack(track, frame) - solved[frame]));
+  }
+
+  return { track, worst };
+};
+
+// Put the corrected tracks back into the windowed clip, replacing the ones they match by
+// bone and channel. Each window keeps one key past each edge so it can still be sampled to
+// its own boundary on its own, which is how the runtime plays them.
+const writeTracksIntoChunks = (clipDirectory, replacements) => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(clipDirectory, "manifest.json"), "utf8"));
+
+  const { frameRate, frameCount, windowSize, chunks } = manifest;
+  let written = 0;
+
+  chunks.forEach((name, windowIndex) => {
+    const file = path.join(clipDirectory, name);
+    const existing = parseMot1(fs.readFileSync(file));
+
+    const windowStart = windowIndex * windowSize;
+    const windowEnd = Math.min(windowStart + windowSize, frameCount);
+
+    const rebuilt = existing.map((track) => {
+      const replacement = replacements.find(
+        (candidate) =>
+          candidate.boneIndex === track.boneIndex && candidate.channelAxis === track.channelAxis,
+      );
+
+      const keys = replacement
+        ? replacement.keys.filter((key) => key.frame >= windowStart - 1 && key.frame <= windowEnd)
+        : track.frames.map((frame, index) => ({
+            frame,
+            value: track.values[index],
+            tangent: track.tangents[index],
+          }));
+
+      if (replacement) written++;
+
+      return { boneIndex: track.boneIndex, channelAxis: track.channelAxis, kind: track.kind, keys };
+    });
+
+    fs.writeFileSync(file, serializeMot1(rebuilt, frameRate, frameCount));
+  });
+
+  return written;
+};
+
 const main = async () => {
   const { Utilities, GLTF, Animation, Skeleton } = loadClasses();
   Utilities.loadImage = async () => null;
@@ -316,6 +511,36 @@ const main = async () => {
 
   const trackIndices = [trackIndexFor("l"), trackIndexFor("r")];
   if (trackIndices.some((index) => index < 0)) throw new Error("leg IK height tracks not found");
+
+  // THE AUTHORED LEG TRACKS ARE THE MASTER, and this is why they exist as a file. The bake
+  // writes its result into the clip itself, so by the second run the clip on disk is already
+  // grounded and solving from it would ground the grounding. The two tracks it rewrites are
+  // kept beside the clip untouched and every run starts from them, the same arrangement the
+  // PNG masters have beside the WebP and the lossless audio beside the mp3. The page never
+  // asks for this file.
+  const masterPath = path.join(MOTIONS, "pv_743-legs-authored.bin");
+
+  if (!fs.existsSync(masterPath)) {
+    const authored = trackIndices.map((index) => toWritableTrack(animation.tracks[index]));
+    fs.writeFileSync(masterPath, serializeMot1(authored, animation.frameRate, frameCount));
+    console.log(`wrote ${path.basename(masterPath)}, the authored leg tracks, on first run`);
+  }
+
+  const master = new Animation(masterPath, readBuffer(masterPath));
+
+  for (const index of trackIndices) {
+    const restored = master.tracks.find(
+      (track) =>
+        track.boneIndex === animation.tracks[index].boneIndex &&
+        track.channel === animation.tracks[index].channel &&
+        track.axis === animation.tracks[index].axis,
+    );
+
+    if (!restored)
+      throw new Error(`${path.basename(masterPath)} has no track for the ${index} slot`);
+
+    animation.tracks[index] = { ...restored, cursor: 0 };
+  }
 
   const candidates = [null, null];
   const wrapped = {
@@ -414,42 +639,42 @@ const main = async () => {
     );
   }
 
-  // serialize: dense per-frame keys, Catmull-Rom tangents for a smooth
-  // fractional-frame playhead
+  // The solve ran per frame, but it goes back onto the keys the animator already wrote,
+  // with keys added only where those cannot follow it. The result belongs in the clip
+  // rather than in a file of its own, so there is nothing to override at runtime.
   const tracks = feet.map((foot, i) => {
-    const values = baked[i];
-    const keys = [];
+    const authored = master.tracks.find(
+      (track) =>
+        track.boneIndex === boneIndexByName.get(`cl_momo_${foot.side}`) &&
+        track.channel === Animation.Channels.ikTarget &&
+        track.axis === 1,
+    );
 
-    // DIVIDED BY THE SPAN THAT WAS ACTUALLY SAMPLED, which is 2 in the middle and 1 at each
-    // end where the clamp folds one neighbour onto the frame itself. Dividing by 2
-    // throughout halves the slope at the two ends, reporting a curve flatter than the data.
-    for (let frame = 0; frame < frameCount; frame++) {
-      const before = Math.max(0, frame - 1);
-      const after = Math.min(frameCount - 1, frame + 1);
-      const span = after - before;
+    const { track, worst } = fitKeyframes(authored, baked[i], frameCount, Animation);
 
-      const tangent = span > 0 ? (values[after] - values[before]) / span : 0;
-
-      keys.push({ frame, value: values[frame], tangent });
-    }
+    console.log(
+      `${foot.side}: ${authored.frames.length} authored keys -> ${track.frames.length} written, ` +
+        `fit within ${(worst * 1000).toFixed(3)}mm`,
+    );
 
     return {
       boneIndex: boneIndexByName.get(`cl_momo_${foot.side}`),
       channelAxis: Animation.Channels.ikTarget * 3 + 1,
       kind: 3,
-      keys,
+      keys: [...track.frames].map((frame, index) => ({
+        frame,
+        value: track.values[index],
+        tangent: track.tangents[index],
+      })),
     };
   });
 
-  const buffer = serializeMot1(tracks, animation.frameRate, frameCount);
-  const outputPath = path.join(MOTIONS, "pv_743_grounding.bin");
-  fs.writeFileSync(outputPath, buffer);
+  const replaced = writeTracksIntoChunks(path.join(MOTIONS, "pv_743"), tracks);
+  console.log(`wrote the corrected legs into ${replaced} tracks across the clip's windows`);
 
-  // verification: replay the written file through the runtime's own
-  // override path and sweep the whole song
-  const merged = new Animation("pv_743.bin", baseBuffer);
-  const overrideBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.length);
-  merged.override(new Animation("pv_743_grounding.bin", overrideBuffer));
+  // verification: reload the clip from what was just written and sweep the whole song, so
+  // this measures the shipped bytes rather than anything still in memory
+  const merged = new Animation("pv_743.bin", loadMergedMotion(path.join(MOTIONS, "pv_743")));
   const verifySkeleton = new Skeleton(skeletonJson, merged, gltf.skin, gltf.nodes);
 
   let minSole = Infinity;
@@ -483,7 +708,12 @@ const main = async () => {
   holdSoles.sort((a, b) => a - b);
   const percentile = (p) => holdSoles[Math.floor((holdSoles.length - 1) * p)];
 
-  console.log(`pv_743_grounding.bin: ${(buffer.length / 1024).toFixed(0)} kB, 2 tracks`);
+  const clipBytes = fs
+    .readdirSync(path.join(MOTIONS, "pv_743"))
+    .filter((name) => name.endsWith(".bin"))
+    .reduce((total, name) => total + fs.statSync(path.join(MOTIONS, "pv_743", name)).size, 0);
+
+  console.log(`pv_743: ${(clipBytes / 1024).toFixed(0)} kB across its windows, legs included`);
   console.log(
     `verify: hold soles p50 ${(percentile(0.5) * 1000).toFixed(2)}mm ` +
       `p95 ${(percentile(0.95) * 1000).toFixed(2)}mm max ${(percentile(1) * 1000).toFixed(2)}mm`,
@@ -495,7 +725,7 @@ const main = async () => {
   console.log(
     `verify: max per-frame sole step inside affected regions ${(maxStep * 1000).toFixed(1)}mm`,
   );
-  console.log(`wrote ${path.relative(ROOT, outputPath)}`);
+  console.log(`wrote ${path.relative(ROOT, path.join(MOTIONS, "pv_743"))}`);
 };
 
 main().catch((error) => {
