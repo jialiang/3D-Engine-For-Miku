@@ -37,7 +37,7 @@
 // 5.28 for this. A basis of their own cannot ship at any price, needing k=47 for 6 degrees
 // against a shader cap of 24.
 //
-// Both figures are quoted here only, and want updating after a re-bake.
+// Both figures are quoted here only and want updating after a re-bake.
 //
 // TANGENTS ARE DERIVED HERE, NOT SHIPPED. Animation.sampleTrack is a cubic Hermite and
 // wants a tangent per key, but with a key on every frame they are just a central difference

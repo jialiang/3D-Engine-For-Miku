@@ -214,7 +214,7 @@ async function onload() {
     cameraUbo.updateCameraData(camera);
 
     // the audio clock drives the dance, smoothed across the browser's coarse
-    // currentTime updates (see AudioClock); a paused or ended track holds its
+    // currentTime updates (see AudioClock). A paused or ended track holds its
     // pose, a restarted track rewinds the sampling cursors automatically
     const frame = Math.min(clock.read() * animation.frameRate, animation.frameCount - 1);
 
@@ -403,7 +403,7 @@ async function onload() {
         return;
       }
 
-      // A STALL IS NOT A PAUSE, and a stopped track cannot tell them apart: the draw loop
+      // A STALL IS NOT A PAUSE and a stopped track cannot tell them apart: the draw loop
       // stops the audio itself while a window arrives. So the toggle tracks the user's own
       // intent, or the next tap does the opposite of what it looks like.
       isPaused = !isPaused;

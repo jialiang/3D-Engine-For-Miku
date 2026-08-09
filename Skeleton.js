@@ -465,7 +465,7 @@ class Skeleton {
   }
 
   // Play another clip on this rig alongside the main take. Clips are expected
-  // to drive disjoint channels (the face bake does); where two overlap, the
+  // to drive disjoint channels (the face bake does). Where two overlap, the
   // clip bound last wins.
   addClip(animation) {
     this.extraClips.push({ animation, slots: this.buildTrackSlots(animation) });

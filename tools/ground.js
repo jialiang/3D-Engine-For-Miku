@@ -17,7 +17,7 @@
 // quasi-static HOLDS of the foot-bottom curve and leaves every moving
 // frame exactly raw, easing in and out across short transitions. Holds
 // are what hover visibly (the ending pose floats 3.5cm for nine
-// seconds); motion, upward or downward, keeps its authored trajectory
+// seconds). Motion, upward or downward, keeps its authored trajectory
 // (low footwork excursions reach ~4cm inside otherwise-low stretches
 // and must survive). All the temporal logic and the solver iteration
 // happen here, offline, where they cannot jitter.

@@ -31,7 +31,7 @@ class Light {
   // REBUILT WHENEVER THE LIGHT MOVES, which is why it is no longer inlined in the constructor.
   // A shadow frustum fixed at the world origin only covers a subject standing there and this
   // one is 30 units across against a character that travels nearly 2 metres of scene space
-  // (24 units); walk out of it and the shadow simply stops.
+  // (24 units). Walk out of it and the shadow simply stops.
   updateTransformation() {
     const { transformationMatrix, projectionMatrix, transform } = this;
 

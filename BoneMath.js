@@ -1,7 +1,7 @@
 // The maths Skeleton's posing needs, all of it pure and lifted from the game (ReDIVA).
 //
 // Two groups: the sine/cosine matrix operations, which take a rotation already resolved to
-// its sine and cosine rather than an angle, and the aiming helpers the procedural bones use
+// its sine and cosine rather than an angle and the aiming helpers the procedural bones use
 // to point one bone at another. They sit apart from Skeleton because none of them touches an
 // instance, which is the only seam that file has.
 class BoneMath {

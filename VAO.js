@@ -1,7 +1,7 @@
 // Vertex Array Object
 class VAO {
   // boneIndices/boneWeights are the 4-bone matrix-palette skinning inputs
-  // (glTF JOINTS_0/WEIGHTS_0); they replaced the old 2-bone quaternion slots.
+  // (glTF JOINTS_0/WEIGHTS_0). They replaced the old 2-bone quaternion slots.
   //
   // canQuantize marks an attribute the asset may store as normalized integers
   // rather than floats, which the GPU scales back on the way to the shader. It

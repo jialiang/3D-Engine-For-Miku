@@ -168,7 +168,7 @@ const main = async () => {
 
   // ASKED AS "not within tolerance" so that a NaN fails. Every comparison against NaN is
   // false, so the question the other way round lets an unanswerable result through as a
-  // pass, and this is the last check before the committed glb is replaced.
+  // pass and this is the last check before the committed glb is replaced.
   if (!(worst <= 1e-6)) {
     throw new Error("the rebind did not take: those vertices are still driven by something else");
   }

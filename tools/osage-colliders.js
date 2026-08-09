@@ -215,7 +215,7 @@ const createHullBodies = (Jolt, bodies, hulls, layer, worldMatrices) => {
   // The hulls as triangles, for drawing them in the engine. Taken from Jolt's own
   // shapes rather than recomputed, so what is on screen is what collided.
   const triangles = () => {
-    // Destroyed by hand, and one scale shared: these are handles into the WASM heap rather
+    // Destroyed by hand and one scale shared: these are handles into the WASM heap rather
     // than JS objects, so nothing collects them and a leak per hull per call exhausts the
     // heap mid-solve, aborting nowhere near the line at fault.
     const scale = new Jolt.Vec3(1, 1, 1);
