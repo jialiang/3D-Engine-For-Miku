@@ -34,9 +34,12 @@ class Animation {
         channelAxis: { type: "unsignedInteger" },
         kind: { type: "unsignedInteger" },
         keyCount: { type: "unsignedLong" },
+        // The tangents are int16 against this, one scale per track. See tools/mot1.js for
+        // why the derivative is the half worth quantising and the values are not.
+        tangentScale: { type: "float" },
         frames: { type: "unsignedShort", length: "keyCount" },
         values: { type: "float", length: "keyCount" },
-        tangents: { type: "float", length: "keyCount" },
+        tangents: { type: "short", length: "keyCount" },
       },
     },
   };
@@ -50,7 +53,7 @@ class Animation {
     const parsed = new FileParser(url, arrayBuffer, Animation.Structure).parsedData;
 
     if (parsed.magic !== "MOT1") throw new Error(`${url} is not a MOT1 animation.`);
-    if (parsed.version !== 1) throw new Error(`Unsupported MOT1 version ${parsed.version}.`);
+    if (parsed.version !== 2) throw new Error(`Unsupported MOT1 version ${parsed.version}.`);
 
     this.frameRate = parsed.frameRate;
     this.frameCount = parsed.frameCount;
@@ -64,7 +67,7 @@ class Animation {
       axis: track.channelAxis % 3,
       frames: track.frames,
       values: track.values,
-      tangents: track.tangents,
+      tangents: Float32Array.from(track.tangents, (stored) => stored * track.tangentScale),
       cursor: 0,
     }));
 

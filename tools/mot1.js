@@ -10,27 +10,39 @@
 const fs = require("fs");
 const path = require("path");
 
+// TANGENTS ARE INT16, values are not, which is the opposite of the obvious split. A
+// tangent is a derivative and barely compresses, so it costs 4.70MB gzipped of the set
+// against the values' 3.37MB, while the rig is far less sensitive to it: quantised
+// tangents move the bones 0.14mm at worst, quantised values 0.42mm, and quantising both
+// saves LESS over the wire than tangents alone because float32 values hold structure gzip
+// exploits and int16 packs it away. One scale per track, since a finger curl and a hip
+// swing do not share a range.
 const serializeMot1 = (tracks, frameRate, frameCount) => {
   const totalKeys = tracks.reduce((sum, track) => sum + track.keys.length, 0);
-  const buffer = Buffer.alloc(20 + tracks.length * 8 + totalKeys * 10);
+  const buffer = Buffer.alloc(20 + tracks.length * 12 + totalKeys * 8);
   const normalizeZero = (value) => (value === 0 ? 0 : value);
   let offset = 0;
 
   buffer.write("MOT1", offset, "ascii");
-  offset = buffer.writeUInt32LE(1, offset + 4);
+  offset = buffer.writeUInt32LE(2, offset + 4);
   offset = buffer.writeUInt32LE(frameRate, offset);
   offset = buffer.writeUInt32LE(frameCount, offset);
   offset = buffer.writeUInt32LE(tracks.length, offset);
 
   for (const track of tracks) {
+    const peak = track.keys.reduce((most, key) => Math.max(most, Math.abs(key.tangent)), 0);
+    const scale = peak === 0 ? 1 : peak / 32767;
+
     offset = buffer.writeUInt16LE(track.boneIndex, offset);
     offset = buffer.writeUInt8(track.channelAxis, offset);
     offset = buffer.writeUInt8(track.kind, offset);
     offset = buffer.writeUInt32LE(track.keys.length, offset);
+    offset = buffer.writeFloatLE(scale, offset);
 
     for (const key of track.keys) offset = buffer.writeUInt16LE(key.frame, offset);
     for (const key of track.keys) offset = buffer.writeFloatLE(normalizeZero(key.value), offset);
-    for (const key of track.keys) offset = buffer.writeFloatLE(normalizeZero(key.tangent), offset);
+    for (const key of track.keys)
+      offset = buffer.writeInt16LE(Math.round(key.tangent / scale), offset);
   }
 
   if (offset !== buffer.length) throw new Error(`wrote ${offset} of ${buffer.length} bytes`);
@@ -38,7 +50,11 @@ const serializeMot1 = (tracks, frameRate, frameCount) => {
   return buffer;
 };
 
+// Hands back plain floats whatever the file holds, so a bake never sees the storage.
 const parseMot1 = (buffer) => {
+  const version = buffer.readUInt32LE(4);
+  if (version !== 2) throw new Error(`Unsupported MOT1 version ${version}.`);
+
   const trackCount = buffer.readUInt32LE(16);
   const tracks = [];
   let offset = 20;
@@ -48,7 +64,8 @@ const parseMot1 = (buffer) => {
     const channelAxis = buffer.readUInt8(offset + 2);
     const kind = buffer.readUInt8(offset + 3);
     const keyCount = buffer.readUInt32LE(offset + 4);
-    offset += 8;
+    const tangentScale = buffer.readFloatLE(offset + 8);
+    offset += 12;
 
     const frames = [];
     const values = [];
@@ -57,8 +74,12 @@ const parseMot1 = (buffer) => {
     offset += keyCount * 2;
     for (let key = 0; key < keyCount; key++) values.push(buffer.readFloatLE(offset + key * 4));
     offset += keyCount * 4;
-    for (let key = 0; key < keyCount; key++) tangents.push(buffer.readFloatLE(offset + key * 4));
-    offset += keyCount * 4;
+
+    for (let key = 0; key < keyCount; key++) {
+      tangents.push(buffer.readInt16LE(offset + key * 2) * tangentScale);
+    }
+
+    offset += keyCount * 2;
 
     tracks.push({ boneIndex, channelAxis, kind, frames, values, tangents });
   }
