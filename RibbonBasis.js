@@ -87,21 +87,35 @@ class RibbonBasis {
       responseType: "json",
     });
 
-    const [basis, mean, weights, rest, fans] = await Promise.all(
-      ["positionBasis", "positionMean", "positionWeights", "positionRest", "normalFans"].map(
-        (key) =>
-          Utilities.fetch(`${directory}/${manifest.files[key].file}`, {
-            responseType: "arraybuffer",
-          }),
+    const keys = ["positionBasis", "positionMean", "positionWeights", "positionRest", "normalFans"];
+
+    const buffers = await Promise.all(
+      keys.map((key) =>
+        Utilities.fetch(`${directory}/${manifest.files[key].file}`, {
+          responseType: "arraybuffer",
+        }),
       ),
     );
 
+    // EVERY BLOB SHIPS AS INT16 with its own scale (see the manifest's quantisation note),
+    // which halves the set for 0.045mm of position at worst. Decoded here rather than
+    // deeper in: past this point nothing needs to know how the bytes arrived.
+    const [basis, mean, weights, rest, fans] = keys.map((key, index) => {
+      const { scale } = manifest.files[key];
+      const stored = new Int16Array(buffers[index]);
+      const values = new Float32Array(stored.length);
+
+      for (let index = 0; index < stored.length; index++) values[index] = stored[index] * scale;
+
+      return values;
+    });
+
     return new RibbonBasis(gl, program, manifest, bindPositions, {
-      basis: new Float32Array(basis),
-      mean: new Float32Array(mean),
-      weights: new Float32Array(weights),
-      rest: new Float32Array(rest),
-      fans: new Float32Array(fans),
+      basis,
+      mean,
+      weights,
+      rest,
+      fans,
     });
   }
 

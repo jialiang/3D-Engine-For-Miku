@@ -3,7 +3,7 @@
   "space": "glb bind (mesh) space, metres",
   "formula": "position = jointMatrix(j_kao_wj) * (rest + mean + sum_i weight[frame][i] * basis[vertex][i])",
   "normals": "DERIVED IN THE SHADER from the deformed positions, using the stencil in ribbon-normal-fans.bin. No normal basis and no normal weights ship, and neither should: a separate basis holds 93% of the field's variance at the shader's mode count and would need k=47 for 6 degrees against a cap of 24, while regressing the normals onto the position weights is worse again. What the shader applies is the ROTATION the derived normal reports between rest and now, carried onto the normal the artist authored, so the bind pose is untouched and the stencil's own standing bias cancels. The error it leaves, and what a static bind normal was costing instead, are measured by .ignored/probe-normals.js and quoted in RibbonBasis.js rather than repeated here.",
-  "normalFans": "the stencil, [vertex][fan][2] float32 of vertex ids, -1 where a vertex has fewer than 3 usable faces. Each pair is crossed with the vertex as origin and the results summed, which weights every face by its own area.",
+  "normalFans": "the stencil, [vertex][fan][2] int16 vertex ids, -1 where a vertex has fewer than 3 usable faces. Each pair is crossed with the vertex as origin and the results summed, which weights every face by its own area.",
   "normalFanCount": 3,
   "frames": 18351,
   "frameRate": 60,
@@ -32,31 +32,37 @@
     1150, 1151, 1152, 1153, 1154
   ],
   "layout": {
-    "basis": "vertex-major: [vertex][mode][xyz], float32",
-    "mean": "[vertex][xyz], float32",
-    "weights": "frame-major: [frame][mode], float32"
+    "basis": "vertex-major: [vertex][mode][xyz], int16",
+    "mean": "[vertex][xyz], int16",
+    "weights": "frame-major: [frame][mode], int16"
   },
   "tangents": "not shipped. Animation.sampleTrack is cubic and wants per-key tangents, but at one key per frame they are a central difference of the values: derive them on load by clamping both neighbours into range and dividing by the span actually sampled, which is 2 in the middle and 1 at each end. Dividing by 2 throughout would halve the slope at the two ends. Shipping them would double the largest file here to store what is already present.",
   "files": {
     "positionBasis": {
       "file": "ribbon-position-basis.bin",
-      "bytes": 334944
+      "bytes": 167472,
+      "scale": 0.000008992367596681144
     },
     "positionMean": {
       "file": "ribbon-position-mean.bin",
-      "bytes": 13956
+      "bytes": 6978,
+      "scale": 0.0000012100277688609715
     },
     "positionWeights": {
       "file": "ribbon-position-weights.bin",
-      "bytes": 1761696
+      "bytes": 880848,
+      "scale": 0.00002726000156496305
     },
     "positionRest": {
       "file": "ribbon-position-rest.bin",
-      "bytes": 13956
+      "bytes": 6978,
+      "scale": 0.00004338897260125186
     },
     "normalFans": {
       "file": "ribbon-normal-fans.bin",
-      "bytes": 27912
+      "bytes": 13956,
+      "scale": 1
     }
-  }
+  },
+  "quantisation": "EVERY BLOB IS INT16, each with its own scale in files[key].scale: multiply on load to get metres back. One scale per file, taken from that file's own peak, so each spends the whole range on the values it holds. This halves the set and costs 0.045mm of position at worst, against the 19.7mm the basis itself leaves. The stencil is vertex ids, so it takes scale 1 and is exact."
 }
