@@ -303,9 +303,7 @@ class Skeleton {
     expression("n_kubi_wj_ex", (o) => {
       const local = this.expressionMatrix;
       mat4.identity(local);
-      mat4.rotateZ(local, local, rotations[head + 2]);
-      mat4.rotateY(local, local, rotations[head + 1]);
-      mat4.rotateX(local, local, rotations[head]);
+      Rig.applyEuler(local, rotations, head);
       BoneMath.rotateZSinCos(local, headChain.aim[0], headChain.aim[1]);
       BoneMath.rotateYSinCos(local, headChain.aim[2], headChain.aim[3]);
 
@@ -516,9 +514,7 @@ class Skeleton {
       globalMatrix,
       positions.subarray(globalPosition, globalPosition + 3),
     );
-    mat4.rotateZ(globalMatrix, globalMatrix, rotations[globalRotation + 2]);
-    mat4.rotateY(globalMatrix, globalMatrix, rotations[globalRotation + 1]);
-    mat4.rotateX(globalMatrix, globalMatrix, rotations[globalRotation + 0]);
+    Rig.applyEuler(globalMatrix, rotations, globalRotation);
 
     let nextChain = 0;
 

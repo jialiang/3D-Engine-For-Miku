@@ -219,12 +219,7 @@ class Model {
     const palette = new Float32Array(skin.jointNames.length * 16);
 
     skin.jointNodeIndices.forEach((nodeIndex, joint) => {
-      const inverseBind = skin.inverseBindMatrices.subarray(joint * 16, joint * 16 + 16);
-      mat4.multiply(
-        palette.subarray(joint * 16, joint * 16 + 16),
-        worldMatrices[nodeIndex],
-        inverseBind,
-      );
+      Rig.writePaletteEntry(palette, skin, joint, worldMatrices[nodeIndex]);
     });
 
     return palette;
