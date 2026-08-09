@@ -2,9 +2,5 @@
 external/
 glMatrix-mat4.js
 
-# binary MMD data renamed to .js so GitHub Pages serves it
-models/
-motions/
-
 # lockfile churn
 package-lock.json
