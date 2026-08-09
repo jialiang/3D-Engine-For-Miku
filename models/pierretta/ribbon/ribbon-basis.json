@@ -34,7 +34,7 @@
   "layout": {
     "basis": "vertex-major: [vertex][mode][xyz], int16",
     "mean": "[vertex][xyz], int16",
-    "weights": "frame-major: [frame][mode], int16"
+    "weights": "frame-major: [frame][mode], int16, split into 19 windows of 1000 frames with one frame of overhang each side"
   },
   "tangents": "not shipped. Animation.sampleTrack is cubic and wants per-key tangents, but at one key per frame they are a central difference of the values: derive them on load by clamping both neighbours into range and dividing by the span actually sampled, which is 2 in the middle and 1 at each end. Dividing by 2 throughout would halve the slope at the two ends. Shipping them would double the largest file here to store what is already present.",
   "files": {
@@ -49,8 +49,105 @@
       "scale": 0.0000012100277688609715
     },
     "positionWeights": {
-      "file": "ribbon-position-weights.bin",
-      "bytes": 880848,
+      "windowSize": 1000,
+      "chunks": [
+        {
+          "file": "ribbon-position-weights-000.bin",
+          "firstFrame": 0,
+          "frameCount": 1002
+        },
+        {
+          "file": "ribbon-position-weights-001.bin",
+          "firstFrame": 999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-002.bin",
+          "firstFrame": 1999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-003.bin",
+          "firstFrame": 2999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-004.bin",
+          "firstFrame": 3999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-005.bin",
+          "firstFrame": 4999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-006.bin",
+          "firstFrame": 5999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-007.bin",
+          "firstFrame": 6999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-008.bin",
+          "firstFrame": 7999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-009.bin",
+          "firstFrame": 8999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-010.bin",
+          "firstFrame": 9999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-011.bin",
+          "firstFrame": 10999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-012.bin",
+          "firstFrame": 11999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-013.bin",
+          "firstFrame": 12999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-014.bin",
+          "firstFrame": 13999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-015.bin",
+          "firstFrame": 14999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-016.bin",
+          "firstFrame": 15999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-017.bin",
+          "firstFrame": 16999,
+          "frameCount": 1003
+        },
+        {
+          "file": "ribbon-position-weights-018.bin",
+          "firstFrame": 17999,
+          "frameCount": 352
+        }
+      ],
+      "bytes": 883440,
       "scale": 0.00002726000156496305
     },
     "positionRest": {
@@ -64,5 +161,6 @@
       "scale": 1
     }
   },
-  "quantisation": "EVERY BLOB IS INT16, each with its own scale in files[key].scale: multiply on load to get metres back. One scale per file, taken from that file's own peak, so each spends the whole range on the values it holds. This halves the set and costs 0.045mm of position at worst, against the 19.7mm the basis itself leaves. The stencil is vertex ids, so it takes scale 1 and is exact."
+  "quantisation": "EVERY BLOB IS INT16, each with its own scale in files[key].scale: multiply on load to get metres back. One scale per file, taken from that file's own peak, so each spends the whole range on the values it holds. This halves the set and costs 0.045mm of position at worst, against the 19.7mm the basis itself leaves. The stencil is vertex ids, so it takes scale 1 and is exact.",
+  "streaming": "THE WEIGHTS STREAM, the rest of the basis does not. They are the only per-frame part and they were 92% of what the page had to have before it could draw anything, so they window on the same cadence the motion clips use: window 0 is awaited, the rest arrive during playback and RibbonBasis.isReady holds the draw loop if the playhead outruns them. Each window carries one frame past each edge so its end tangents are still central differences."
 }

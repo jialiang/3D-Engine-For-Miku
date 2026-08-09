@@ -87,7 +87,19 @@ class RibbonBasis {
       responseType: "json",
     });
 
-    const keys = ["positionBasis", "positionMean", "positionWeights", "positionRest", "normalFans"];
+    const keys = ["positionBasis", "positionMean", "positionRest", "normalFans"];
+
+    // EVERY BLOB SHIPS AS INT16 with its own scale (see the manifest's quantisation note),
+    // which halves the set for 0.045mm of position at worst. Decoded here rather than
+    // deeper in: past this point nothing needs to know how the bytes arrived.
+    const decode = (buffer, scale) => {
+      const stored = new Int16Array(buffer);
+      const values = new Float32Array(stored.length);
+
+      for (let index = 0; index < stored.length; index++) values[index] = stored[index] * scale;
+
+      return values;
+    };
 
     const buffers = await Promise.all(
       keys.map((key) =>
@@ -97,30 +109,107 @@ class RibbonBasis {
       ),
     );
 
-    // EVERY BLOB SHIPS AS INT16 with its own scale (see the manifest's quantisation note),
-    // which halves the set for 0.045mm of position at worst. Decoded here rather than
-    // deeper in: past this point nothing needs to know how the bytes arrived.
-    const [basis, mean, weights, rest, fans] = keys.map((key, index) => {
-      const { scale } = manifest.files[key];
-      const stored = new Int16Array(buffers[index]);
-      const values = new Float32Array(stored.length);
+    const [basis, mean, rest, fans] = keys.map((key, index) =>
+      decode(buffers[index], manifest.files[key].scale),
+    );
 
-      for (let index = 0; index < stored.length; index++) values[index] = stored[index] * scale;
-
-      return values;
-    });
-
-    return new RibbonBasis(gl, program, manifest, bindPositions, {
+    const basisObject = new RibbonBasis(gl, program, manifest, bindPositions, {
       basis,
       mean,
-      weights,
       rest,
       fans,
     });
+
+    // Only window 0 is waited for, the way StreamedAnimation waits for its first chunk. The
+    // rest is what the page used to sit through before it could draw anything.
+    await basisObject.loadWindow(0, directory, decode);
+    basisObject.streamRemaining(directory, decode).catch(handleError);
+
+    return basisObject;
+  }
+
+  // One window of the weight stream, as the per-mode curves update() ssamples. The tangents
+  // are central differences, which is why each window carries a frame past each edge: the
+  // first and last frame it is ever asked for still have a neighbour on both sides.
+  async loadWindow(windowIndex, directory, decode) {
+    const { windowSize, chunks, scale } = this.manifest.files.positionWeights;
+    const chunk = chunks[windowIndex];
+
+    const weights = decode(
+      await Utilities.fetch(`${directory}/${chunk.file}`, { responseType: "arraybuffer" }),
+      scale,
+    );
+
+    const { modes } = this;
+    const count = chunk.frameCount;
+
+    if (weights.length !== count * modes) {
+      throw new Error(`${chunk.file} holds ${weights.length} weights, expected ${count * modes}.`);
+    }
+
+    const frameNumbers = new Float32Array(count);
+    for (let frame = 0; frame < count; frame++) frameNumbers[frame] = chunk.firstFrame + frame;
+
+    this.windows[windowIndex] = Array.from({ length: modes }, (unused, mode) => {
+      const values = new Float32Array(count);
+      const tangents = new Float32Array(count);
+
+      for (let frame = 0; frame < count; frame++) values[frame] = weights[frame * modes + mode];
+
+      for (let frame = 0; frame < count; frame++) {
+        const before = Math.max(frame - 1, 0);
+        const after = Math.min(frame + 1, count - 1);
+        const span = after - before;
+
+        tangents[frame] = span > 0 ? (values[after] - values[before]) / span : 0;
+      }
+
+      return { frames: frameNumbers, values, tangents, cursor: 0 };
+    });
+
+    this.windowSize = windowSize;
+  }
+
+  // ONE BAD WINDOW MUST NOT END THE STREAM, and the hood holding its last shape is a far
+  // better failure than the playhead stopping against a window that is never coming. Same
+  // shape as StreamedAnimation.streamRemaining, for the same reasons.
+  async streamRemaining(directory, decode) {
+    const { chunks } = this.manifest.files.positionWeights;
+    const failed = [];
+
+    for (let windowIndex = 1; windowIndex < chunks.length; windowIndex++) {
+      try {
+        await this.loadWindow(windowIndex, directory, decode);
+      } catch {
+        try {
+          await this.loadWindow(windowIndex, directory, decode);
+        } catch (retryError) {
+          this.abandonedWindows.add(windowIndex);
+          failed.push(chunks[windowIndex].file);
+          console.error(retryError);
+        }
+      }
+    }
+
+    if (failed.length) {
+      throw new Error(`${directory}: ${failed.length} ribbon window(s) never loaded: ${failed}`);
+    }
+  }
+
+  windowFor(frame) {
+    return Math.min(Math.floor(frame / this.windowSize), this.windows.length - 1);
+  }
+
+  // An abandoned window reads as ready so the playhead runs across it, and update() falls
+  // back to the nearest window that did load.
+  isReady(frame) {
+    const windowIndex = this.windowFor(frame);
+
+    return Boolean(this.windows[windowIndex]) || this.abandonedWindows.has(windowIndex);
   }
 
   constructor(gl, program, manifest, bindPositions, data) {
-    const { modes, frames, primitiveVertices } = manifest;
+    const { modes, primitiveVertices } = manifest;
 
     if (!bindPositions) throw new Error("no bind positions to check the ribbon basis against.");
 
@@ -153,10 +242,11 @@ class RibbonBasis {
       );
     }
 
+    // The weights are not here: they stream, and each window checks its own length as it
+    // lands (see loadWindow).
     const expected = {
       basis: primitiveVertices * modes * 3,
       mean: primitiveVertices * 3,
-      weights: frames * modes,
       rest: primitiveVertices * 3,
       fans: primitiveVertices * RibbonBasis.fans * 2,
     };
@@ -205,36 +295,26 @@ class RibbonBasis {
     this.modesLocation = GL.getUniformLocation(program, "u_ribbonModes");
     this.weightsLocation = GL.getUniformLocation(program, "u_ribbonWeights");
 
-    // One scalar curve per mode, in the shape Animation.sampleTrack destructures, with the
-    // tangents it needs derived from the values either side.
-    const frameNumbers = new Float32Array(frames);
-    for (let frame = 0; frame < frames; frame++) frameNumbers[frame] = frame;
-
-    this.tracks = Array.from({ length: modes }, (unused, mode) => {
-      const values = new Float32Array(frames);
-      const tangents = new Float32Array(frames);
-
-      for (let frame = 0; frame < frames; frame++)
-        values[frame] = data.weights[frame * modes + mode];
-
-      for (let frame = 0; frame < frames; frame++) {
-        const before = Math.max(frame - 1, 0);
-        const after = Math.min(frame + 1, frames - 1);
-        const span = after - before;
-
-        tangents[frame] = span > 0 ? (values[after] - values[before]) / span : 0;
-      }
-
-      return { frames: frameNumbers, values, tangents, cursor: 0 };
-    });
+    // Filled in by loadWindow as each window of the weight stream lands.
+    this.manifest = manifest;
+    this.windows = new Array(manifest.files.positionWeights.chunks.length).fill(null);
+    this.windowSize = manifest.files.positionWeights.windowSize;
+    this.abandonedWindows = new Set();
   }
 
   // Sample every mode's weight for this frame. CPU only, deliberately: a uniform belongs to
   // the program that is currently bound and this is called from the posing step where none
   // is. Uploading here raised GL_INVALID_OPERATION every frame. The upload happens in
   // setActive instead, which runs inside the draw.
+  //
+  // A window that was abandoned leaves the weights where the last loaded one left them, so
+  // the hood holds its shape across the gap instead of snapping to rest.
   update(frame) {
-    const { tracks, weights } = this;
+    const windowIndex = this.windowFor(frame);
+    const tracks = this.windows[windowIndex];
+    if (!tracks) return;
+
+    const { weights } = this;
 
     tracks.forEach((track, mode) => {
       weights[mode] = Animation.sampleTrack(track, frame);

@@ -225,7 +225,8 @@ async function onload() {
       animation.isReady(frame) &&
       faceAnimation.isReady(frame) &&
       micAnimation.isReady(frame) &&
-      osageAnimation.isReady(frame);
+      osageAnimation.isReady(frame) &&
+      miku.ribbonBasis.isReady(frame);
 
     if (isMotionReady) {
       if (isBuffering) {
