@@ -65,7 +65,7 @@ const loadClasses = () => {
     "Rig.js",
     "Skeleton.js",
   ]
-    .map((file) => fs.readFileSync(path.join(ROOT, file), "utf8"))
+    .map((file) => fs.readFileSync(path.join(ROOT, "engine", file), "utf8"))
     .join("\n");
 
   // classic scripts: evaluate in one scope, take the classes from the

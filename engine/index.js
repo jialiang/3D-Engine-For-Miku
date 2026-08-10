@@ -1,5 +1,9 @@
 window.addEventListener("error", handleError);
 
+document.querySelector(".error-close").addEventListener("click", () => {
+  document.querySelector(".error-content").style.display = "";
+});
+
 window.addEventListener("load", async () => {
   try {
     await onload();

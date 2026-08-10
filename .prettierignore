@@ -1,6 +1,6 @@
 # vendored libraries
 external/
-glMatrix-mat4.js
+engine/glMatrix-mat4.js
 
 # lockfile churn
 package-lock.json
