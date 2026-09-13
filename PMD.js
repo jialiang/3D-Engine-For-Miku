@@ -310,14 +310,13 @@ class PMD extends FileParser {
         image.onload = () => resolve(image);
         image.onerror = () => reject(`Failed to load image ${filename}`);
 
-        if (defaultToonMaps[filename]) {
-          image.src = `${defaultToonMapFolder}/${filename}`;
-          return;
-        }
+        const folder = defaultToonMaps[filename] ? defaultToonMapFolder : textureFolder;
 
-        // tga is not supported by browsers and bmp is uncompressed, expected you'll convert them to png
-        // sphere maps have .spa and .sph extensions but are actually png images
-        image.src = `${textureFolder}/${filename.replace(/tga|bmp/gi, "png")}`;
+        // tga is not supported by browsers and bmp is uncompressed, so every
+        // texture is stored as png on disk
+        // sphere maps keep their .spa and .sph names because the extension
+        // picks the blend mode, but the file behind the name holds png data
+        image.src = `${folder}/${filename.replace(/tga|bmp/gi, "png")}`;
       });
     };
 

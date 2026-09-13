@@ -8,7 +8,6 @@
 *.vmd.js binary
 
 # Textures (.sph and .spa are sphere-map images) and audio
-*.bmp binary
 *.png binary
 *.sph binary
 *.spa binary
